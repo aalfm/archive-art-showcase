@@ -5,9 +5,6 @@ import { redirect } from 'next/navigation';
 import { query } from '@/lib/db';
 import { createSession, deleteSession } from '@/lib/auth';
 
-/**
- * Register a new user (member or curator)
- */
 export async function registerUser(prevState, formData) {
   const name = formData.get('name')?.toString().trim();
   const email = formData.get('email')?.toString().trim().toLowerCase();
@@ -62,9 +59,6 @@ export async function registerUser(prevState, formData) {
   }
 }
 
-/**
- * Login a user
- */
 export async function loginUser(prevState, formData) {
   const email = formData.get('email')?.toString().trim().toLowerCase();
   const password = formData.get('password')?.toString();
@@ -93,7 +87,6 @@ export async function loginUser(prevState, formData) {
     return { error: 'Sign in failed. Please try again.' };
   }
 
-  // Honour a safe, same-site redirect target (set by the route guard)
   if (redirectTo.startsWith('/') && !redirectTo.startsWith('//') && !redirectTo.startsWith('/login')) {
     redirect(redirectTo);
   }
@@ -111,9 +104,6 @@ export async function loginUser(prevState, formData) {
   }
 }
 
-/**
- * Logout
- */
 export async function logoutUser() {
   await deleteSession();
   redirect('/');

@@ -5,7 +5,6 @@ import { query, getClient } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { toId } from '@/lib/utils';
 
-/** Create a challenge (curator only) */
 export async function createChallenge(prevState, formData) {
   const session = await getSession();
   if (!session || session.user.role !== 'curator' || session.user.curator_status !== 'approved') {
@@ -44,7 +43,6 @@ export async function createChallenge(prevState, formData) {
   }
 }
 
-/** Update a challenge */
 export async function updateChallenge(prevState, formData) {
   const session = await getSession();
   if (!session || (session.user.role !== 'curator' && session.user.role !== 'admin')) {
@@ -94,7 +92,6 @@ export async function updateChallenge(prevState, formData) {
   }
 }
 
-/** Delete a challenge */
 export async function deleteChallenge(rawChallengeId) {
   const session = await getSession();
   if (!session) return { error: 'Please sign in.' };
@@ -120,7 +117,6 @@ export async function deleteChallenge(rawChallengeId) {
   }
 }
 
-/** Submit artwork to challenge */
 export async function submitToChallenge(prevState, formData) {
   const session = await getSession();
   if (!session || session.user.role !== 'member') {
@@ -178,7 +174,6 @@ export async function submitToChallenge(prevState, formData) {
   }
 }
 
-/** Withdraw a submission */
 export async function withdrawSubmission(rawSubmissionId) {
   const session = await getSession();
   if (!session) return { error: 'Please sign in.' };
@@ -212,7 +207,6 @@ export async function withdrawSubmission(rawSubmissionId) {
   }
 }
 
-/** Select winners (curator only) */
 export async function selectWinner(prevState, formData) {
   const session = await getSession();
   if (!session || session.user.role !== 'curator' || session.user.curator_status !== 'approved') {
