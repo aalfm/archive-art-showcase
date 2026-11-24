@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Clock3, FileText, Search, Trophy, X } from '@/components/ui/Icons';
+import ArtworkImage from '@/components/ui/ArtworkImage';
+import { ArrowRight, Clock3, FileText, Search, Trophy, X } from '@/components/ui/Icons';
 
 function getDaysLeft(startDate, endDate, status, nowMs) {
   if (status === 'ended') return 'Ended';
@@ -18,17 +18,33 @@ function getDaysLeft(startDate, endDate, status, nowMs) {
   return `${days} ${days === 1 ? 'day' : 'days'} left`;
 }
 
+function formatSchedule(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return '';
+  const sameYear = start.getFullYear() === end.getFullYear();
+  const startLabel = start.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    ...(sameYear ? {} : { year: 'numeric' }),
+  });
+  const endLabel = end.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  return `${startLabel} – ${endLabel}`;
+}
+
 export default function ChallengesGallery({
   initialChallenges,
-  initialCounts,
   initialNow,
   userRole,
 }) {
-  const [statusFilter, setStatusFilter] = useState('active');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [searchResults, setSearchResults] = useState(null);
-  const [searchCounts, setSearchCounts] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [nowMs, setNowMs] = useState(initialNow);
@@ -63,7 +79,6 @@ export default function ChallengesGallery({
         const data = await res.json();
         if (active) {
           setSearchResults(Array.isArray(data.challenges) ? data.challenges : []);
-          if (data.counts) setSearchCounts(data.counts);
           if (typeof data.serverNow === 'number') setNowMs(data.serverNow);
         }
       } catch (err) {
@@ -88,7 +103,6 @@ export default function ChallengesGallery({
     if (!val.trim()) {
       setDebouncedQuery('');
       setSearchResults(null);
-      setSearchCounts(null);
       setIsSearching(false);
       setSearchError('');
     }
@@ -98,18 +112,27 @@ export default function ChallengesGallery({
     setSearchQuery('');
     setDebouncedQuery('');
     setSearchResults(null);
-    setSearchCounts(null);
     setIsSearching(false);
     setSearchError('');
     searchInputRef.current?.focus();
   };
 
-  const isSearchActive = Boolean(debouncedQuery);
-  const counts = isSearchActive && searchCounts ? searchCounts : initialCounts;
+  const handleResetAll = () => {
+    setSearchQuery('');
+    setDebouncedQuery('');
+    setSearchResults(null);
+    setIsSearching(false);
+    setSearchError('');
+    setStatusFilter('all');
+  };
 
-  const displayedChallenges = isSearchActive
-    ? (searchResults ?? [])
-    : initialChallenges.filter((ch) => ch.challenge_status === statusFilter);
+  const isSearchActive = Boolean(debouncedQuery);
+
+  const displayedChallenges = useMemo(() => {
+    if (isSearchActive) return searchResults ?? [];
+    if (statusFilter === 'all') return initialChallenges;
+    return initialChallenges.filter((ch) => ch.challenge_status === statusFilter);
+  }, [isSearchActive, searchResults, statusFilter, initialChallenges]);
 
   return (
     <>
@@ -128,6 +151,7 @@ export default function ChallengesGallery({
               placeholder="Search challenges..."
               value={searchQuery}
               onChange={handleSearchChange}
+              autoComplete="off"
               aria-label="Search challenges"
               id="challenges-search-input"
             />
@@ -147,6 +171,16 @@ export default function ChallengesGallery({
 
         <div className="explore-filter-row">
           <div className="challenge-status-tabs" role="tablist" aria-label="Challenge status filter">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={statusFilter === 'all'}
+              className={`challenge-status-tab ${statusFilter === 'all' ? 'active' : ''}`}
+              onClick={() => setStatusFilter('all')}
+              id="filter-challenges-all"
+            >
+              <span>All</span>
+            </button>
             <button
               type="button"
               role="tab"
@@ -181,7 +215,7 @@ export default function ChallengesGallery({
         </p>
       )}
 
-      <div className="challenges-full-grid">
+      <div className="masonry-grid">
         {displayedChallenges.length === 0 ? (
           <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--surface)' }}>
@@ -189,84 +223,113 @@ export default function ChallengesGallery({
                 ? 'NO MATCHING CHALLENGES'
                 : statusFilter === 'upcoming'
                   ? 'NO UPCOMING CHALLENGES'
-                  : 'NO ACTIVE CHALLENGES'}
+                  : statusFilter === 'active'
+                    ? 'NO ACTIVE CHALLENGES'
+                    : 'NO CHALLENGES AVAILABLE'}
             </p>
             <p style={{ marginTop: 8, color: 'var(--surface)', fontSize: '0.88rem' }}>
               {isSearchActive
-                ? 'No challenges found. Try adjusting your search keyword or status filter.'
+                ? 'Try adjusting your search keyword or status filter.'
                 : statusFilter === 'upcoming'
                   ? 'Check back soon for new architectural challenges.'
                   : 'All active challenges have closed or none are currently running.'}
             </p>
-            {isSearchActive && (
+            {(isSearchActive || statusFilter !== 'all') && (
               <button
                 type="button"
                 className="btn-secondary"
-                onClick={handleClearSearch}
+                onClick={handleResetAll}
                 style={{ marginTop: 18 }}
               >
-                Clear Search
+                Reset Filters
               </button>
             )}
           </div>
         ) : (
-          displayedChallenges.map((ch) => (
-            <article key={ch.id} className="challenge-full-card">
-              <div className="challenge-banner-wrap">
-                {ch.banner_url && (
-                  <Image
-                    src={ch.banner_url}
-                    alt={ch.title}
-                    fill
-                    className="challenge-banner-img"
-                    style={{ objectFit: 'cover' }}
-                    sizes="(max-width: 640px) 100vw, 50vw"
-                  />
-                )}
-                <div className="challenge-banner-overlay"></div>
-                <span className={`challenge-status-badge ${ch.challenge_status}`}>
-                  {ch.challenge_status === 'active'
-                    ? 'ACTIVE'
-                    : ch.challenge_status === 'upcoming'
-                      ? 'UPCOMING'
-                      : 'ENDED'}
-                </span>
-              </div>
-              <div className="challenge-card-body">
-                <div className="challenge-card-curator">By {ch.curator_name}</div>
-                <h3 className="challenge-card-title">{ch.title}</h3>
-                <p className="challenge-card-desc">
-                  {ch.description?.length > 150
-                    ? `${ch.description.substring(0, 150)}...`
-                    : ch.description}
-                </p>
-                <div className="challenge-card-meta">
-                  <span>
-                    <Trophy size={16} className="challenge-meta-icon" />
-                    <span>{ch.prize}</span>
-                  </span>
-                  <span>
-                    <FileText size={16} className="challenge-meta-icon" />
-                    <span>{ch.submission_count} submissions</span>
-                  </span>
-                  <span>
-                    <Clock3 size={16} className="challenge-meta-icon" />
-                    <span>{getDaysLeft(ch.start_date, ch.end_date, ch.challenge_status, nowMs)}</span>
-                  </span>
-                </div>
-                <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                  <Link href={`/challenges/${ch.id}`} className="btn-primary" style={{ flex: 1, textAlign: 'center' }}>
-                    View Details
-                  </Link>
-                  {userRole === 'member' && ch.challenge_status === 'active' && (
-                    <Link href={`/challenges/${ch.id}`} className="btn-secondary" style={{ flex: 1, textAlign: 'center' }}>
-                      Enter Now
-                    </Link>
-                  )}
-                </div>
-              </div>
-            </article>
-          ))
+          displayedChallenges.map((ch) => {
+            const statusText =
+              ch.challenge_status === 'active'
+                ? 'Active'
+                : ch.challenge_status === 'upcoming'
+                  ? 'Upcoming'
+                  : 'Ended';
+            const daysText = getDaysLeft(ch.start_date, ch.end_date, ch.challenge_status, nowMs);
+            const scheduleText = formatSchedule(ch.start_date, ch.end_date);
+
+            return (
+              <article key={ch.id} className="project-card challenge-dir-card" data-id={ch.id}>
+                <Link
+                  href={`/challenges/${ch.id}`}
+                  className="challenge-dir-card-link"
+                  aria-label={`View challenge: ${ch.title}`}
+                >
+                  <div className="project-image-wrap challenge-dir-media">
+                    {ch.banner_url ? (
+                      <ArtworkImage
+                        src={ch.banner_url}
+                        alt={ch.title}
+                        fill
+                        className="project-image"
+                        style={{ objectFit: 'cover' }}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="challenge-dir-fallback" aria-hidden="true">
+                        <span>ARCHIVE</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="card-editorial-body challenge-dir-body">
+                    <div className="card-top-bar">
+                      <span className={`challenge-dir-status is-${ch.challenge_status}`}>
+                        {statusText}
+                      </span>
+                      <span className="challenge-dir-deadline">{daysText}</span>
+                    </div>
+
+                    <div className="card-bottom-info challenge-dir-info">
+                      <h2 className="card-title challenge-dir-title">{ch.title}</h2>
+                      {ch.description && (
+                        <p className="challenge-dir-desc">{ch.description}</p>
+                      )}
+                    </div>
+
+                    <div className="challenge-dir-meta">
+                      {ch.prize && (
+                        <span className="challenge-dir-meta-item">
+                          <Trophy size={13} className="challenge-dir-meta-icon" />
+                          <span>{ch.prize}</span>
+                        </span>
+                      )}
+                      {scheduleText && (
+                        <span className="challenge-dir-meta-item">
+                          <Clock3 size={13} className="challenge-dir-meta-icon" />
+                          <span>{scheduleText}</span>
+                        </span>
+                      )}
+                      <span className="challenge-dir-meta-item">
+                        <FileText size={13} className="challenge-dir-meta-icon" />
+                        <span>
+                          {ch.submission_count}{' '}
+                          {ch.submission_count === 1 ? 'submission' : 'submissions'}
+                        </span>
+                      </span>
+                    </div>
+
+                    <span className="challenge-dir-cta">
+                      <span>
+                        {userRole === 'member' && ch.challenge_status === 'active'
+                          ? 'Enter Challenge'
+                          : 'View Challenge'}
+                      </span>
+                      <ArrowRight size={14} strokeWidth={1.75} className="challenge-dir-cta-arrow" />
+                    </span>
+                  </div>
+                </Link>
+              </article>
+            );
+          })
         )}
       </div>
     </>

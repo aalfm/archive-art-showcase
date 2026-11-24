@@ -5,7 +5,9 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get('q')?.trim() || '';
-    const status = searchParams.get('status') === 'upcoming' ? 'upcoming' : 'active';
+    const rawStatus = searchParams.get('status');
+    const status =
+      rawStatus === 'all' ? 'all' : rawStatus === 'upcoming' ? 'upcoming' : 'active';
 
     const whereConditions = ['c.end_date >= NOW()'];
     const params = [];
@@ -26,9 +28,11 @@ export async function GET(request) {
     const baseWhere = whereConditions.join(' AND ');
 
     const statusCondition =
-      status === 'upcoming'
-        ? 'NOW() < c.start_date'
-        : 'c.start_date <= NOW() AND c.end_date >= NOW()';
+      status === 'all'
+        ? 'TRUE'
+        : status === 'upcoming'
+          ? 'NOW() < c.start_date'
+          : 'c.start_date <= NOW() AND c.end_date >= NOW()';
 
     const [listRes, countsRes] = await Promise.all([
       query(
