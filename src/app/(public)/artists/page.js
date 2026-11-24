@@ -1,10 +1,12 @@
 import Link from 'next/link';
+import { unstable_noStore as noStore } from 'next/cache';
 import { query } from '@/lib/db';
 import PublicPageContainer from '@/components/layout/PublicPageContainer';
 import ArtistDirectoryCard from '@/components/artists/ArtistDirectoryCard';
 import ArtistsFilters from './ArtistsFilters';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata = {
   title: 'Artists — ARCHIVE',
@@ -12,6 +14,7 @@ export const metadata = {
 };
 
 async function getArtistsDirectoryData(searchParams) {
+  noStore();
   const search = (searchParams?.search || '').trim();
   const category = (searchParams?.category || '').trim();
 
@@ -54,7 +57,7 @@ async function getArtistsDirectoryData(searchParams) {
     const [artistsRes, categoriesRes] = await Promise.all([
       query(
         `
-        SELECT u.id, u.name, u.bio, u.profile_image, u.created_at,
+        SELECT u.id, u.name, u.bio, u.profile_image, u.created_at, u.is_active,
                COUNT(a.id)::int as artwork_count,
                COALESCE(SUM(a.like_count), 0)::int as total_likes,
                (
@@ -70,7 +73,6 @@ async function getArtistsDirectoryData(searchParams) {
         LEFT JOIN artworks a ON a.user_id = u.id AND a.status = 'active'
         WHERE ${whereClause}
         GROUP BY u.id
-        HAVING COUNT(a.id) > 0
         ORDER BY total_likes DESC, artwork_count DESC, u.created_at ASC
         LIMIT 48
         `,
@@ -79,8 +81,13 @@ async function getArtistsDirectoryData(searchParams) {
       query('SELECT id, name FROM categories ORDER BY name ASC'),
     ]);
 
+    const artists = artistsRes.rows.map((row) => ({
+      ...row,
+      is_active: row.is_active !== false,
+    }));
+
     return {
-      artists: artistsRes.rows,
+      artists,
       categories: categoriesRes.rows,
       hasFilters: Boolean(search || category),
       error: '',

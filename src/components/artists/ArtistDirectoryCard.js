@@ -23,6 +23,8 @@ export default function ArtistDirectoryCard({ artist }) {
   const workCount = Number(artist.artwork_count || 0);
   const specialization = artist.primary_category || 'Architectural Creator';
   const shortBio = typeof artist.bio === 'string' ? artist.bio.trim() : '';
+  const isInactive =
+    artist.is_active === false || artist.is_active === 'false' || artist.is_active === 0;
 
   return (
     <article className="project-card artist-dir-card" data-id={artist.id}>
@@ -59,7 +61,15 @@ export default function ArtistDirectoryCard({ artist }) {
           </div>
 
           <div className="card-bottom-info artist-dir-info">
-            <h2 className="card-title artist-dir-name">{artist.name}</h2>
+            <div className="artist-dir-name-row">
+              <h2 className="card-title artist-dir-name">{artist.name}</h2>
+              {isInactive && (
+                <span className="artist-dir-status-inactive" aria-label="Account status: Inactive">
+                  <span className="artist-dir-status-dot" aria-hidden="true" />
+                  <span>INACTIVE</span>
+                </span>
+              )}
+            </div>
             <p className="artist-dir-bio">
               {shortBio || `${specialization} creator publishing curated works on ARCHIVE.`}
             </p>

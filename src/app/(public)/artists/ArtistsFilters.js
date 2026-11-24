@@ -44,6 +44,25 @@ function ArtistsFiltersInner({ categories = [] }) {
   );
 
   useEffect(() => {
+    const refreshLatestStatus = () => {
+      if (document.visibilityState === 'visible') {
+        router.refresh();
+      }
+    };
+    const handlePageShow = (event) => {
+      if (event.persisted) {
+        router.refresh();
+      }
+    };
+    document.addEventListener('visibilitychange', refreshLatestStatus);
+    window.addEventListener('pageshow', handlePageShow);
+    return () => {
+      document.removeEventListener('visibilitychange', refreshLatestStatus);
+      window.removeEventListener('pageshow', handlePageShow);
+    };
+  }, [router]);
+
+  useEffect(() => {
     const trimmed = search.trim();
     const currentParam = paramSearch.trim();
     if (trimmed === currentParam) return undefined;

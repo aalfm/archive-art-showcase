@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { unstable_noStore as noStore } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
 import { query } from '@/lib/db';
@@ -7,11 +8,13 @@ import { Heart } from '@/components/ui/Icons';
 import UserAvatar from '@/components/ui/UserAvatar';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 async function getCreatorProfile(id) {
+  noStore();
   const [userRes, artworksRes] = await Promise.all([
     query(`
-      SELECT id, name, bio, profile_image, external_link, role, created_at
+      SELECT id, name, bio, profile_image, external_link, role, is_active, created_at
       FROM users WHERE id = $1 AND role = 'member'
     `, [id]),
     query(`
@@ -59,7 +62,15 @@ export default async function CreatorProfilePage(props) {
           />
         </div>
         <div className="creator-profile-info">
-          <h1 className="creator-profile-name">{user.name}</h1>
+          <div className="creator-profile-name-row">
+            <h1 className="creator-profile-name">{user.name}</h1>
+            {user.is_active === false && (
+              <span className="artist-dir-status-inactive" aria-label="Account status: Inactive">
+                <span className="artist-dir-status-dot" aria-hidden="true" />
+                <span>INACTIVE</span>
+              </span>
+            )}
+          </div>
           {user.bio && <p className="creator-profile-bio">{user.bio}</p>}
           {user.external_link && (
             <a href={user.external_link} target="_blank" rel="noopener noreferrer" className="creator-profile-link">
