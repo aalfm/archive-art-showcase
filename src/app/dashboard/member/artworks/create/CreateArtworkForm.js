@@ -32,6 +32,7 @@ export default function CreateArtworkForm({ categories }) {
             currentImage={imageUrl}
             onUpload={(url) => setImageUrl(url)}
             name="image_url"
+            label="artwork image"
           />
         </div>
 

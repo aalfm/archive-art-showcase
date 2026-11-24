@@ -42,6 +42,7 @@ export default function EditChallengeForm({ challenge }) {
             currentImage={bannerUrl}
             onUpload={(url) => setBannerUrl(url)}
             name="banner_url"
+            label="challenge banner"
           />
         </div>
 

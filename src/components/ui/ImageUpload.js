@@ -3,30 +3,89 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const ALLOWED_EXTENSIONS = /\.(jpe?g|png|webp)$/i;
+
 function isRenderablePreview(src) {
-  if (!src) return false;
-  if (src.startsWith('/')) return true;
+  if (!src || typeof src !== 'string') return false;
+  const trimmed = src.trim();
+  if (!trimmed) return false;
+  if (trimmed.startsWith('/')) return true;
   try {
-    const parsed = new URL(src);
+    const parsed = new URL(trimmed);
     return parsed.protocol === 'https:' || parsed.protocol === 'http:';
   } catch {
     return false;
   }
 }
 
-export default function ImageUpload({ currentImage, onUpload, name = 'image_url' }) {
-  const [preview, setPreview] = useState(currentImage || '');
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState('');
-  const [urlMode, setUrlMode] = useState(Boolean(currentImage && currentImage.startsWith('http')));
-  const [urlInput, setUrlInput] = useState(currentImage || '');
-  const fileRef = useRef();
+function formatFileSize(bytes) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+function extractDisplayName(src) {
+  if (!src) return '';
+  const clean = src.split('?')[0];
+  const segment = clean.split('/').pop();
+  return segment || 'Current image';
+}
+
+export default function ImageUpload({
+  currentImage = '',
+  onUpload,
+  name = 'image_url',
+  label = 'image',
+}) {
+  const [imageValue, setImageValue] = useState(currentImage || '');
+  const [prevPropImage, setPrevPropImage] = useState(currentImage || '');
+  const [fileMeta, setFileMeta] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const fileRef = useRef(null);
+
+  if (prevPropImage !== (currentImage || '')) {
+    const next = currentImage || '';
+    setPrevPropImage(next);
+    setImageValue(next);
+    if (!next) {
+      setFileMeta(null);
+      setSuccessMessage('');
+    }
+  }
+
+  const validateFile = (file) => {
+    if (!file) return 'No file selected.';
+    const hasValidType = ALLOWED_MIME_TYPES.has(file.type);
+    const hasValidExt = ALLOWED_EXTENSIONS.test(file.name || '');
+    if (!hasValidType || !hasValidExt) {
+      return 'Unsupported file format. Please select a JPG, PNG, or WebP image.';
+    }
+    if (file.size <= 0) {
+      return 'Selected file is empty.';
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      return 'File is too large. Maximum allowed size is 10MB.';
+    }
+    return '';
+  };
+
+  const uploadSelectedFile = async (file) => {
+    const validationError = validateFile(file);
+    if (validationError) {
+      setError(validationError);
+      setSuccessMessage('');
+      if (fileRef.current) fileRef.current.value = '';
+      return;
+    }
 
     setError('');
+    setSuccessMessage('');
     setUploading(true);
 
     const formData = new FormData();
@@ -36,121 +95,199 @@ export default function ImageUpload({ currentImage, onUpload, name = 'image_url'
       const res = await fetch('/api/upload', { method: 'POST', body: formData });
       const data = await res.json();
 
-      if (!res.ok || data.error) {
-        setError(data.error || 'Upload failed. Please try again.');
+      if (!res.ok || data.error || !data.url) {
+        // Keep previously saved image intact on upload failure
+        setError(data.error || 'Upload failed. Your previous image was kept unchanged.');
+        setSuccessMessage('');
       } else {
-        setPreview(data.url);
-        setUrlInput(data.url);
+        setImageValue(data.url);
+        setPrevPropImage(data.url);
+        setFileMeta({ name: file.name, size: file.size });
+        setSuccessMessage(`Uploaded "${file.name}" successfully.`);
         onUpload?.(data.url);
       }
     } catch {
-      setError('Upload failed. Please try again.');
+      setError('Upload failed due to a network error. Please try again.');
+      setSuccessMessage('');
     } finally {
       setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
     }
   };
 
-  const handleUrlInput = (e) => {
-    const url = e.target.value;
-    setError('');
-    setUrlInput(url);
-    setPreview(isRenderablePreview(url) ? url : '');
-    onUpload?.(url);
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadSelectedFile(file);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!uploading) setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (uploading) return;
+    const file = e.dataTransfer?.files?.[0];
+    if (file) {
+      uploadSelectedFile(file);
+    }
   };
 
   const handleRemove = () => {
-    setPreview('');
-    setUrlInput('');
+    setImageValue('');
+    setPrevPropImage('');
+    setFileMeta(null);
     setError('');
+    setSuccessMessage('');
     if (fileRef.current) fileRef.current.value = '';
     onUpload?.('');
   };
 
+  const hasPreview = isRenderablePreview(imageValue);
+
   return (
     <div className="image-upload-wrapper">
-      {/* Hidden input for form submission */}
-      <input type="hidden" name={name} value={urlInput} />
+      {/* Hidden field carrying the server-uploaded image path */}
+      <input type="hidden" name={name} value={imageValue} />
 
-      {/* Preview */}
-      {isRenderablePreview(preview) && (
-        <div className="image-preview-wrap">
-          <Image
-            src={preview}
-            alt="Preview"
-            fill
-            unoptimized
-            className="image-preview"
-            style={{ objectFit: 'cover', borderRadius: 6 }}
-            onError={() => setPreview('')}
-          />
-          <button
-            type="button"
-            className="image-preview-remove"
-            onClick={handleRemove}
-            aria-label="Remove image"
-          >
-            ×
-          </button>
+      {/* File-only input */}
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+        aria-label={`Upload ${label} file`}
+      />
+
+      {hasPreview ? (
+        <div
+          className={`upload-preview-card${isDragging ? ' is-dragging' : ''}`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <div className="image-preview-wrap">
+            <Image
+              src={imageValue}
+              alt="Selected image preview"
+              fill
+              unoptimized
+              className="image-preview"
+              style={{ objectFit: 'cover' }}
+              onError={() => {
+                setError('Unable to render image preview.');
+              }}
+            />
+            {uploading && (
+              <div className="upload-preview-overlay" role="status" aria-live="polite">
+                <div className="spinner"></div>
+                <span>Uploading replacement...</span>
+              </div>
+            )}
+          </div>
+
+          <div className="upload-file-meta-bar">
+            <div className="upload-file-info">
+              <span className="upload-file-name">
+                {fileMeta?.name || extractDisplayName(imageValue)}
+              </span>
+              <span className="upload-file-sub">
+                {fileMeta?.size
+                  ? `${formatFileSize(fileMeta.size)} · Ready to save`
+                  : 'Current image · Drop a new file or click Replace'}
+              </span>
+            </div>
+
+            <div className="upload-file-actions">
+              <button
+                type="button"
+                className="btn-secondary upload-action-btn"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? 'Uploading...' : 'Replace Image'}
+              </button>
+              <button
+                type="button"
+                className="btn-danger upload-action-btn"
+                onClick={handleRemove}
+                disabled={uploading}
+                aria-label="Remove image"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
         </div>
-      )}
-
-      {/* Mode Toggle */}
-      <div className="upload-mode-toggle">
-        <button
-          type="button"
-          className={`upload-mode-btn ${!urlMode ? 'active' : ''}`}
-          onClick={() => setUrlMode(false)}
+      ) : (
+        <div
+          role="button"
+          tabIndex={0}
+          className={`upload-file-area${isDragging ? ' is-dragging' : ''}`}
+          onClick={() => !uploading && fileRef.current?.click()}
+          onKeyDown={(e) => {
+            if ((e.key === 'Enter' || e.key === ' ') && !uploading) {
+              e.preventDefault();
+              fileRef.current?.click();
+            }
+          }}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          aria-label={`Choose or drop ${label} file`}
         >
-          Upload File
-        </button>
-        <button
-          type="button"
-          className={`upload-mode-btn ${urlMode ? 'active' : ''}`}
-          onClick={() => setUrlMode(true)}
-        >
-          Image URL
-        </button>
-      </div>
-
-      {!urlMode ? (
-        <button type="button" className="upload-file-area" onClick={() => fileRef.current?.click()} style={{ width: '100%', color: 'var(--text-primary)' }}>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            onChange={handleFileChange}
-            style={{ display: 'none' }}
-            aria-label="Upload artwork image"
-          />
           {uploading ? (
-            <div className="upload-loading">
+            <div className="upload-loading" role="status" aria-live="polite">
               <div className="spinner"></div>
-              <span>Uploading...</span>
+              <span>Uploading image...</span>
             </div>
           ) : (
             <>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <svg
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                aria-hidden="true"
+              >
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="17 8 12 3 7 8"></polyline>
                 <line x1="12" y1="3" x2="12" y2="15"></line>
               </svg>
-              <span>Click to upload image</span>
-              <span style={{ fontSize: '0.78rem', color: 'var(--surface)' }}>JPEG, PNG, WebP, GIF · Max 10MB</span>
+              <span className="upload-drop-title">
+                {isDragging ? 'Drop your image here' : 'Click to choose an image or drag and drop'}
+              </span>
+              <span className="upload-drop-hint">JPG, PNG, or WebP · Max 10MB</span>
             </>
           )}
-        </button>
-      ) : (
-        <input
-          type="url"
-          className="form-input"
-          placeholder="https://example.com/image.jpg"
-          value={urlInput}
-          onChange={handleUrlInput}
-          aria-label="Image URL"
-        />
+        </div>
       )}
 
-      {error && <p className="form-error">{error}</p>}
+      {successMessage && !error && (
+        <p className="upload-feedback is-success" role="status" aria-live="polite">
+          {successMessage}
+        </p>
+      )}
+      {error && (
+        <p className="upload-feedback is-error" role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

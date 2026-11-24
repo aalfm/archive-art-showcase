@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { query, getClient } from '@/lib/db';
 import { getSession } from '@/lib/auth';
-import { toId } from '@/lib/utils';
+import { isUploadedImagePath, toId } from '@/lib/utils';
 
 export async function createChallenge(prevState, formData) {
   const session = await getSession();
@@ -21,6 +21,9 @@ export async function createChallenge(prevState, formData) {
 
   if (!title || !description || !rules || !prize || !bannerUrl || !startDate || !endDate) {
     return { error: 'All fields are required.' };
+  }
+  if (!isUploadedImagePath(bannerUrl)) {
+    return { error: 'Please upload a challenge banner file from your device (JPG, PNG, or WebP).' };
   }
   if (new Date(endDate) <= new Date(startDate)) {
     return { error: 'End date must be after start date.' };
@@ -69,10 +72,13 @@ export async function updateChallenge(prevState, formData) {
   }
 
   try {
-    const challenge = await query('SELECT curator_id FROM challenges WHERE id=$1', [challengeId]);
+    const challenge = await query('SELECT curator_id, banner_url FROM challenges WHERE id=$1', [challengeId]);
     if (challenge.rows.length === 0) return { error: 'Challenge not found.' };
     if (challenge.rows[0].curator_id !== session.user.id && session.user.role !== 'admin') {
       return { error: 'Not authorized to edit this challenge.' };
+    }
+    if (bannerUrl !== challenge.rows[0].banner_url && !isUploadedImagePath(bannerUrl)) {
+      return { error: 'Please upload a challenge banner file from your device (JPG, PNG, or WebP).' };
     }
 
     await query(

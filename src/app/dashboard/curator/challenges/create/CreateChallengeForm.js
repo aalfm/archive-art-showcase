@@ -32,6 +32,7 @@ export default function CreateChallengeForm() {
             currentImage={bannerUrl}
             onUpload={(url) => setBannerUrl(url)}
             name="banner_url"
+            label="challenge banner"
           />
         </div>
 
