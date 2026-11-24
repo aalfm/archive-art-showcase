@@ -121,6 +121,9 @@ export async function deleteArtwork(rawArtworkId) {
 export async function toggleLike(rawArtworkId) {
   const session = await getSession();
   if (!session) return { error: 'login_required' };
+  if (session.user.role === 'admin') {
+    return { error: 'Administrators cannot like artworks.' };
+  }
 
   const artworkId = toId(rawArtworkId);
   if (!artworkId) return { error: 'Invalid artwork ID.' };
@@ -159,6 +162,9 @@ export async function toggleLike(rawArtworkId) {
 export async function toggleFavorite(rawArtworkId) {
   const session = await getSession();
   if (!session) return { error: 'login_required' };
+  if (session.user.role === 'admin') {
+    return { error: 'Administrators cannot save favorites.' };
+  }
 
   const artworkId = toId(rawArtworkId);
   if (!artworkId) return { error: 'Invalid artwork ID.' };
@@ -189,6 +195,9 @@ export async function toggleFavorite(rawArtworkId) {
 export async function addComment(prevState, formData) {
   const session = await getSession();
   if (!session) return { error: 'login_required' };
+  if (session.user.role === 'admin') {
+    return { error: 'Administrators cannot post comments.' };
+  }
 
   const artworkId = formData.get('artwork_id')?.toString();
   const content = formData.get('content')?.toString().trim();
@@ -232,6 +241,9 @@ export async function deleteComment(commentId, artworkId) {
 export async function reportArtwork(prevState, formData) {
   const session = await getSession();
   if (!session) return { error: 'login_required' };
+  if (session.user.role === 'admin') {
+    return { error: 'Administrators cannot report artworks.' };
+  }
 
   const artworkId = formData.get('artwork_id')?.toString();
   const reason = formData.get('reason')?.toString();

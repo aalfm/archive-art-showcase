@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ConfirmDialog } from '@/components/ui/Modal';
 import { Toast, useToast } from '@/components/ui/Toast';
 
@@ -15,6 +16,7 @@ export default function ConfirmActionButton({
   buttonTitle,
   onConfirm,
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast, showToast, hideToast } = useToast();
@@ -25,6 +27,8 @@ export default function ConfirmActionButton({
       const res = await onConfirm();
       if (res?.error) {
         showToast(res.error, 'error');
+      } else {
+        router.refresh();
       }
     } catch {
       showToast('An error occurred while processing the action.', 'error');

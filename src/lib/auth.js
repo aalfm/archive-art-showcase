@@ -23,7 +23,7 @@ export async function createSession(userId) {
   );
 
   // Create JWT
-  const token = await new SignJWT({ sessionId })
+  const token = await new SignJWT({ sessionId, userId })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime(`${SESSION_DURATION_DAYS}d`)
     .setIssuedAt()
@@ -56,17 +56,53 @@ export async function getSession() {
     const { sessionId } = payload;
 
     const result = await query(
-      `SELECT s.id as session_id, u.id, u.name, u.email, u.role, u.curator_status, 
-              u.profile_image, u.bio, u.external_link, u.created_at
+      `SELECT s.id as session_id, u.id, u.name, u.email, u.role, u.curator_status,
+              u.is_active, u.profile_image, u.bio, u.external_link, u.created_at
        FROM sessions s
        JOIN users u ON s.user_id = u.id
-       WHERE s.id = $1 AND s.expires_at > NOW()`,
+       WHERE s.id = $1 AND s.expires_at > NOW() AND u.is_active = TRUE`,
       [sessionId]
     );
 
     if (result.rows.length === 0) return null;
 
     return { user: result.rows[0] };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Revoke all active sessions for a specific user (e.g. on account deactivation)
+ */
+export async function revokeUserSessions(userId) {
+  await query('DELETE FROM sessions WHERE user_id = $1', [userId]);
+}
+
+/**
+ * Inspect whether the current signed session cookie belongs to a deactivated account.
+ * Queries the database directly and NEVER grants authenticated session access.
+ * @returns {Promise<Object|null>}
+ */
+export async function getInactiveSessionUser() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(COOKIE_NAME)?.value;
+    if (!token) return null;
+
+    const { payload } = await jwtVerify(token, SECRET);
+    const userId = Number(payload?.userId);
+    if (!Number.isInteger(userId) || userId <= 0) return null;
+
+    const result = await query(
+      `SELECT id, name, email, role, curator_status, is_active, profile_image, created_at
+       FROM users
+       WHERE id = $1 AND is_active = FALSE`,
+      [userId]
+    );
+
+    if (result.rows.length === 0) return null;
+    return result.rows[0];
   } catch {
     return null;
   }
@@ -99,7 +135,11 @@ export async function deleteSession() {
 export async function requireAuth() {
   const session = await getSession();
   if (!session) {
+    const inactiveUser = await getInactiveSessionUser();
     const { redirect } = await import('next/navigation');
+    if (inactiveUser) {
+      redirect('/dashboard/member/inactive');
+    }
     redirect('/login');
   }
   return session.user;

@@ -8,7 +8,7 @@ import { logoutUser } from '@/lib/actions/auth.actions';
 import UserAvatar from '@/components/ui/UserAvatar';
 import { Menu, X } from '@/components/ui/Icons';
 
-export default function DashboardSidebar({ user }) {
+export default function DashboardSidebar({ user, isInactive = false }) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -57,10 +57,17 @@ export default function DashboardSidebar({ user }) {
     { href: '/dashboard/admin/reports', label: 'Content Moderation', icon: 'flag' },
   ];
 
-  const rawLinks = user.role === 'admin' ? adminLinks :
-                user.role === 'curator'
-                  ? (user.curator_status === 'approved' ? curatorLinks : pendingCuratorLinks) :
-                memberLinks;
+  const inactiveLinks = [
+    { href: pathname || '/dashboard/member', label: 'Account Status', icon: 'shield' },
+  ];
+
+  const rawLinks = isInactive
+    ? inactiveLinks
+    : user.role === 'admin'
+      ? adminLinks
+      : user.role === 'curator'
+        ? (user.curator_status === 'approved' ? curatorLinks : pendingCuratorLinks)
+        : memberLinks;
 
   const links = rawLinks.filter(
     (item, idx, arr) => arr.findIndex((other) => other.href === item.href) === idx
@@ -154,10 +161,12 @@ export default function DashboardSidebar({ user }) {
           />
           <div className="sidebar-user-info">
             <span className="sidebar-user-name">{user.name}</span>
-            <span className="sidebar-user-role">
-              {user.role === 'curator' && user.curator_status
-                ? `${user.role} · ${user.curator_status}`
-                : user.role}
+            <span className={`sidebar-user-role${isInactive ? ' is-inactive' : ''}`}>
+              {isInactive
+                ? `${user.role} · inactive`
+                : user.role === 'curator' && user.curator_status
+                  ? `${user.role} · ${user.curator_status}`
+                  : user.role}
             </span>
           </div>
         </div>

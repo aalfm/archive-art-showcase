@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
-import DeleteUserButton from './DeleteUserButton';
+import UserStatusButton from './UserStatusButton';
 import UserFilters from './UserFilters';
 
 export const dynamic = 'force-dynamic';
@@ -17,7 +17,7 @@ export default async function AdminUsersPage({ searchParams }) {
   const roleFilter = (sp?.role || '').trim().toLowerCase();
 
   let sql = `
-    SELECT u.id, u.name, u.email, u.role, u.curator_status, u.created_at,
+    SELECT u.id, u.name, u.email, u.role, u.curator_status, u.is_active, u.created_at,
            COUNT(a.id) as artwork_count
     FROM users u
     LEFT JOIN artworks a ON a.user_id = u.id AND a.status = 'active'
@@ -60,6 +60,7 @@ export default async function AdminUsersPage({ searchParams }) {
               <th>User Name</th>
               <th>Email</th>
               <th>Role</th>
+              <th>Account Status</th>
               <th>Curator Status</th>
               <th>Active Artworks</th>
               <th>Joined</th>
@@ -69,61 +70,70 @@ export default async function AdminUsersPage({ searchParams }) {
           <tbody>
             {users.length === 0 ? (
               <tr>
-                <td colSpan={7} style={{ textAlign: 'center', padding: 32, color: 'var(--surface)' }}>
+                <td colSpan={8} style={{ textAlign: 'left', padding: 32, color: 'var(--surface)' }}>
                   No users found.
                 </td>
               </tr>
             ) : (
-              users.map((u) => (
-                <tr key={u.id}>
-                  <td style={{ fontWeight: 600 }}>
-                    {u.role === 'member' ? (
-                      <Link href={`/artists/${u.id}`} target="_blank" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>
-                        {u.name} ↗
-                      </Link>
-                    ) : (
-                      u.name
-                    )}
-                  </td>
-                  <td style={{ fontSize: '0.82rem', color: 'var(--surface)' }}>{u.email}</td>
-                  <td>
-                    <span
-                      className={`badge ${
-                        u.role === 'admin'
-                          ? 'badge-role-admin'
-                          : u.role === 'curator'
-                            ? 'badge-role-curator'
-                            : 'badge-role-member'
-                      }`}
-                    >
-                      {u.role}
-                    </span>
-                  </td>
-                  <td>
-                    {u.role === 'curator' ? (
-                      <span className={`badge badge-${u.curator_status}`}>
-                        {u.curator_status === 'approved' ? 'Verified' : u.curator_status === 'pending' ? 'Pending' : 'Rejected'}
+              users.map((u) => {
+                const isActive = u.is_active !== false;
+                return (
+                  <tr key={u.id}>
+                    <td style={{ fontWeight: 600 }}>
+                      {u.role === 'member' ? (
+                        <Link href={`/artists/${u.id}`} target="_blank" className="dashboard-user-link">
+                          {u.name}
+                        </Link>
+                      ) : (
+                        u.name
+                      )}
+                    </td>
+                    <td style={{ fontSize: '0.82rem', color: 'var(--surface)' }}>{u.email}</td>
+                    <td>
+                      <span
+                        className={`badge ${
+                          u.role === 'admin'
+                            ? 'badge-role-admin'
+                            : u.role === 'curator'
+                              ? 'badge-role-curator'
+                              : 'badge-role-member'
+                        }`}
+                      >
+                        {u.role}
                       </span>
-                    ) : (
-                      <span style={{ color: 'var(--surface)', fontSize: '0.78rem' }}>—</span>
-                    )}
-                  </td>
-                  <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
-                    {u.artwork_count}
-                  </td>
-                  <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem', color: 'var(--surface)' }}>
-                    {new Date(u.created_at).toLocaleDateString('en-US')}
-                  </td>
-                  <td>
-                    <DeleteUserButton
-                      userId={u.id}
-                      userName={u.name}
-                      userRole={u.role}
-                      currentAdminId={currentAdmin.id}
-                    />
-                  </td>
-                </tr>
-              ))
+                    </td>
+                    <td>
+                      <span className={`badge ${isActive ? 'badge-approved' : 'badge-rejected'}`}>
+                        {isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td>
+                      {u.role === 'curator' ? (
+                        <span className={`badge badge-${u.curator_status}`}>
+                          {u.curator_status === 'approved' ? 'Verified' : u.curator_status === 'pending' ? 'Pending' : 'Rejected'}
+                        </span>
+                      ) : (
+                        <span style={{ color: 'var(--surface)', fontSize: '0.78rem' }}>—</span>
+                      )}
+                    </td>
+                    <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
+                      {u.artwork_count}
+                    </td>
+                    <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem', color: 'var(--surface)' }}>
+                      {new Date(u.created_at).toLocaleDateString('en-US')}
+                    </td>
+                    <td>
+                      <UserStatusButton
+                        userId={u.id}
+                        userName={u.name}
+                        userRole={u.role}
+                        isActive={isActive}
+                        currentAdminId={currentAdmin.id}
+                      />
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

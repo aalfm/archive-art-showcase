@@ -6,7 +6,7 @@ import { getSession } from '@/lib/auth';
 import { toId } from '@/lib/utils';
 
 function requireAdmin(session) {
-  if (!session || session.user.role !== 'admin') {
+  if (!session || session.user.role !== 'admin' || session.user.is_active === false) {
     throw new Error('Unauthorized');
   }
 }
@@ -51,29 +51,51 @@ export async function updateCuratorStatus(curatorId, status) {
   }
 }
 
-export async function deleteUser(rawUserId) {
+export async function setUserActiveStatus(rawUserId, nextActive) {
   const session = await getSession();
   requireAdmin(session);
 
   const userId = toId(rawUserId);
   if (!userId) return { error: 'Invalid user ID.' };
+  if (typeof nextActive !== 'boolean') return { error: 'Invalid account status.' };
   if (userId === session.user.id) {
-    return { error: 'Cannot delete your own account.' };
+    return { error: 'Cannot change the status of your own account.' };
   }
 
+  const client = await getClient();
   try {
-    const user = await query('SELECT role FROM users WHERE id=$1', [userId]);
-    if (user.rows.length === 0) return { error: 'User not found.' };
-    if (user.rows[0].role === 'admin') {
-      return { error: 'Cannot delete an admin account.' };
+    await client.query('BEGIN');
+
+    const userRes = await client.query('SELECT role, is_active FROM users WHERE id = $1', [userId]);
+    if (userRes.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return { error: 'User not found.' };
+    }
+    if (userRes.rows[0].role === 'admin') {
+      await client.query('ROLLBACK');
+      return { error: 'Cannot deactivate or modify an admin account.' };
     }
 
-    await query('DELETE FROM users WHERE id=$1', [userId]);
+    await client.query('UPDATE users SET is_active = $1 WHERE id = $2', [nextActive, userId]);
+
+    if (!nextActive) {
+      await client.query('DELETE FROM sessions WHERE user_id = $1', [userId]);
+    }
+
+    await client.query('COMMIT');
     revalidatePath('/dashboard/admin/users');
-    return { success: true };
+    revalidatePath('/dashboard/admin');
+    revalidatePath('/artists');
+    revalidatePath(`/artists/${userId}`);
+    revalidatePath('/artists/[id]', 'page');
+    revalidatePath('/');
+    return { success: true, isActive: nextActive };
   } catch (err) {
-    console.error('[Admin] Delete user error:', err);
-    return { error: 'Failed to delete user.' };
+    await client.query('ROLLBACK');
+    console.error('[Admin] Update user active status error:', err);
+    return { error: `Failed to ${nextActive ? 'activate' : 'deactivate'} account.` };
+  } finally {
+    client.release();
   }
 }
 

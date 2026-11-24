@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
     password TEXT NOT NULL,
     role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'member', 'curator')),
     curator_status VARCHAR(20) CHECK (curator_status IN ('pending','approved','rejected')),
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     profile_image TEXT,
     bio TEXT,
     external_link TEXT,
@@ -102,6 +103,7 @@ CREATE TABLE IF NOT EXISTS submissions (
     UNIQUE(challenge_id, artwork_id)
 );
 
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;
 ALTER TABLE artworks ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'active';
 ALTER TABLE artworks ADD COLUMN IF NOT EXISTS like_count INT DEFAULT 0;
 ALTER TABLE reports ADD COLUMN IF NOT EXISTS admin_note TEXT;
@@ -130,11 +132,13 @@ BEGIN
     END IF;
 END $$;
 
+UPDATE users SET is_active = TRUE WHERE is_active IS NULL;
 UPDATE artworks SET status = 'active' WHERE status IS NULL;
 UPDATE artworks a
 SET like_count = COALESCE((SELECT COUNT(*)::int FROM artwork_likes al WHERE al.artwork_id = a.id), 0)
 WHERE like_count IS NULL;
 
+CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active);
 CREATE INDEX IF NOT EXISTS idx_artworks_user_id ON artworks(user_id);
 CREATE INDEX IF NOT EXISTS idx_artworks_category_id ON artworks(category_id);
 CREATE INDEX IF NOT EXISTS idx_artworks_status ON artworks(status);
