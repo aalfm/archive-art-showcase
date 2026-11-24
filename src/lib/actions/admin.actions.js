@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { query, getClient } from '@/lib/db';
 import { getSession } from '@/lib/auth';
+import { validateRejectionReason } from '@/lib/curator';
 import { toId } from '@/lib/utils';
 
 function requireAdmin(session) {
@@ -30,24 +31,142 @@ export async function getDashboardStats() {
   };
 }
 
-export async function updateCuratorStatus(curatorId, status) {
+export async function updateCuratorStatus(rawCuratorId, status, rejectionReason = '') {
   const session = await getSession();
   requireAdmin(session);
 
-  if (!['approved', 'rejected'].includes(status)) {
-    return { error: 'Invalid status.' };
+  const curatorId = toId(rawCuratorId);
+  if (!curatorId) {
+    return { error: 'Invalid curator ID.' };
   }
 
+  if (!['approved', 'rejected'].includes(status)) {
+    return { error: 'Invalid curator decision status.' };
+  }
+
+  let cleanReason = null;
+  if (status === 'rejected') {
+    const reasonCheck = validateRejectionReason(rejectionReason);
+    if (!reasonCheck.valid) {
+      return { error: reasonCheck.error };
+    }
+    cleanReason = reasonCheck.value;
+  }
+
+  const client = await getClient();
   try {
-    await query(
-      'UPDATE users SET curator_status=$1 WHERE id=$2 AND role=\'curator\'',
+    await client.query('BEGIN');
+
+    // Lock the target curator row to guarantee consistent transitions
+    const userRes = await client.query(
+      `SELECT id, role, curator_status, bio, external_link, created_at
+       FROM users
+       WHERE id = $1
+       FOR UPDATE`,
+      [curatorId]
+    );
+
+    if (userRes.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return { error: 'Curator account not found.' };
+    }
+
+    const target = userRes.rows[0];
+    if (target.role !== 'curator') {
+      await client.query('ROLLBACK');
+      return { error: 'Selected user is not a curator applicant.' };
+    }
+
+    // Strict state transition rules:
+    // Allowed: pending -> approved, pending -> rejected
+    // Forbidden: rejected -> approved (must reapply first), approved -> anything via this action
+    if (target.curator_status === 'rejected') {
+      await client.query('ROLLBACK');
+      return {
+        error:
+          status === 'approved'
+            ? 'Rejected applications cannot be approved directly. The applicant must submit a reapplication first.'
+            : 'This curator application has already been rejected.',
+      };
+    }
+
+    if (target.curator_status === 'approved') {
+      await client.query('ROLLBACK');
+      return { error: 'This curator account is already approved.' };
+    }
+
+    if (target.curator_status !== 'pending') {
+      await client.query('ROLLBACK');
+      return { error: 'Only pending curator applications can be reviewed.' };
+    }
+
+    // Lock the active pending application attempt (backfilling attempt 1 if legacy row missing)
+    const pendingAppRes = await client.query(
+      `SELECT id, attempt_number
+       FROM curator_applications
+       WHERE user_id = $1 AND status = 'pending'
+       ORDER BY attempt_number DESC
+       LIMIT 1
+       FOR UPDATE`,
+      [curatorId]
+    );
+
+    if (pendingAppRes.rows.length > 0) {
+      await client.query(
+        `UPDATE curator_applications
+         SET status = $1,
+             rejection_reason = $2,
+             reviewed_at = NOW(),
+             reviewed_by = $3
+         WHERE id = $4`,
+        [status, cleanReason, session.user.id, pendingAppRes.rows[0].id]
+      );
+    } else {
+      const nextRes = await client.query(
+        `SELECT COALESCE(MAX(attempt_number), 0)::int + 1 AS next_attempt
+         FROM curator_applications
+         WHERE user_id = $1`,
+        [curatorId]
+      );
+      await client.query(
+        `INSERT INTO curator_applications (
+           user_id, attempt_number, portfolio_url, background, status,
+           rejection_reason, submitted_at, reviewed_at, reviewed_by
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8)`,
+        [
+          curatorId,
+          nextRes.rows[0].next_attempt,
+          target.external_link,
+          target.bio,
+          status,
+          cleanReason,
+          target.created_at,
+          session.user.id,
+        ]
+      );
+    }
+
+    await client.query(
+      `UPDATE users SET curator_status = $1 WHERE id = $2 AND role = 'curator'`,
       [status, curatorId]
     );
+
+    await client.query('COMMIT');
+
+    revalidatePath('/dashboard', 'layout');
+    revalidatePath('/dashboard/admin');
     revalidatePath('/dashboard/admin/curators');
-    return { success: true };
+    revalidatePath('/dashboard/admin/users');
+    revalidatePath('/dashboard/curator/pending');
+    revalidatePath('/dashboard/curator');
+
+    return { success: true, status };
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error('[Admin] Curator status error:', err);
     return { error: 'Failed to update curator status.' };
+  } finally {
+    client.release();
   }
 }
 
@@ -88,6 +207,8 @@ export async function setUserActiveStatus(rawUserId, nextActive) {
     revalidatePath('/artists');
     revalidatePath(`/artists/${userId}`);
     revalidatePath('/artists/[id]', 'page');
+    revalidatePath('/explore');
+    revalidatePath('/artworks/[id]', 'page');
     revalidatePath('/');
     return { success: true, isActive: nextActive };
   } catch (err) {
