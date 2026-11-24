@@ -1,23 +1,32 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useRef, useState, useTransition, Suspense } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition, Suspense } from 'react';
+import DirectorySearchBar from '@/components/ui/DirectorySearchBar';
 import FilterDropdown from '@/components/ui/FilterDropdown';
-import { Search, X } from '@/components/ui/Icons';
 
 function ExploreFiltersInner({ categories }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const searchInputRef = useRef(null);
+  const debounceTimerRef = useRef(null);
 
-  const [search, setSearch] = useState(searchParams.get('search') || '');
-  const [category, setCategory] = useState(searchParams.get('category') || '');
-  const [sort, setSort] = useState(searchParams.get('sort') || 'latest');
+  const paramSearch = searchParams.get('search') || '';
+  const paramCategory = searchParams.get('category') || '';
+  const paramSort = searchParams.get('sort') || 'latest';
+
+  const [search, setSearch] = useState(paramSearch);
+  const [prevParamSearch, setPrevParamSearch] = useState(paramSearch);
+
+  if (prevParamSearch !== paramSearch) {
+    setPrevParamSearch(paramSearch);
+    setSearch(paramSearch);
+  }
 
   const categoryOptions = [
     { value: '', label: 'All Categories' },
-    ...categories.map((cat) => ({ value: cat.id, label: cat.name })),
+    ...categories.map((cat) => ({ value: String(cat.id), label: cat.name })),
   ];
 
   const sortOptions = [
@@ -25,61 +34,65 @@ function ExploreFiltersInner({ categories }) {
     { value: 'popular', label: 'Most Popular' },
   ];
 
-  const applyFilters = (newSearch, newCategory, newSort) => {
-    const params = new URLSearchParams();
-    if (newSearch) params.set('search', newSearch);
-    if (newCategory) params.set('category', newCategory);
-    if (newSort && newSort !== 'latest') params.set('sort', newSort);
-    startTransition(() => {
-      router.push(`/explore?${params.toString()}`);
-    });
-  };
+  const applyFilters = useCallback(
+    (newSearch, newCategory, newSort) => {
+      const params = new URLSearchParams();
+      const trimmed = (newSearch || '').trim();
+      if (trimmed) params.set('search', trimmed);
+      if (newCategory) params.set('category', String(newCategory));
+      if (newSort && newSort !== 'latest') params.set('sort', newSort);
+      const qs = params.toString();
+      const targetUrl = qs ? `/explore?${qs}` : '/explore';
+      startTransition(() => {
+        router.replace(targetUrl, { scroll: false });
+      });
+    },
+    [router]
+  );
+
+  useEffect(() => {
+    const trimmed = search.trim();
+    const currentParam = paramSearch.trim();
+    if (trimmed === currentParam) return undefined;
+
+    debounceTimerRef.current = setTimeout(() => {
+      applyFilters(trimmed, paramCategory, paramSort);
+    }, 300);
+
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, [search, paramSearch, paramCategory, paramSort, applyFilters]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    applyFilters(search, category, sort);
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    applyFilters(search, paramCategory, paramSort);
   };
 
   const handleClearSearch = () => {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     setSearch('');
-    if (searchParams.get('search')) {
-      applyFilters('', category, sort);
+    if (paramSearch) {
+      applyFilters('', paramCategory, paramSort);
     }
     searchInputRef.current?.focus();
   };
 
   return (
     <div className="explore-filters">
-      <form onSubmit={handleSearch} className="explore-search-form" role="search">
-        <div className="explore-search-wrap">
-          <Search size={16} />
-          <input
-            ref={searchInputRef}
-            type="search"
-            className="form-input explore-search-input"
-            placeholder="Search artworks or artists..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            autoComplete="off"
-            aria-label="Search artworks"
-            id="explore-search"
-          />
-          {search && (
-            <button
-              type="button"
-              className="explore-search-clear"
-              onClick={handleClearSearch}
-              aria-label="Clear search keyword"
-              id="btn-explore-search-clear"
-            >
-              <X size={15} />
-            </button>
-          )}
-          <button type="submit" className="btn-primary explore-search-btn" id="btn-explore-search">
-            {isPending ? '...' : 'Search'}
-          </button>
-        </div>
-      </form>
+      <DirectorySearchBar
+        inputRef={searchInputRef}
+        id="explore-search"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        onSubmit={handleSearch}
+        onClear={handleClearSearch}
+        placeholder="Search artworks or artists..."
+        ariaLabel="Search artworks"
+        clearButtonId="btn-explore-search-clear"
+        clearAriaLabel="Clear search keyword"
+      />
 
       <div className="explore-filter-row explore-filter-row--pair">
         {/* Category filter */}
@@ -87,12 +100,12 @@ function ExploreFiltersInner({ categories }) {
           id="explore-material-filter"
           className="explore-dropdown-category"
           ariaLabel="Filter by category"
-          value={category}
+          value={paramCategory}
           options={categoryOptions}
           placeholder="All Categories"
           onSelect={(val) => {
-            setCategory(val);
-            applyFilters(search, val, sort);
+            if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+            applyFilters(search, val, paramSort);
           }}
         />
 
@@ -101,12 +114,12 @@ function ExploreFiltersInner({ categories }) {
           id="explore-era-filter"
           className="explore-dropdown-sort"
           ariaLabel="Sort order"
-          value={sort}
+          value={paramSort}
           options={sortOptions}
           placeholder="Latest"
           onSelect={(val) => {
-            setSort(val);
-            applyFilters(search, category, val);
+            if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+            applyFilters(search, paramCategory, val);
           }}
         />
       </div>
