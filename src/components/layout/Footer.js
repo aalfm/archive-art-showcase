@@ -44,7 +44,7 @@ export default function Footer() {
             &copy; {currentYear} ARCHIVE Digital Architecture Showcase.
           </p>
           <p className="footer-system-tag">
-            ARCHIVE — A Space for Architectural Expression.
+            ARCHIVE | A Space for Architectural Expression.
           </p>
         </div>
       </div>
