@@ -457,9 +457,6 @@ export default function ArtworkGallery({
               {/* Hierarchy 2: Clickable Artwork Title Beneath the Artwork */}
               <div className="tilted-caption-bar">
                 <div className="tilted-title-wrap">
-                  <span className="tilted-title-index">
-                    {formatPlateNumber(safeIndex + 1)}
-                  </span>
                   <h3 className="tilted-artwork-title">
                     <Link
                       href={`/artworks/${activeArtwork.id}`}
@@ -534,7 +531,7 @@ export default function ArtworkGallery({
               </div>
 
               <Link href="/explore" className="exhibition-archive-link" id="btn-load-more">
-                <span>View Complete Archive</span>
+                <span>View All Artworks</span>
               </Link>
             </div>
           </div>

@@ -78,15 +78,22 @@ async function getHomepageData() {
       `),
     ]);
 
+    const serializedChallenges = challengesRes.rows.map((row) => ({
+      ...row,
+      start_date: row.start_date instanceof Date ? row.start_date.toISOString() : row.start_date,
+      end_date: row.end_date instanceof Date ? row.end_date.toISOString() : row.end_date,
+    }));
+
     return {
       artworks: artworksRes.rows,
-      challenges: challengesRes.rows,
+      challenges: serializedChallenges,
       categories: categoriesRes.rows,
       artists: artistsRes.rows,
+      serverNow: Date.now(),
     };
   } catch (err) {
     console.error('[Homepage] Data fetch error:', err);
-    return { artworks: [], challenges: [], categories: [], artists: [] };
+    return { artworks: [], challenges: [], categories: [], artists: [], serverNow: Date.now() };
   }
 }
 
@@ -111,7 +118,7 @@ export default async function HomePage() {
           categories={data.categories}
         />
         {data.challenges.length > 0 && (
-          <ChallengesSection challenges={data.challenges} />
+          <ChallengesSection challenges={data.challenges} initialNow={data.serverNow} />
         )}
         {data.artists.length > 0 && (
           <ArtistsSection artists={data.artists} />
