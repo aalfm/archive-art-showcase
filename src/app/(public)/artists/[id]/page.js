@@ -3,6 +3,7 @@ import { unstable_noStore as noStore } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
 import { query } from '@/lib/db';
+import { applyAvatarPolicy } from '@/lib/avatar';
 import { toId } from '@/lib/utils';
 import { Heart } from '@/components/ui/Icons';
 import UserAvatar from '@/components/ui/UserAvatar';
@@ -12,23 +13,36 @@ export const revalidate = 0;
 
 async function getCreatorProfile(id) {
   noStore();
-  const [userRes, artworksRes] = await Promise.all([
-    query(`
-      SELECT id, name, bio, profile_image, external_link, role, is_active, created_at
+  const userRes = await query(
+    `
+      SELECT id, name, bio,
+             CASE WHEN LOWER(role) = 'member' THEN profile_image ELSE NULL END as profile_image,
+             external_link, role, is_active, created_at
       FROM users WHERE id = $1 AND role = 'member'
-    `, [id]),
-    query(`
+    `,
+    [id]
+  );
+
+  if (userRes.rows.length === 0) return null;
+  const user = applyAvatarPolicy(userRes.rows[0]);
+
+  if (user.is_active === false) {
+    return { user, artworks: [] };
+  }
+
+  const artworksRes = await query(
+    `
       SELECT a.id, a.title, a.image_url, a.like_count, a.created_at,
              c.name as category_name
       FROM artworks a
       LEFT JOIN categories c ON a.category_id = c.id
       WHERE a.user_id = $1 AND a.status = 'active'
       ORDER BY a.like_count DESC
-    `, [id]),
-  ]);
+    `,
+    [id]
+  );
 
-  if (userRes.rows.length === 0) return null;
-  return { user: userRes.rows[0], artworks: artworksRes.rows };
+  return { user, artworks: artworksRes.rows };
 }
 
 export async function generateMetadata(props) {
@@ -36,6 +50,9 @@ export async function generateMetadata(props) {
   if (!toId(params.id)) notFound();
   const data = await getCreatorProfile(params.id);
   if (!data) return { title: 'Artist not found — ARCHIVE' };
+  if (data.user.is_active === false) {
+    return { title: `${data.user.name} (Inactive) — ARCHIVE` };
+  }
   return { title: `${data.user.name} — ARCHIVE Artist` };
 }
 
@@ -46,8 +63,80 @@ export default async function CreatorProfilePage(props) {
   if (!data) notFound();
 
   const { user, artworks } = data;
+  const joinDate = new Date(user.created_at).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
+
+  if (user.is_active === false) {
+    return (
+      <div className="creator-profile-page artist-inactive-page">
+        <div className="detail-breadcrumb">
+          <Link href="/artists">Artists</Link>
+          <span>›</span>
+          <span className="detail-breadcrumb-current">{user.name}</span>
+        </div>
+
+        <section
+          className="artist-inactive-card"
+          id="artist-inactive-profile"
+          aria-labelledby="artist-inactive-name"
+        >
+          <div className="artist-inactive-identity">
+            <div className="artist-inactive-avatar-wrap">
+              <UserAvatar
+                src={user.profile_image}
+                role={user.role}
+                name={user.name}
+                size={88}
+                className="creator-profile-avatar-placeholder artist-inactive-avatar"
+              />
+            </div>
+
+            <div className="artist-inactive-identity-text">
+              <div className="creator-profile-name-row">
+                <h1 className="creator-profile-name artist-inactive-name" id="artist-inactive-name">
+                  {user.name}
+                </h1>
+                <span
+                  className="artist-dir-status-inactive"
+                  id="artist-profile-inactive-badge"
+                  aria-label="Account status: Inactive"
+                >
+                  <span className="artist-dir-status-dot" aria-hidden="true" />
+                  <span>INACTIVE</span>
+                </span>
+              </div>
+              <p className="artist-inactive-meta">Artist · Joined {joinDate}</p>
+            </div>
+          </div>
+
+          <div className="artist-inactive-notice" role="status" id="artist-account-inactive-notice">
+            <span className="artist-inactive-notice-label" id="artist-account-inactive-label">
+              ACCOUNT INACTIVE
+            </span>
+            <p className="artist-inactive-notice-message" id="artist-account-inactive-message">
+              This artist account is currently inactive and is no longer available on ARTHIVE.
+            </p>
+            <p className="artist-inactive-notice-sub">
+              Published artworks by this creator remain accessible in the Explore gallery and through their artwork detail pages.
+            </p>
+          </div>
+
+          <div className="artist-inactive-actions">
+            <Link href="/explore" className="btn-primary">
+              Explore Artworks
+            </Link>
+            <Link href="/artists" className="btn-secondary">
+              Back to Artists
+            </Link>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   const totalLikes = artworks.reduce((sum, a) => sum + (a.like_count || 0), 0);
-  const joinDate = new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
     <div className="creator-profile-page">
@@ -56,6 +145,7 @@ export default async function CreatorProfilePage(props) {
         <div className="creator-profile-avatar-wrap">
           <UserAvatar
             src={user.profile_image}
+            role={user.role}
             name={user.name}
             size={100}
             className="creator-profile-avatar-placeholder"
@@ -64,12 +154,6 @@ export default async function CreatorProfilePage(props) {
         <div className="creator-profile-info">
           <div className="creator-profile-name-row">
             <h1 className="creator-profile-name">{user.name}</h1>
-            {user.is_active === false && (
-              <span className="artist-dir-status-inactive" aria-label="Account status: Inactive">
-                <span className="artist-dir-status-dot" aria-hidden="true" />
-                <span>INACTIVE</span>
-              </span>
-            )}
           </div>
           {user.bio && <p className="creator-profile-bio">{user.bio}</p>}
           {user.external_link && (

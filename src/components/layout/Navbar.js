@@ -100,23 +100,13 @@ export default function Navbar({ user }) {
                   aria-expanded={userMenuOpen}
                   id="btn-user-menu"
                 >
-                  {user.profile_image ? (
-                    <UserAvatar
-                      src={user.profile_image}
-                      name={user.name}
-                      size={20}
-                      className="user-profile-icon"
-                    />
-                  ) : (
-                    <Image
-                      src="/logo/Favicon_profil.svg"
-                      alt=""
-                      width={20}
-                      height={20}
-                      className="user-profile-icon"
-                      style={{ borderRadius: '50%', flexShrink: 0 }}
-                    />
-                  )}
+                  <UserAvatar
+                    src={user.profile_image}
+                    role={user.role}
+                    name={user.name}
+                    size={22}
+                    className="user-profile-icon"
+                  />
                   <span className="navbar-user-name">{user.name.split(' ')[0]}</span>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <polyline points="6 9 12 15 18 9"></polyline>
@@ -125,8 +115,17 @@ export default function Navbar({ user }) {
                 {userMenuOpen && (
                   <div className="user-dropdown" role="menu">
                     <div className="user-dropdown-header">
-                      <span className="user-dropdown-name">{user.name}</span>
-                      <span className="user-dropdown-role">{user.role.toUpperCase()}</span>
+                      <UserAvatar
+                        src={user.profile_image}
+                        role={user.role}
+                        name={user.name}
+                        size={30}
+                        className="user-dropdown-avatar"
+                      />
+                      <div className="user-dropdown-meta">
+                        <span className="user-dropdown-name">{user.name}</span>
+                        <span className="user-dropdown-role">{user.role.toUpperCase()}</span>
+                      </div>
                     </div>
                     <div className="user-dropdown-divider"></div>
                     <Link href={getDashboardLink()} className="user-dropdown-item" role="menuitem" onClick={() => setUserMenuOpen(false)}>

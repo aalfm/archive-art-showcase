@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { unstable_noStore as noStore } from 'next/cache';
 import { query } from '@/lib/db';
+import { applyAvatarPolicy } from '@/lib/avatar';
 import PublicPageContainer from '@/components/layout/PublicPageContainer';
 import ArtistDirectoryCard from '@/components/artists/ArtistDirectoryCard';
 import ArtistsFilters from './ArtistsFilters';
@@ -57,7 +58,9 @@ async function getArtistsDirectoryData(searchParams) {
     const [artistsRes, categoriesRes] = await Promise.all([
       query(
         `
-        SELECT u.id, u.name, u.bio, u.profile_image, u.created_at, u.is_active,
+        SELECT u.id, u.name, u.bio, u.role,
+               CASE WHEN LOWER(u.role) = 'member' THEN u.profile_image ELSE NULL END as profile_image,
+               u.created_at, u.is_active,
                COUNT(a.id)::int as artwork_count,
                COALESCE(SUM(a.like_count), 0)::int as total_likes,
                (
@@ -81,10 +84,12 @@ async function getArtistsDirectoryData(searchParams) {
       query('SELECT id, name FROM categories ORDER BY name ASC'),
     ]);
 
-    const artists = artistsRes.rows.map((row) => ({
-      ...row,
-      is_active: row.is_active !== false,
-    }));
+    const artists = artistsRes.rows.map((row) =>
+      applyAvatarPolicy({
+        ...row,
+        is_active: row.is_active !== false,
+      })
+    );
 
     return {
       artists,

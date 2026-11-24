@@ -155,6 +155,7 @@ export default function DashboardSidebar({ user, isInactive = false }) {
         <div className="sidebar-user">
           <UserAvatar
             src={user.profile_image}
+            role={user.role}
             name={user.name}
             size={42}
             className="sidebar-avatar"

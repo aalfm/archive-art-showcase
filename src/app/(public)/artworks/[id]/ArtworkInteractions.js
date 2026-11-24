@@ -136,6 +136,7 @@ export default function ArtworkInteractions({
               <div key={comment.id} className="comment-item">
                 <UserAvatar
                   src={comment.user_image}
+                  role={comment.user_role}
                   name={comment.user_name || 'User'}
                   size={38}
                   className="comment-avatar"

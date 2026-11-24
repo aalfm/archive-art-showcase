@@ -25,6 +25,7 @@ export default function ArtistProfile({ artist, index = 0, total = 1 }) {
       <div className="artist-profile-identity">
         <UserAvatar
           src={artist.profile_image}
+          role={artist.role || 'member'}
           name={artist.name}
           size={72}
           className="artist-showcase-avatar"

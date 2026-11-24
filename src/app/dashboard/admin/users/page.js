@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
+import { applyAvatarPolicy } from '@/lib/avatar';
 import { query } from '@/lib/db';
+import UserAvatar from '@/components/ui/UserAvatar';
 import UserStatusButton from './UserStatusButton';
 import UserFilters from './UserFilters';
 
@@ -17,7 +19,9 @@ export default async function AdminUsersPage({ searchParams }) {
   const roleFilter = (sp?.role || '').trim().toLowerCase();
 
   let sql = `
-    SELECT u.id, u.name, u.email, u.role, u.curator_status, u.is_active, u.created_at,
+    SELECT u.id, u.name, u.email, u.role, u.curator_status, u.is_active,
+           CASE WHEN LOWER(u.role) = 'member' THEN u.profile_image ELSE NULL END as profile_image,
+           u.created_at,
            COUNT(a.id) as artwork_count
     FROM users u
     LEFT JOIN artworks a ON a.user_id = u.id AND a.status = 'active'
@@ -38,7 +42,7 @@ export default async function AdminUsersPage({ searchParams }) {
   sql += ` GROUP BY u.id ORDER BY u.created_at DESC`;
 
   const res = await query(sql, params);
-  const users = res.rows;
+  const users = res.rows.map((row) => applyAvatarPolicy(row));
 
   return (
     <div>
@@ -54,7 +58,7 @@ export default async function AdminUsersPage({ searchParams }) {
 
       {/* Users Table */}
       <div className="data-table-wrap">
-        <table className="data-table">
+        <table className="data-table admin-users-table">
           <thead>
             <tr>
               <th>User Name</th>
@@ -80,13 +84,21 @@ export default async function AdminUsersPage({ searchParams }) {
                 return (
                   <tr key={u.id}>
                     <td style={{ fontWeight: 600 }}>
-                      {u.role === 'member' ? (
-                        <Link href={`/artists/${u.id}`} target="_blank" className="dashboard-user-link">
-                          {u.name}
-                        </Link>
-                      ) : (
-                        u.name
-                      )}
+                      <div className="dashboard-user-cell">
+                        <UserAvatar
+                          src={u.profile_image}
+                          role={u.role}
+                          name={u.name}
+                          size={28}
+                        />
+                        {u.role === 'member' ? (
+                          <Link href={`/artists/${u.id}`} target="_blank" className="dashboard-user-link dashboard-user-cell-name">
+                            {u.name}
+                          </Link>
+                        ) : (
+                          <span className="dashboard-user-cell-name">{u.name}</span>
+                        )}
+                      </div>
                     </td>
                     <td style={{ fontSize: '0.82rem', color: 'var(--surface)' }}>{u.email}</td>
                     <td>

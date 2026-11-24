@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { query } from './db';
+import { applyAvatarPolicy } from './avatar';
 
 const SECRET = new TextEncoder().encode(
   process.env.SESSION_SECRET || 'arthive-fallback-secret-key-32chars'
@@ -57,7 +58,9 @@ export async function getSession() {
 
     const result = await query(
       `SELECT s.id as session_id, u.id, u.name, u.email, u.role, u.curator_status,
-              u.is_active, u.profile_image, u.bio, u.external_link, u.created_at
+              u.is_active,
+              CASE WHEN LOWER(u.role) = 'member' THEN u.profile_image ELSE NULL END as profile_image,
+              u.bio, u.external_link, u.created_at
        FROM sessions s
        JOIN users u ON s.user_id = u.id
        WHERE s.id = $1 AND s.expires_at > NOW() AND u.is_active = TRUE`,
@@ -66,7 +69,7 @@ export async function getSession() {
 
     if (result.rows.length === 0) return null;
 
-    return { user: result.rows[0] };
+    return { user: applyAvatarPolicy(result.rows[0]) };
   } catch {
     return null;
   }
@@ -95,14 +98,16 @@ export async function getInactiveSessionUser() {
     if (!Number.isInteger(userId) || userId <= 0) return null;
 
     const result = await query(
-      `SELECT id, name, email, role, curator_status, is_active, profile_image, created_at
+      `SELECT id, name, email, role, curator_status, is_active,
+              CASE WHEN LOWER(role) = 'member' THEN profile_image ELSE NULL END as profile_image,
+              created_at
        FROM users
        WHERE id = $1 AND is_active = FALSE`,
       [userId]
     );
 
     if (result.rows.length === 0) return null;
-    return result.rows[0];
+    return applyAvatarPolicy(result.rows[0]);
   } catch {
     return null;
   }

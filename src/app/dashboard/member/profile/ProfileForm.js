@@ -5,14 +5,18 @@ import { useRouter } from 'next/navigation';
 import { updateProfile } from '@/lib/actions/artwork.actions';
 import ImageUpload from '@/components/ui/ImageUpload';
 import UserAvatar from '@/components/ui/UserAvatar';
+import { canUseProfileImage, resolveUserAvatarSrc } from '@/lib/avatar';
 
 export default function ProfileForm({ user }) {
   const router = useRouter();
-  const [profileImage, setProfileImage] = useState(user.profile_image || '');
+  const allowProfilePhoto = canUseProfileImage(user?.role);
+  const [profileImage, setProfileImage] = useState(
+    allowProfilePhoto ? resolveUserAvatarSrc(user) || '' : ''
+  );
   const [state, formAction, isPending] = useActionState(async (prevState, formData) => {
     const res = await updateProfile(prevState, formData);
     if (res?.success) {
-      setProfileImage(res.profileImage || '');
+      setProfileImage(allowProfilePhoto ? res.profileImage || '' : '');
       router.refresh();
     }
     return res;
@@ -21,11 +25,15 @@ export default function ProfileForm({ user }) {
   return (
     <div className="dashboard-form-panel">
       <div className="profile-identity-preview">
-        <UserAvatar src={profileImage} name={user.name} size={64} />
+        <UserAvatar src={profileImage} role={user.role} name={user.name} size={64} />
         <div className="profile-identity-meta">
           <span className="profile-identity-name">{user.name}</span>
           <span className="profile-identity-hint">
-            {profileImage ? 'Current profile photo preview' : 'No profile photo uploaded — default icon is shown'}
+            {!allowProfilePhoto
+              ? 'Default role avatar is used for this account'
+              : profileImage
+                ? 'Current profile photo preview'
+                : 'No profile photo uploaded — default icon is shown'}
           </span>
         </div>
       </div>
@@ -42,14 +50,17 @@ export default function ProfileForm({ user }) {
       )}
 
       <form action={formAction} className="dashboard-form">
-        <div className="form-group">
-          <label className="form-label">Profile Photo</label>
-          <ImageUpload
-            currentImage={profileImage}
-            onUpload={(url) => setProfileImage(url)}
-            name="profile_image"
-          />
-        </div>
+        {allowProfilePhoto && (
+          <div className="form-group">
+            <label className="form-label">Profile Photo</label>
+            <ImageUpload
+              currentImage={profileImage}
+              onUpload={(url) => setProfileImage(url)}
+              name="profile_image"
+              label="profile photo"
+            />
+          </div>
+        )}
 
         <div className="dashboard-form-grid-2">
           <div className="form-group">
