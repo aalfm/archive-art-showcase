@@ -23,7 +23,7 @@ export default async function AdminCategoriesPage() {
     <div>
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">CATEGORY MANAGEMENT</h1>
+          <h1 className="dashboard-title">Category Management</h1>
           <p className="dashboard-subtitle">Manage the curatorial taxonomy for digital artworks across ARCHIVE.</p>
         </div>
       </div>

@@ -57,9 +57,9 @@ export default function CategoryManager({ categories }) {
   return (
     <div>
       {/* Create Category Form */}
-      <div style={{ maxWidth: 540, background: '#141618', border: '1px solid var(--bg-secondary)', borderRadius: 8, padding: 24, marginBottom: 36 }}>
-        <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '0.84rem', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: 16 }}>
-          + ADD NEW CATEGORY
+      <div style={{ maxWidth: 540, background: 'var(--bg-elevated)', border: '1px solid var(--bg-secondary)', borderRadius: 'var(--radius-xs)', padding: 24, marginBottom: 32 }}>
+        <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
+          Add Category
         </h2>
 
         {createState?.error && (
@@ -101,8 +101,8 @@ export default function CategoryManager({ categories }) {
       )}
 
       {/* Category List */}
-      <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '0.84rem', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: 16 }}>
-        CATEGORY LIST ({categories.length})
+      <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
+        Categories ({categories.length})
       </h2>
 
       <div className="data-table-wrap">

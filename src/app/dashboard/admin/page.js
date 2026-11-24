@@ -10,46 +10,78 @@ export const metadata = {
   title: 'Admin Overview — ARCHIVE',
 };
 
+function formatShortDate(value) {
+  return new Date(value).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 export default async function AdminOverviewPage() {
   await requireRole('admin');
-  const stats = await getDashboardStats();
 
-  // Get recent reports and pending curators for quick action
-  const [pendingCuratorsRes, pendingReportsRes] = await Promise.all([
+  const [stats, pendingCuratorCountRes, pendingCuratorsRes, pendingReportsRes] = await Promise.all([
+    getDashboardStats(),
+    query(`SELECT COUNT(*)::int AS count FROM users WHERE role = 'curator' AND curator_status = 'pending'`),
     query(`
       SELECT id, name, email, created_at
       FROM users
       WHERE role = 'curator' AND curator_status = 'pending'
-      ORDER BY created_at ASC
-      LIMIT 5
+      ORDER BY created_at DESC
+      LIMIT 3
     `),
     query(`
       SELECT r.id, r.reason, r.created_at,
-             a.id as artwork_id, a.title as artwork_title,
-             COALESCE(u.name, 'Deleted User') as reporter_name
+             a.title AS artwork_title,
+             COALESCE(u.name, 'Deleted User') AS reporter_name
       FROM reports r
       JOIN artworks a ON r.artwork_id = a.id
       LEFT JOIN users u ON r.user_id = u.id
       WHERE r.status = 'pending'
       ORDER BY r.created_at DESC
-      LIMIT 5
+      LIMIT 3
     `),
   ]);
 
-  const pendingCurators = pendingCuratorsRes.rows;
-  const pendingReports = pendingReportsRes.rows;
+  const pendingCuratorCount = pendingCuratorCountRes.rows[0]?.count ?? 0;
+
+  const attentionItems = [
+    ...pendingReportsRes.rows.map((r) => ({
+      key: `report-${r.id}`,
+      type: 'Artwork Report',
+      title: r.artwork_title,
+      meta: `${r.reason} · Reported by ${r.reporter_name} · ${formatShortDate(r.created_at)}`,
+      href: '/dashboard/admin/reports',
+      actionLabel: 'Review',
+      createdAt: new Date(r.created_at).getTime(),
+    })),
+    ...pendingCuratorsRes.rows.map((c) => ({
+      key: `curator-${c.id}`,
+      type: 'Curator Verification',
+      title: c.name,
+      meta: `${c.email} · Applied ${formatShortDate(c.created_at)}`,
+      href: '/dashboard/admin/curators',
+      actionLabel: 'Verify',
+      createdAt: new Date(c.created_at).getTime(),
+    })),
+  ]
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, 5);
 
   return (
-    <div>
+    <div className="dash-overview">
       <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Admin Overview</h1>
-          <p className="dashboard-subtitle">Central operations and governance control for the ARCHIVE platform.</p>
+          <p className="dashboard-subtitle">
+            Platform summary and items requiring administrative review.
+          </p>
         </div>
       </div>
 
-      {/* Real-time Stats Grid */}
-      <div className="stats-grid">
+      {/* Primary Metrics (3 Focused Cards) */}
+      <div className="dash-kpi-grid">
         <DashboardStatCard
           label="Total Users"
           value={stats.totalUsers}
@@ -57,116 +89,81 @@ export default async function AdminOverviewPage() {
           linkLabel="Manage Users →"
         />
         <DashboardStatCard
-          label="Active Artworks"
-          value={stats.totalArtworks}
-          href="/explore"
-          linkLabel="View Gallery →"
-        />
-        <DashboardStatCard
-          label="Reports Pending Moderation"
+          label="Pending Moderation"
           value={stats.pendingReports}
           href="/dashboard/admin/reports"
           linkLabel="Review Reports →"
         />
         <DashboardStatCard
-          label="Active Challenges"
-          value={stats.activeChallenges}
-          href="/challenges"
-          linkLabel="View Challenges →"
+          label="Pending Curators"
+          value={pendingCuratorCount}
+          href="/dashboard/admin/curators"
+          linkLabel="Verify Curators →"
         />
       </div>
 
-      <div className="admin-overview-tables-grid">
-        {/* Pending Curators */}
-        <div className="admin-overview-table-panel">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
-            <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '0.86rem', color: 'var(--accent)', letterSpacing: '0.1em' }}>
-              PENDING CURATOR APPLICATIONS ({pendingCurators.length})
-            </h2>
-            <Link href="/dashboard/admin/curators" style={{ fontSize: '0.8rem', color: 'var(--surface)', textDecoration: 'none' }}>
-              View All →
-            </Link>
+      {/* Priority Attention List */}
+      <section className="dash-section">
+        <div className="dash-section-head">
+          <div>
+            <h2 className="dash-section-title">Needs Attention</h2>
+            <p className="dash-section-desc">
+              Recent moderation reports and curator verification requests.
+            </p>
           </div>
-
-          {pendingCurators.length === 0 ? (
-            <div style={{ padding: 24, background: '#141618', borderRadius: 8, border: '1px solid var(--bg-secondary)', color: 'var(--surface)', fontSize: '0.86rem' }}>
-              No curator applications awaiting review.
-            </div>
-          ) : (
-            <div className="data-table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingCurators.map((c) => (
-                    <tr key={c.id}>
-                      <td style={{ fontWeight: 600 }}>{c.name}</td>
-                      <td style={{ fontSize: '0.8rem', color: 'var(--surface)' }}>{c.email}</td>
-                      <td>
-                        <Link href="/dashboard/admin/curators" className="btn-primary" style={{ padding: '4px 10px', fontSize: '0.74rem' }}>
-                          Verify
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <Link href="/dashboard/admin/reports" className="dash-inline-link">
+            Moderation Queue →
+          </Link>
         </div>
 
-        {/* Pending Reports */}
-        <div className="admin-overview-table-panel">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
-            <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '0.86rem', color: 'var(--accent)', letterSpacing: '0.1em' }}>
-              RECENT CONTENT REPORTS ({pendingReports.length})
-            </h2>
-            <Link href="/dashboard/admin/reports" style={{ fontSize: '0.8rem', color: 'var(--surface)', textDecoration: 'none' }}>
-              View All →
-            </Link>
+        {attentionItems.length === 0 ? (
+          <div className="dash-empty">
+            <p>All clear. No curator applications or content reports require attention right now.</p>
           </div>
+        ) : (
+          <div className="dash-panel">
+            <ul className="dash-list">
+              {attentionItems.map((item) => (
+                <li key={item.key} className="dash-list-item">
+                  <div className="dash-list-main">
+                    <span className="dash-item-kicker">{item.type}</span>
+                    <span className="dash-item-title">{item.title}</span>
+                    <span className="dash-item-meta">{item.meta}</span>
+                  </div>
+                  <Link href={item.href} className="dash-row-link">
+                    {item.actionLabel} →
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
 
-          {pendingReports.length === 0 ? (
-            <div style={{ padding: 24, background: '#141618', borderRadius: 8, border: '1px solid var(--bg-secondary)', color: 'var(--surface)', fontSize: '0.86rem' }}>
-              All content is safe. No reports awaiting review.
-            </div>
-          ) : (
-            <div className="data-table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Artwork</th>
-                    <th>Reason</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingReports.map((r) => (
-                    <tr key={r.id}>
-                      <td style={{ fontWeight: 600 }}>{r.artwork_title}</td>
-                      <td>
-                        <span className="badge badge-rejected" style={{ fontSize: '0.7rem' }}>
-                          {r.reason}
-                        </span>
-                      </td>
-                      <td>
-                        <Link href="/dashboard/admin/reports" className="btn-secondary" style={{ padding: '4px 10px', fontSize: '0.74rem' }}>
-                          Moderate
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+      {/* Direct Links to Full Management Pages */}
+      <section className="dash-section">
+        <div className="dash-section-head">
+          <h2 className="dash-section-title">Management</h2>
         </div>
-      </div>
+        <div className="dash-quick-links">
+          <Link href="/dashboard/admin/users" className="dash-quick-link">
+            <span>User Management</span>
+            <span className="dash-quick-arrow" aria-hidden="true">→</span>
+          </Link>
+          <Link href="/dashboard/admin/curators" className="dash-quick-link">
+            <span>Curator Verification</span>
+            <span className="dash-quick-arrow" aria-hidden="true">→</span>
+          </Link>
+          <Link href="/dashboard/admin/reports" className="dash-quick-link">
+            <span>Content Moderation</span>
+            <span className="dash-quick-arrow" aria-hidden="true">→</span>
+          </Link>
+          <Link href="/dashboard/admin/categories" className="dash-quick-link">
+            <span>Categories</span>
+            <span className="dash-quick-arrow" aria-hidden="true">→</span>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

@@ -42,7 +42,7 @@ export default async function MemberFavoritesPage() {
       </div>
 
       {favorites.length === 0 ? (
-        <div style={{ padding: 48, background: '#141618', borderRadius: 8, textAlign: 'center', border: '1px solid var(--bg-secondary)' }}>
+        <div style={{ padding: 48, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-xs)', textAlign: 'center', border: '1px solid var(--bg-secondary)' }}>
           <p style={{ color: 'var(--surface)', fontSize: '0.95rem', marginBottom: 20 }}>
             You haven&apos;t saved any favorite artworks yet.
           </p>

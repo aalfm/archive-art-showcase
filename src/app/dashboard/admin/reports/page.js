@@ -56,15 +56,15 @@ export default async function AdminReportsPage() {
     <div className="moderation-page">
       <div className="dashboard-header moderation-page-header">
         <div>
-          <h1 className="dashboard-title">CONTENT MODERATION</h1>
+          <h1 className="dashboard-title">Content Moderation</h1>
           <p className="dashboard-subtitle">Review community guideline violation reports and take moderation action.</p>
         </div>
       </div>
 
       {/* Pending Reports */}
       <section className="moderation-section">
-        <h2 className="moderation-section-title">
-          ACTIVE / PENDING REPORTS ({pendingReports.length})
+        <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
+          Pending Reports ({pendingReports.length})
         </h2>
 
         {pendingReports.length === 0 ? (
@@ -112,7 +112,7 @@ export default async function AdminReportsPage() {
                         </Link>
                       </td>
                       <td>
-                        <Link href={`/artists/${r.creator_id}`} target="_blank" className="moderation-creator-link">
+                        <Link href={`/artists/${r.creator_id}`} target="_blank" className="moderation-creator-link dashboard-user-link">
                           {r.creator_name}
                         </Link>
                       </td>
@@ -120,12 +120,12 @@ export default async function AdminReportsPage() {
                       <td>
                         <span className="badge badge-neutral moderation-badge">{r.reason}</span>
                       </td>
-                      <td className="td-center moderation-total-cell">
+                      <td className="moderation-total-cell">
                         <span className={totalReports > 1 ? 'moderation-count-highlight' : ''}>
                           {totalReports} {totalReports === 1 ? 'report' : 'reports'}
                         </span>
                       </td>
-                      <td className="td-right">
+                      <td>
                         <ReportActionButtons
                           reportId={r.report_id}
                           artworkId={r.artwork_id}
@@ -147,8 +147,8 @@ export default async function AdminReportsPage() {
 
       {/* Moderation History */}
       <section className="moderation-section">
-        <h2 className="moderation-section-title">
-          MODERATION HISTORY ({historyReports.length})
+        <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
+          Moderation History ({historyReports.length})
         </h2>
 
         <div className="data-table-wrap moderation-table-wrap">
@@ -196,7 +196,7 @@ export default async function AdminReportsPage() {
                     <td className="moderation-date-cell">
                       {new Date(r.created_at).toLocaleDateString('en-US')}
                     </td>
-                    <td className="td-right">
+                    <td>
                       {r.reason === 'Other' ? (
                         <ReportDetailsButton
                           reportId={r.report_id}

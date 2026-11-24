@@ -63,7 +63,7 @@ export default async function CuratorChallengesPage() {
     <div className="curator-overview-page">
       <div className="dashboard-header curator-page-header">
         <div>
-          <h1 className="curator-page-title">MY CHALLENGES</h1>
+          <h1 className="curator-page-title">My Challenges</h1>
           <p className="curator-page-subtitle">Manage curatorial programs, review submissions, and select winners.</p>
         </div>
         <Link href="/dashboard/curator/challenges/create" className="btn-primary curator-cta-btn">
@@ -142,7 +142,7 @@ export default async function CuratorChallengesPage() {
                       <td>
                         <span className="curator-schedule-text">{scheduleText}</span>
                       </td>
-                      <td className="td-right">
+                      <td>
                         <div className="curator-5col-actions-wrap">
                           <Link
                             href={`/dashboard/curator/challenges/${ch.id}/submissions`}

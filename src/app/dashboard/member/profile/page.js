@@ -15,7 +15,7 @@ export default async function MemberProfilePage() {
     <div>
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">MY PROFILE</h1>
+          <h1 className="dashboard-title">My Profile</h1>
           <p className="dashboard-subtitle">Manage your public profile and creator identity.</p>
         </div>
         <Link href={`/artists/${user.id}`} className="btn-secondary" target="_blank">

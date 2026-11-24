@@ -30,22 +30,22 @@ export default async function MemberSubmissionsPage() {
   `, [user.id]);
 
   const submissions = res.rows;
-  const rankLabels = { 1: '🥇 1st Place', 2: '🥈 2nd Place', 3: '🥉 3rd Place' };
+  const rankLabels = { 1: '1st Place', 2: '2nd Place', 3: '3rd Place' };
 
   return (
     <div>
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">CHALLENGE SUBMISSIONS</h1>
+          <h1 className="dashboard-title">Challenge Submissions</h1>
           <p className="dashboard-subtitle">Track the status of your entries across curated challenges.</p>
         </div>
         <Link href="/challenges" className="btn-primary">
-          Explore Active Challenges
+          Explore Challenges
         </Link>
       </div>
 
       {submissions.length === 0 ? (
-        <div style={{ padding: 48, background: '#141618', borderRadius: 8, textAlign: 'center', border: '1px solid var(--bg-secondary)' }}>
+        <div style={{ padding: 48, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-xs)', textAlign: 'center', border: '1px solid var(--bg-secondary)' }}>
           <p style={{ color: 'var(--surface)', fontSize: '0.95rem', marginBottom: 20 }}>
             You haven&apos;t submitted to any challenges yet.
           </p>
@@ -73,7 +73,7 @@ export default async function MemberSubmissionsPage() {
                 return (
                   <tr key={sub.submission_id}>
                     <td>
-                      <div style={{ position: 'relative', width: 50, height: 50, borderRadius: 6, overflow: 'hidden', margin: '0 auto' }}>
+                      <div style={{ position: 'relative', width: 50, height: 50, borderRadius: 6, overflow: 'hidden' }}>
                         <Image src={sub.artwork_image} alt={sub.artwork_title} fill style={{ objectFit: 'cover' }} sizes="50px" />
                       </div>
                     </td>

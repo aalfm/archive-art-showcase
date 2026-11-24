@@ -72,7 +72,7 @@ export default async function ChallengeSubmissionsPage(props) {
       )}
 
       {submissions.length === 0 ? (
-        <div style={{ padding: 48, background: '#141618', borderRadius: 8, textAlign: 'center', border: '1px solid var(--bg-secondary)' }}>
+        <div style={{ padding: 48, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-xs)', textAlign: 'center', border: '1px solid var(--bg-secondary)' }}>
           <p style={{ color: 'var(--surface)', fontSize: '0.95rem' }}>
             No submissions have been received for this challenge yet.
           </p>
@@ -95,7 +95,7 @@ export default async function ChallengeSubmissionsPage(props) {
                 <tr key={sub.submission_id}>
                   <td>
                     <Link href={`/artworks/${sub.artwork_id}`} target="_blank">
-                      <div style={{ position: 'relative', width: 64, height: 64, borderRadius: 6, overflow: 'hidden', margin: '0 auto' }}>
+                      <div style={{ position: 'relative', width: 64, height: 64, borderRadius: 6, overflow: 'hidden' }}>
                         <Image src={sub.image_url} alt={sub.artwork_title} fill style={{ objectFit: 'cover' }} sizes="64px" />
                       </div>
                     </Link>
@@ -104,12 +104,12 @@ export default async function ChallengeSubmissionsPage(props) {
                     <Link href={`/artworks/${sub.artwork_id}`} target="_blank" style={{ fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }}>
                       {sub.artwork_title} ↗
                     </Link>
-                    <p style={{ fontSize: '0.78rem', color: '#b3aea3', margin: '4px auto 0', maxWidth: 360, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '4px 0 0', maxWidth: 360, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {sub.description}
                     </p>
                   </td>
                   <td>
-                    <Link href={`/artists/${sub.artist_id}`} target="_blank" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
+                    <Link href={`/artists/${sub.artist_id}`} target="_blank" className="dashboard-user-link">
                       {sub.artist_name}
                     </Link>
                     <div style={{ fontSize: '0.72rem', color: 'var(--surface)' }}>{sub.artist_email}</div>

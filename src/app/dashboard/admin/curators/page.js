@@ -33,22 +33,20 @@ export default async function AdminCuratorsPage() {
     <div>
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">CURATOR VERIFICATION</h1>
+          <h1 className="dashboard-title">Curator Verification</h1>
           <p className="dashboard-subtitle">Review curator applicant portfolios and grant program curation authorization.</p>
         </div>
       </div>
 
       {/* Pending Section */}
-      <div style={{ marginBottom: 48 }}>
-        <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '0.86rem', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: 16 }}>
-          AWAITING APPROVAL ({pendingCurators.length})
+      <div className="dash-section">
+        <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
+          Awaiting Approval ({pendingCurators.length})
         </h2>
 
         {pendingCurators.length === 0 ? (
-          <div style={{ padding: 32, background: '#141618', borderRadius: 8, textAlign: 'center', border: '1px solid var(--bg-secondary)' }}>
-            <p style={{ color: 'var(--surface)', fontSize: '0.9rem' }}>
-              No curator applications awaiting approval right now.
-            </p>
+          <div className="dash-empty">
+            <p>No curator applications awaiting approval right now.</p>
           </div>
         ) : (
           <div className="data-table-wrap">
@@ -91,9 +89,9 @@ export default async function AdminCuratorsPage() {
       </div>
 
       {/* Verified / Rejected History Section */}
-      <div>
-        <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '0.86rem', color: 'var(--accent)', letterSpacing: '0.1em', marginBottom: 16 }}>
-          CURATOR VERIFICATION HISTORY ({historyCurators.length})
+      <div className="dash-section">
+        <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
+          Verification History ({historyCurators.length})
         </h2>
 
         <div className="data-table-wrap">

@@ -18,7 +18,7 @@ export default async function CreateArtworkPage() {
     <div>
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">UPLOAD ARTWORK</h1>
+          <h1 className="dashboard-title">Upload Artwork</h1>
           <p className="dashboard-subtitle">Publish your new digital artwork to ARCHIVE&apos;s curated gallery.</p>
         </div>
       </div>

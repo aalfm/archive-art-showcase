@@ -38,7 +38,7 @@ export default async function MemberArtworksPage() {
       </div>
 
       {artworks.length === 0 ? (
-        <div style={{ padding: 48, background: '#141618', borderRadius: 8, textAlign: 'center', border: '1px solid var(--bg-secondary)' }}>
+        <div style={{ padding: 48, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-xs)', textAlign: 'center', border: '1px solid var(--bg-secondary)' }}>
           <p style={{ color: 'var(--surface)', fontSize: '0.95rem', marginBottom: 20 }}>
             You haven&apos;t uploaded any artworks yet.
           </p>
@@ -63,7 +63,7 @@ export default async function MemberArtworksPage() {
               {artworks.map((art) => (
                 <tr key={art.id}>
                   <td>
-                    <div style={{ position: 'relative', width: 60, height: 60, borderRadius: 6, overflow: 'hidden', margin: '0 auto' }}>
+                    <div style={{ position: 'relative', width: 60, height: 60, borderRadius: 6, overflow: 'hidden' }}>
                       <Image src={art.image_url} alt={art.title} fill style={{ objectFit: 'cover' }} sizes="60px" />
                     </div>
                   </td>

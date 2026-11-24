@@ -14,7 +14,7 @@ export default async function CreateChallengePage() {
     <div className="curator-overview-page">
       <div className="dashboard-header curator-page-header">
         <div>
-          <h1 className="curator-page-title">CREATE CHALLENGE</h1>
+          <h1 className="curator-page-title">Create Challenge</h1>
           <p className="curator-page-subtitle">Launch a curatorial competition and invite creators to submit their finest works.</p>
         </div>
       </div>
