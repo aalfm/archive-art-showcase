@@ -1,9 +1,11 @@
 'use server';
 
 import bcrypt from 'bcryptjs';
+import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { query } from '@/lib/db';
+import { getClient, query } from '@/lib/db';
 import { createSession, deleteSession, revokeUserSessions } from '@/lib/auth';
+import { MAX_BACKGROUND_LENGTH, validatePortfolioUrl } from '@/lib/curator';
 
 export async function registerUser(prevState, formData) {
   const name = formData.get('name')?.toString().trim();
@@ -11,7 +13,7 @@ export async function registerUser(prevState, formData) {
   const password = formData.get('password')?.toString();
   const role = formData.get('role')?.toString();
   const bio = formData.get('bio')?.toString().trim() || null;
-  const externalLink = formData.get('external_link')?.toString().trim() || null;
+  const rawExternalLink = formData.get('external_link')?.toString().trim() || '';
 
   // Validation
   if (!name || !email || !password || !role) {
@@ -29,32 +31,73 @@ export async function registerUser(prevState, formData) {
   if (password.length < 8) {
     return { error: 'Password must be at least 8 characters.' };
   }
+  if (bio && bio.length > MAX_BACKGROUND_LENGTH) {
+    return { error: `Background must be at most ${MAX_BACKGROUND_LENGTH} characters.` };
+  }
 
+  const portfolioCheck = validatePortfolioUrl(rawExternalLink);
+  if (!portfolioCheck.valid) {
+    return { error: portfolioCheck.error };
+  }
+  const externalLink = portfolioCheck.value;
+
+  const client = await getClient();
+  let newUserId;
   try {
+    await client.query('BEGIN');
+
     // Check if email already exists
-    const existing = await query('SELECT id FROM users WHERE email = $1', [email]);
+    const existing = await client.query('SELECT id FROM users WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
+      await client.query('ROLLBACK');
       return { error: 'Email is already registered.' };
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
     const curatorStatus = role === 'curator' ? 'pending' : null;
 
-    const result = await query(
+    const result = await client.query(
       `INSERT INTO users (name, email, password, role, curator_status, bio, external_link)
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
       [name, email, hashedPassword, role, curatorStatus, bio, externalLink]
     );
+    newUserId = result.rows[0].id;
 
-    await createSession(result.rows[0].id);
+    if (role === 'curator') {
+      await client.query(
+        `INSERT INTO curator_applications (
+           user_id, attempt_number, portfolio_url, background, status, submitted_at
+         ) VALUES ($1, 1, $2, $3, 'pending', NOW())`,
+        [newUserId, externalLink, bio]
+      );
+    }
+
+    await client.query('COMMIT');
   } catch (err) {
+    await client.query('ROLLBACK');
+    if (err.code === '23505') {
+      return { error: 'Email is already registered.' };
+    }
     console.error('[Auth] Register error:', err);
     return { error: 'Registration failed. Please try again.' };
+  } finally {
+    client.release();
+  }
+
+  try {
+    await createSession(newUserId);
+  } catch (err) {
+    console.error('[Auth] Create session error after register:', err);
+    return { error: 'Account created, but failed to start session. Please sign in.' };
   }
 
   if (role === 'curator') {
+    revalidatePath('/dashboard/admin');
+    revalidatePath('/dashboard/admin/curators');
+    revalidatePath('/dashboard/admin/users');
     redirect('/dashboard/curator/pending');
   } else {
+    revalidatePath('/dashboard/admin/users');
     redirect('/dashboard/member');
   }
 }

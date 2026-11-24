@@ -1,16 +1,40 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
 import Link from 'next/link';
 import { registerUser } from '@/lib/actions/auth.actions';
+import {
+  MAX_BACKGROUND_LENGTH,
+  PORTFOLIO_RECOMMENDATION_BODY,
+  PORTFOLIO_RECOMMENDATION_NOTE,
+  PORTFOLIO_RECOMMENDATION_TITLE,
+  validatePortfolioUrl,
+} from '@/lib/curator';
 
 function RegisterForm() {
   const searchParams = useSearchParams();
   const defaultRole = searchParams.get('role') === 'curator' ? 'curator' : 'member';
   const [state, formAction, isPending] = useActionState(registerUser, null);
   const [selectedRole, setSelectedRole] = useState(defaultRole);
+  const [portfolioUrl, setPortfolioUrl] = useState('');
+  const [portfolioError, setPortfolioError] = useState('');
+
+  const handlePortfolioBlur = () => {
+    const result = validatePortfolioUrl(portfolioUrl);
+    setPortfolioError(result.valid ? '' : result.error);
+  };
+
+  const handleFormSubmit = (e) => {
+    if (selectedRole === 'curator') {
+      const result = validatePortfolioUrl(portfolioUrl);
+      if (!result.valid) {
+        e.preventDefault();
+        setPortfolioError(result.error);
+        document.getElementById('register-portfolio')?.focus();
+      }
+    }
+  };
 
   return (
     <div className="auth-page">
@@ -28,7 +52,10 @@ function RegisterForm() {
             <button
               type="button"
               className={`role-option ${selectedRole === 'member' ? 'active' : ''}`}
-              onClick={() => setSelectedRole('member')}
+              onClick={() => {
+                setSelectedRole('member');
+                setPortfolioError('');
+              }}
               aria-pressed={selectedRole === 'member'}
               id="role-member"
             >
@@ -38,7 +65,7 @@ function RegisterForm() {
               </svg>
               <div>
                 <strong>Member</strong>
-                <small>Upload artworks & join challenges</small>
+                <small>Upload artworks &amp; join challenges</small>
               </div>
             </button>
             <button
@@ -54,7 +81,7 @@ function RegisterForm() {
               </svg>
               <div>
                 <strong>Curator</strong>
-                <small>Host challenges & curate artworks</small>
+                <small>Host challenges &amp; curate artworks</small>
               </div>
             </button>
           </div>
@@ -81,7 +108,7 @@ function RegisterForm() {
             </div>
           )}
 
-          <form action={formAction} className="auth-form">
+          <form action={formAction} onSubmit={handleFormSubmit} className="auth-form">
             <input type="hidden" name="role" value={selectedRole} />
 
             <div className="form-group">
@@ -131,23 +158,55 @@ function RegisterForm() {
             {selectedRole === 'curator' && (
               <>
                 <div className="form-group">
-                  <label htmlFor="register-portfolio" className="form-label">Curatorial Portfolio Link (Optional)</label>
+                  <div className="portfolio-recommendation-box" id="curator-portfolio-recommendation" role="note">
+                    <p className="portfolio-recommendation-title">
+                      {PORTFOLIO_RECOMMENDATION_TITLE}
+                    </p>
+                    <p className="portfolio-recommendation-body">
+                      {PORTFOLIO_RECOMMENDATION_BODY}
+                    </p>
+                    <p className="portfolio-recommendation-note">
+                      {PORTFOLIO_RECOMMENDATION_NOTE}
+                    </p>
+                  </div>
+
+                  <label htmlFor="register-portfolio" className="form-label">
+                    Curatorial Portfolio Link (Optional)
+                  </label>
                   <input
-                    type="url"
+                    type="text"
+                    inputMode="url"
                     id="register-portfolio"
                     name="external_link"
-                    className="form-input"
-                    placeholder="https://your-portfolio.com"
+                    className={`form-input${portfolioError ? ' is-invalid' : ''}`}
+                    placeholder="https://behance.net/username or https://your-portfolio.com"
+                    value={portfolioUrl}
+                    onChange={(e) => {
+                      setPortfolioUrl(e.target.value);
+                      if (portfolioError) setPortfolioError('');
+                    }}
+                    onBlur={handlePortfolioBlur}
+                    aria-invalid={Boolean(portfolioError)}
+                    aria-describedby="curator-portfolio-recommendation register-portfolio-error"
                   />
+                  {portfolioError && (
+                    <p id="register-portfolio-error" className="form-field-error" role="alert">
+                      {portfolioError}
+                    </p>
+                  )}
                 </div>
+
                 <div className="form-group">
-                  <label htmlFor="register-bio" className="form-label">Curatorial Background (Optional)</label>
+                  <label htmlFor="register-bio" className="form-label">
+                    Curatorial Background (Optional)
+                  </label>
                   <textarea
                     id="register-bio"
                     name="bio"
                     rows={3}
+                    maxLength={MAX_BACKGROUND_LENGTH}
                     className="form-textarea"
-                    placeholder="Tell us about your curatorial experience or art institution..."
+                    placeholder="Tell us about your curatorial experience, architectural practice, or art institution..."
                   />
                 </div>
               </>
