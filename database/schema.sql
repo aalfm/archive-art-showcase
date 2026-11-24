@@ -103,6 +103,25 @@ CREATE TABLE IF NOT EXISTS submissions (
     UNIQUE(challenge_id, artwork_id)
 );
 
+CREATE TABLE IF NOT EXISTS curator_applications (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    attempt_number INT NOT NULL DEFAULT 1 CHECK (attempt_number >= 1),
+    portfolio_url TEXT,
+    background TEXT,
+    supporting_notes TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+    rejection_reason TEXT,
+    submitted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    reviewed_at TIMESTAMP,
+    reviewed_by INT REFERENCES users(id) ON DELETE SET NULL,
+    UNIQUE(user_id, attempt_number),
+    CHECK (
+        (status = 'rejected' AND rejection_reason IS NOT NULL AND LENGTH(BTRIM(rejection_reason)) > 0)
+        OR status != 'rejected'
+    )
+);
+
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;
 ALTER TABLE artworks ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'active';
 ALTER TABLE artworks ADD COLUMN IF NOT EXISTS like_count INT DEFAULT 0;
@@ -138,6 +157,41 @@ UPDATE artworks a
 SET like_count = COALESCE((SELECT COUNT(*)::int FROM artwork_likes al WHERE al.artwork_id = a.id), 0)
 WHERE like_count IS NULL;
 
+INSERT INTO curator_applications (
+    user_id,
+    attempt_number,
+    portfolio_url,
+    background,
+    status,
+    rejection_reason,
+    submitted_at,
+    reviewed_at,
+    reviewed_by
+)
+SELECT
+    u.id,
+    1,
+    u.external_link,
+    u.bio,
+    COALESCE(u.curator_status, 'pending'),
+    CASE
+        WHEN u.curator_status = 'rejected'
+        THEN 'Portofolio belum menunjukkan pengalaman kuratorial yang relevan dengan bidang arsitektur serta informasi profil masih perlu dilengkapi.'
+        ELSE NULL
+    END,
+    COALESCE(u.created_at, CURRENT_TIMESTAMP),
+    CASE WHEN u.curator_status IN ('approved', 'rejected') THEN CURRENT_TIMESTAMP ELSE NULL END,
+    CASE
+        WHEN u.curator_status IN ('approved', 'rejected')
+        THEN (SELECT id FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1)
+        ELSE NULL
+    END
+FROM users u
+WHERE u.role = 'curator'
+  AND NOT EXISTS (
+      SELECT 1 FROM curator_applications ca WHERE ca.user_id = u.id
+  );
+
 CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active);
 CREATE INDEX IF NOT EXISTS idx_artworks_user_id ON artworks(user_id);
 CREATE INDEX IF NOT EXISTS idx_artworks_category_id ON artworks(category_id);
@@ -149,3 +203,6 @@ CREATE INDEX IF NOT EXISTS idx_reports_status ON reports(status);
 CREATE INDEX IF NOT EXISTS idx_submissions_challenge_id ON submissions(challenge_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_curator_applications_one_pending ON curator_applications(user_id) WHERE status = 'pending';
+CREATE INDEX IF NOT EXISTS idx_curator_applications_user_attempt ON curator_applications(user_id, attempt_number DESC);
+CREATE INDEX IF NOT EXISTS idx_curator_applications_status_submitted ON curator_applications(status, submitted_at ASC);

@@ -1,6 +1,8 @@
 import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
+import UserAvatar from '@/components/ui/UserAvatar';
 import CuratorActionButtons from './CuratorActionButtons';
+import CuratorHistoryModal from './CuratorHistoryModal';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,23 +10,70 @@ export const metadata = {
   title: 'Curator Verification — ARCHIVE',
 };
 
+function formatDate(value) {
+  if (!value) return '—';
+  return new Date(value).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 export default async function AdminCuratorsPage() {
   await requireRole('admin');
 
-  const [pendingRes, historyRes] = await Promise.all([
+  const [pendingRes, historyRes, appsRes] = await Promise.all([
     query(`
-      SELECT id, name, email, bio, external_link, created_at
-      FROM users
-      WHERE role = 'curator' AND curator_status = 'pending'
-      ORDER BY created_at ASC
+      SELECT u.id, u.name, u.email, u.role, u.bio, u.external_link, u.created_at,
+             COALESCE(la.submitted_at, u.created_at) AS latest_submitted_at
+      FROM users u
+      LEFT JOIN LATERAL (
+        SELECT submitted_at
+        FROM curator_applications
+        WHERE user_id = u.id
+        ORDER BY attempt_number DESC
+        LIMIT 1
+      ) la ON TRUE
+      WHERE u.role = 'curator' AND u.curator_status = 'pending'
+      ORDER BY COALESCE(la.submitted_at, u.created_at) ASC
     `),
     query(`
-      SELECT id, name, email, curator_status, bio, external_link, created_at
-      FROM users
-      WHERE role = 'curator' AND curator_status != 'pending'
-      ORDER BY created_at DESC
+      SELECT u.id, u.name, u.email, u.role, u.curator_status, u.bio, u.external_link, u.created_at,
+             COALESCE(la.reviewed_at, u.created_at) AS latest_reviewed_at
+      FROM users u
+      LEFT JOIN LATERAL (
+        SELECT reviewed_at
+        FROM curator_applications
+        WHERE user_id = u.id
+        ORDER BY attempt_number DESC
+        LIMIT 1
+      ) la ON TRUE
+      WHERE u.role = 'curator' AND u.curator_status != 'pending'
+      ORDER BY COALESCE(la.reviewed_at, u.created_at) DESC
+    `),
+    query(`
+      SELECT ca.id, ca.user_id, ca.attempt_number, ca.portfolio_url, ca.background,
+             ca.supporting_notes, ca.status, ca.rejection_reason,
+             ca.submitted_at, ca.reviewed_at,
+             adm.name AS reviewed_by_name
+      FROM curator_applications ca
+      LEFT JOIN users adm ON adm.id = ca.reviewed_by
+      ORDER BY ca.user_id ASC, ca.attempt_number DESC
     `),
   ]);
+
+  const appsByUser = new Map();
+  for (const row of appsRes.rows) {
+    const serialized = {
+      ...row,
+      submitted_at: row.submitted_at instanceof Date ? row.submitted_at.toISOString() : row.submitted_at,
+      reviewed_at: row.reviewed_at instanceof Date ? row.reviewed_at.toISOString() : row.reviewed_at,
+    };
+    if (!appsByUser.has(row.user_id)) {
+      appsByUser.set(row.user_id, []);
+    }
+    appsByUser.get(row.user_id).push(serialized);
+  }
 
   const pendingCurators = pendingRes.rows;
   const historyCurators = historyRes.rows;
@@ -34,7 +83,9 @@ export default async function AdminCuratorsPage() {
       <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Curator Verification</h1>
-          <p className="dashboard-subtitle">Review curator applicant portfolios and grant program curation authorization.</p>
+          <p className="dashboard-subtitle">
+            Review curator applications, portfolios, and prior decision history before granting curation authorization.
+          </p>
         </div>
       </div>
 
@@ -50,38 +101,85 @@ export default async function AdminCuratorsPage() {
           </div>
         ) : (
           <div className="data-table-wrap">
-            <table className="data-table">
+            <table className="data-table admin-curators-table">
               <thead>
                 <tr>
-                  <th>Applicant Name</th>
+                  <th>Applicant</th>
                   <th>Email</th>
-                  <th>Profile &amp; Portfolio</th>
-                  <th>Applied Date</th>
+                  <th>Portfolio &amp; Application</th>
+                  <th>Submitted</th>
                   <th>Decision</th>
                 </tr>
               </thead>
               <tbody>
-                {pendingCurators.map((c) => (
-                  <tr key={c.id}>
-                    <td style={{ fontWeight: 700 }}>{c.name}</td>
-                    <td style={{ fontSize: '0.82rem', color: 'var(--surface)' }}>{c.email}</td>
-                    <td>
-                      {c.external_link ? (
-                        <a href={c.external_link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', fontSize: '0.8rem', textDecoration: 'none' }}>
-                          View Portfolio ↗
-                        </a>
-                      ) : (
-                        <span style={{ color: 'var(--surface)', fontSize: '0.78rem' }}>{c.bio || 'No additional info'}</span>
-                      )}
-                    </td>
-                    <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--surface)' }}>
-                      {new Date(c.created_at).toLocaleDateString('en-US')}
-                    </td>
-                    <td>
-                      <CuratorActionButtons curatorId={c.id} curatorName={c.name} />
-                    </td>
-                  </tr>
-                ))}
+                {pendingCurators.map((c) => {
+                  const history = appsByUser.get(c.id) || [];
+                  const latestApp = history[0] || null;
+                  const attemptNumber = latestApp?.attempt_number || 1;
+                  const portfolioUrl = latestApp?.portfolio_url || c.external_link || null;
+                  const background = latestApp?.background || c.bio || '';
+                  const isReapplication = attemptNumber > 1;
+
+                  return (
+                    <tr key={c.id}>
+                      <td>
+                        <div className="dashboard-user-cell">
+                          <UserAvatar src={null} role={c.role} name={c.name} size={28} />
+                          <div className="admin-curator-name-col">
+                            <span className="dashboard-user-cell-name" style={{ fontWeight: 600 }}>
+                              {c.name}
+                            </span>
+                            {isReapplication && (
+                              <span className="admin-curator-attempt-note">
+                                Reapplication · Attempt #{attemptNumber}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ fontSize: '0.82rem', color: 'var(--surface)' }}>{c.email}</td>
+                      <td>
+                        <div className="admin-curator-app-cell">
+                          {portfolioUrl ? (
+                            <a
+                              href={portfolioUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="admin-curator-portfolio-link"
+                            >
+                              View Portfolio ↗
+                            </a>
+                          ) : (
+                            <span className="admin-curator-no-portfolio">No portfolio provided</span>
+                          )}
+                          {background && (
+                            <p className="admin-curator-bio-snippet">{background}</p>
+                          )}
+                          <CuratorHistoryModal
+                            curatorName={c.name}
+                            curatorEmail={c.email}
+                            applications={history}
+                            buttonLabel={
+                              history.length > 1
+                                ? `View History (${history.length})`
+                                : 'View Details'
+                            }
+                          />
+                        </div>
+                      </td>
+                      <td style={{ fontSize: '0.78rem', color: 'var(--surface)', whiteSpace: 'nowrap' }}>
+                        {formatDate(latestApp?.submitted_at || c.created_at)}
+                      </td>
+                      <td>
+                        <CuratorActionButtons
+                          curatorId={c.id}
+                          curatorName={c.name}
+                          attemptNumber={attemptNumber}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -90,39 +188,89 @@ export default async function AdminCuratorsPage() {
 
       {/* Verified / Rejected History Section */}
       <div className="dash-section">
-        <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
-          Verification History ({historyCurators.length})
-        </h2>
+        <div className="dash-section-head" style={{ marginBottom: 14 }}>
+          <div>
+            <h2 className="dash-section-title">
+              Verification History ({historyCurators.length})
+            </h2>
+            <p className="dash-section-desc">
+              Past approval and rejection decisions. Rejected applicants must reapply before they can be reviewed again.
+            </p>
+          </div>
+        </div>
 
         <div className="data-table-wrap">
-          <table className="data-table">
+          <table className="data-table admin-curators-table">
             <thead>
               <tr>
-                <th>Curator Name</th>
+                <th>Curator</th>
                 <th>Email</th>
-                <th>Authorization Status</th>
-                <th>Registered Date</th>
-                <th>Update Status</th>
+                <th>Status</th>
+                <th>Decision Summary</th>
+                <th>History</th>
               </tr>
             </thead>
             <tbody>
-              {historyCurators.map((c) => (
-                <tr key={c.id}>
-                  <td style={{ fontWeight: 600 }}>{c.name}</td>
-                  <td style={{ fontSize: '0.82rem', color: 'var(--surface)' }}>{c.email}</td>
-                  <td>
-                    <span className={`badge badge-${c.curator_status}`}>
-                      {c.curator_status === 'approved' ? 'Approved' : 'Rejected'}
-                    </span>
-                  </td>
-                  <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--surface)' }}>
-                    {new Date(c.created_at).toLocaleDateString('en-US')}
-                  </td>
-                  <td>
-                    <CuratorActionButtons curatorId={c.id} curatorName={c.name} />
-                  </td>
-                </tr>
-              ))}
+              {historyCurators.map((c) => {
+                const history = appsByUser.get(c.id) || [];
+                const latestApp = history[0] || null;
+                const attemptCount = history.length || 1;
+
+                return (
+                  <tr key={c.id}>
+                    <td>
+                      <div className="dashboard-user-cell">
+                        <UserAvatar src={null} role={c.role} name={c.name} size={28} />
+                        <div className="admin-curator-name-col">
+                          <span className="dashboard-user-cell-name" style={{ fontWeight: 600 }}>
+                            {c.name}
+                          </span>
+                          {attemptCount > 1 && (
+                            <span className="admin-curator-attempt-note">
+                              {attemptCount} attempts
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{ fontSize: '0.82rem', color: 'var(--surface)' }}>{c.email}</td>
+                    <td>
+                      <div className="admin-curator-status-col">
+                        <span className={`badge badge-${c.curator_status}`}>
+                          {c.curator_status === 'approved' ? 'Approved' : 'Rejected'}
+                        </span>
+                        <span className="admin-curator-review-meta">
+                          {formatDate(latestApp?.reviewed_at || c.created_at)}
+                          {latestApp?.reviewed_by_name ? ` · ${latestApp.reviewed_by_name}` : ''}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      {c.curator_status === 'rejected' && latestApp?.rejection_reason ? (
+                        <p className="admin-curator-reason-snippet">
+                          {latestApp.rejection_reason}
+                        </p>
+                      ) : c.curator_status === 'approved' ? (
+                        <span className="admin-curator-approved-note">
+                          Verified curator access granted
+                        </span>
+                      ) : (
+                        <span className="admin-curator-no-portfolio">—</span>
+                      )}
+                    </td>
+                    <td>
+                      <CuratorHistoryModal
+                        curatorName={c.name}
+                        curatorEmail={c.email}
+                        applications={history}
+                        buttonLabel={
+                          attemptCount > 1 ? `History (${attemptCount})` : 'View Record'
+                        }
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -25,10 +25,19 @@ export default async function AdminOverviewPage() {
     getDashboardStats(),
     query(`SELECT COUNT(*)::int AS count FROM users WHERE role = 'curator' AND curator_status = 'pending'`),
     query(`
-      SELECT id, name, email, created_at
-      FROM users
-      WHERE role = 'curator' AND curator_status = 'pending'
-      ORDER BY created_at DESC
+      SELECT u.id, u.name, u.email,
+             COALESCE(la.submitted_at, u.created_at) AS submitted_at,
+             COALESCE(la.attempt_number, 1) AS attempt_number
+      FROM users u
+      LEFT JOIN LATERAL (
+        SELECT submitted_at, attempt_number
+        FROM curator_applications
+        WHERE user_id = u.id
+        ORDER BY attempt_number DESC
+        LIMIT 1
+      ) la ON TRUE
+      WHERE u.role = 'curator' AND u.curator_status = 'pending'
+      ORDER BY COALESCE(la.submitted_at, u.created_at) DESC
       LIMIT 3
     `),
     query(`
@@ -58,12 +67,12 @@ export default async function AdminOverviewPage() {
     })),
     ...pendingCuratorsRes.rows.map((c) => ({
       key: `curator-${c.id}`,
-      type: 'Curator Verification',
+      type: c.attempt_number > 1 ? `Curator Reapplication (#${c.attempt_number})` : 'Curator Verification',
       title: c.name,
-      meta: `${c.email} · Applied ${formatShortDate(c.created_at)}`,
+      meta: `${c.email} · Submitted ${formatShortDate(c.submitted_at)}`,
       href: '/dashboard/admin/curators',
       actionLabel: 'Verify',
-      createdAt: new Date(c.created_at).getTime(),
+      createdAt: new Date(c.submitted_at).getTime(),
     })),
   ]
     .sort((a, b) => b.createdAt - a.createdAt)
