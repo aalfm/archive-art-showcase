@@ -33,7 +33,7 @@ export default async function MemberFavoritesPage() {
     <div>
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">MY FAVORITES</h1>
+          <h1 className="dashboard-title">My Favorites</h1>
           <p className="dashboard-subtitle">Artworks you have saved to your collection ({favorites.length} total).</p>
         </div>
         <Link href="/explore" className="btn-secondary">
@@ -57,22 +57,24 @@ export default async function MemberFavoritesPage() {
               <Link href={`/artworks/${fav.artwork_id}`} className="project-image-wrap">
                 <Image src={fav.image_url} alt={fav.title} fill className="project-image" sizes="300px" />
               </Link>
-              <div className="card-top-bar">
-                <span className="card-tag-typology">{fav.category_name}</span>
-                <span className="card-like-count">
-                  <Heart size={16} className="card-like-icon" />
-                  <span className="card-like-num">{fav.like_count}</span>
-                </span>
-              </div>
-              <div className="card-bottom-info">
-                <Link href={`/artworks/${fav.artwork_id}`}>
-                  <h3 className="card-title">{fav.title}</h3>
-                </Link>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                  <Link href={`/artists/${fav.creator_id}`} className="card-author">
-                    by {fav.creator_name}
+              <div className="card-editorial-body">
+                <div className="card-top-bar">
+                  <span className="card-tag-typology">{fav.category_name}</span>
+                  <span className="card-like-count">
+                    <Heart size={15} className="card-like-icon" />
+                    <span className="card-like-num">{fav.like_count}</span>
+                  </span>
+                </div>
+                <div className="card-bottom-info">
+                  <Link href={`/artworks/${fav.artwork_id}`}>
+                    <h3 className="card-title">{fav.title}</h3>
                   </Link>
-                  <RemoveFavoriteButton artworkId={fav.artwork_id} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                    <Link href={`/artists/${fav.creator_id}`} className="card-author">
+                      by {fav.creator_name}
+                    </Link>
+                    <RemoveFavoriteButton artworkId={fav.artwork_id} />
+                  </div>
                 </div>
               </div>
             </article>

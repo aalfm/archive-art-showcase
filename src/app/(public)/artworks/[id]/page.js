@@ -103,7 +103,7 @@ export default async function ArtworkDetailPage(props) {
         <span>›</span>
         <span>{artwork.category_name}</span>
         <span>›</span>
-        <span>{artwork.title}</span>
+        <span className="detail-breadcrumb-current">{artwork.title}</span>
       </div>
 
       <div className="artwork-detail-layout">
@@ -123,7 +123,7 @@ export default async function ArtworkDetailPage(props) {
         <div className="artwork-detail-info-col">
           <div className="artwork-detail-header">
             {artwork.category_name && (
-              <span>{artwork.category_name}</span>
+              <span className="artwork-detail-category">{artwork.category_name}</span>
             )}
             <h1 className="artwork-detail-title">{artwork.title}</h1>
           </div>
@@ -173,8 +173,8 @@ export default async function ArtworkDetailPage(props) {
 
       <div className="artwork-comments-section">
         <div className="showcase-container" style={{ maxWidth: '900px' }}>
-          <h2 className="showcase-heading" style={{ fontSize: '1.4rem' }}>
-            COMMENTS ({comments.length})
+          <h2 className="showcase-heading" style={{ fontSize: '1.25rem' }}>
+            Comments ({comments.length})
           </h2>
 
           <ArtworkInteractions
@@ -191,8 +191,8 @@ export default async function ArtworkDetailPage(props) {
       {otherWorks.length > 0 && (
         <div className="artwork-other-works">
           <div className="showcase-container">
-            <h2 className="showcase-heading" style={{ fontSize: '1.4rem' }}>
-              MORE FROM {artwork.creator_name.toUpperCase()}
+            <h2 className="showcase-heading" style={{ fontSize: '1.25rem' }}>
+              More from {artwork.creator_name}
             </h2>
             <div className="masonry-grid" style={{ marginTop: '1.5rem' }}>
               {otherWorks.map((w) => (
@@ -200,8 +200,12 @@ export default async function ArtworkDetailPage(props) {
                   <Link href={`/artworks/${w.id}`} className="project-image-wrap">
                     <Image src={w.image_url} alt={w.title} fill className="project-image" sizes="300px" />
                   </Link>
-                  <div className="card-bottom-info">
-                    <h3 className="card-title">{w.title}</h3>
+                  <div className="card-editorial-body">
+                    <div className="card-bottom-info">
+                      <Link href={`/artworks/${w.id}`}>
+                        <h3 className="card-title">{w.title}</h3>
+                      </Link>
+                    </div>
                   </div>
                 </article>
               ))}

@@ -2,11 +2,6 @@ import Link from 'next/link';
 import { Clock3, Trophy } from '@/components/ui/Icons';
 import ArtworkImage from '@/components/ui/ArtworkImage';
 
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  return new Date(dateStr).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
-}
-
 function getDaysLeft(startDate, endDate, status) {
   if (status === 'ended') return 'Ended';
   if (status === 'upcoming') {
@@ -22,62 +17,76 @@ function getDaysLeft(startDate, endDate, status) {
 
 export default function ChallengesSection({ challenges }) {
   return (
-    <section className="challenges-preview-section">
-      <div className="showcase-container">
-        <div className="showcase-header">
-          <div className="showcase-title-area">
-            <h2 className="showcase-heading">ACTIVE CHALLENGES</h2>
-            <p className="showcase-subtitle">
-              Join curatorial challenges and showcase your creativity to the community.
+    <section className="challenges-preview-section" aria-label="Active Challenges">
+      <div className="editorial-container">
+        <header className="editorial-section-header">
+          <div className="editorial-section-title-group">
+            <span className="editorial-eyebrow">OPEN CALLS &amp; COMPETITIONS</span>
+            <h2 className="editorial-section-heading">Active Challenges</h2>
+            <p className="editorial-section-subtitle">
+              Join curatorial challenges and present spatial concepts to the ARCHIVE community.
             </p>
           </div>
-        </div>
+          <Link href="/challenges" className="editorial-header-link">
+            <span>View All Challenges</span>
+          </Link>
+        </header>
 
-        <div className="challenges-grid">
-          {challenges.map((ch) => (
-            <article key={ch.id} className="challenge-preview-card">
+        <div className="editorial-challenges-grid">
+          {challenges.map((ch, idx) => (
+            <article key={ch.id} className="editorial-challenge-item">
               {ch.banner_url && (
-                <div className="challenge-preview-banner">
+                <Link href={`/challenges/${ch.id}`} className="editorial-challenge-media">
                   <ArtworkImage
                     src={ch.banner_url}
                     alt={ch.title}
                     fill
-                    className="challenge-preview-img"
+                    className="editorial-challenge-img"
                     style={{ objectFit: 'cover' }}
-                    sizes="(max-width: 640px) 100vw, 400px"
+                    sizes="(max-width: 767px) 100vw, 33vw"
                   />
-                  <div className="challenge-preview-overlay"></div>
-                  <span className={`challenge-status-badge ${ch.challenge_status}`}>
-                    {ch.challenge_status === 'active' ? 'ACTIVE' :
-                     ch.challenge_status === 'upcoming' ? 'UPCOMING' : 'ENDED'}
+                </Link>
+              )}
+
+              <div className="editorial-challenge-body">
+                <div className="editorial-challenge-kicker">
+                  <span className="editorial-challenge-index">0{idx + 1}</span>
+                  <span className={`editorial-status-tag ${ch.challenge_status}`}>
+                    {ch.challenge_status === 'active'
+                      ? 'ACTIVE'
+                      : ch.challenge_status === 'upcoming'
+                        ? 'UPCOMING'
+                        : 'ENDED'}
                   </span>
                 </div>
-              )}
-              <div className="challenge-preview-body">
-                <h3 className="challenge-preview-title">{ch.title}</h3>
-                <p className="challenge-preview-desc">{ch.description.substring(0, 120)}...</p>
-                <div className="challenge-preview-meta">
+
+                <h3 className="editorial-challenge-title">
+                  <Link href={`/challenges/${ch.id}`}>{ch.title}</Link>
+                </h3>
+
+                <p className="editorial-challenge-desc">
+                  {ch.description?.length > 130
+                    ? `${ch.description.substring(0, 127).trim()}...`
+                    : ch.description}
+                </p>
+
+                <div className="editorial-challenge-meta">
                   <span>
-                    <Clock3 size={16} className="challenge-meta-icon" />
+                    <Clock3 size={14} className="editorial-meta-icon" />
                     <span>{getDaysLeft(ch.start_date, ch.end_date, ch.challenge_status)}</span>
                   </span>
                   <span>
-                    <Trophy size={16} className="challenge-meta-icon" />
+                    <Trophy size={14} className="editorial-meta-icon" />
                     <span>{ch.prize}</span>
                   </span>
                 </div>
-                <Link href={`/challenges/${ch.id}`} className="btn-primary challenge-preview-cta">
-                  View Challenge
+
+                <Link href={`/challenges/${ch.id}`} className="editorial-inline-cta">
+                  <span>View Challenge</span>
                 </Link>
               </div>
             </article>
           ))}
-        </div>
-
-        <div className="gallery-footer-action">
-          <Link href="/challenges" className="btn-secondary">
-            View All Challenges
-          </Link>
         </div>
       </div>
     </section>

@@ -29,8 +29,8 @@ export default async function MemberArtworksPage() {
     <div>
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">MY ARTWORKS</h1>
-          <p className="dashboard-subtitle">Manage all digital artworks you have published ({artworks.length} total).</p>
+          <h1 className="dashboard-title">My Artworks</h1>
+          <p className="dashboard-subtitle">Manage all architectural works you have published ({artworks.length} total).</p>
         </div>
         <Link href="/dashboard/member/artworks/create" className="btn-primary">
           + Upload New Artwork

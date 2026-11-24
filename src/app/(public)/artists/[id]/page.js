@@ -90,7 +90,7 @@ export default async function CreatorProfilePage(props) {
       {/* Artwork Gallery */}
       <div className="showcase-container creator-profile-gallery">
         <h2 className="showcase-heading creator-profile-gallery-heading">
-          ARTWORK GALLERY
+          Artwork Gallery
         </h2>
         {artworks.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px' }}>
@@ -109,17 +109,19 @@ export default async function CreatorProfilePage(props) {
                     sizes="(max-width: 639px) 100vw, (max-width: 1079px) 50vw, 33vw"
                   />
                 </Link>
-                <div className="card-top-bar">
-                  <span className="card-tag-typology">{artwork.category_name}</span>
-                  <span className="card-like-count">
-                    <Heart size={16} className="card-like-icon" />
-                    <span className="card-like-num">{artwork.like_count}</span>
-                  </span>
-                </div>
-                <div className="card-bottom-info">
-                  <Link href={`/artworks/${artwork.id}`}>
-                    <h3 className="card-title">{artwork.title}</h3>
-                  </Link>
+                <div className="card-editorial-body">
+                  <div className="card-top-bar">
+                    <span className="card-tag-typology">{artwork.category_name}</span>
+                    <span className="card-like-count">
+                      <Heart size={15} className="card-like-icon" />
+                      <span className="card-like-num">{artwork.like_count}</span>
+                    </span>
+                  </div>
+                  <div className="card-bottom-info">
+                    <Link href={`/artworks/${artwork.id}`}>
+                      <h3 className="card-title">{artwork.title}</h3>
+                    </Link>
+                  </div>
                 </div>
               </article>
             ))}

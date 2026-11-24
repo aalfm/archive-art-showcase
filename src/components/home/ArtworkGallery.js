@@ -1,33 +1,82 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import ArtworkImage from '@/components/ui/ArtworkImage';
-import { ChevronDown, Heart, Menu } from '@/components/ui/Icons';
+import { ArrowLeft, ArrowRight, ChevronDown } from '@/components/ui/Icons';
 
-function formatCategoryLabel(name) {
-  if (!name) return '';
-  const cleaned = name.replace(/\s*\barchitecture\b/gi, '').trim();
-  return cleaned || name;
+function formatPlateNumber(num) {
+  return String(num).padStart(2, '0');
 }
 
-export default function ArtworkGallery({ popularArtworks, latestArtworks, categories }) {
-  const [activeCategory, setActiveCategory] = useState('SEMUA');
-  const [activeTab, setActiveTab] = useState('latest');
-  const [mobileCatOpen, setMobileCatOpen] = useState(false);
-  const mobileCatRef = useRef(null);
-  const mobileCatTriggerRef = useRef(null);
+export default function ArtworkGallery({
+  artworks = [],
+  latestArtworks = [],
+  categories = [],
+}) {
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [catOpen, setCatOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [slideDir, setSlideDir] = useState('next');
+  const [transitionTick, setTransitionTick] = useState(0);
+  const [isInView, setIsInView] = useState(false);
+  const [isGalleryVisible, setIsGalleryVisible] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(false);
 
+  const sectionRef = useRef(null);
+  const cardViewportRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const triggerRef = useRef(null);
+  const navLockRef = useRef(false);
+  const navTimerRef = useRef(null);
+  const lastPointerTypeRef = useRef('mouse');
+  const touchSwipeRef = useRef({ x: 0, y: 0, active: false });
+
+  // Cleanup navigation lock timer on unmount
+  useEffect(() => {
+    return () => {
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+    };
+  }, []);
+
+  // Viewport entrance & visibility observer (for entrance reveal + keyboard arrow scoping)
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      const rafId = requestAnimationFrame(() => {
+        setIsInView(true);
+        setIsGalleryVisible(true);
+      });
+      return () => cancelAnimationFrame(rafId);
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        if (entry.isIntersecting) {
+          setIsInView(true);
+        }
+        setIsGalleryVisible(entry.intersectionRatio >= 0.25);
+      },
+      { threshold: [0.12, 0.25, 0.5] }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  // Dropdown outside-click & Escape handling
   useEffect(() => {
     const handleOutside = (e) => {
-      if (mobileCatRef.current && !mobileCatRef.current.contains(e.target)) {
-        setMobileCatOpen(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setCatOpen(false);
       }
     };
     const handleEsc = (e) => {
-      if (e.key === 'Escape' && mobileCatOpen) {
-        setMobileCatOpen(false);
-        mobileCatTriggerRef.current?.focus();
+      if (e.key === 'Escape' && catOpen) {
+        setCatOpen(false);
+        triggerRef.current?.focus();
       }
     };
     document.addEventListener('pointerdown', handleOutside);
@@ -36,22 +85,22 @@ export default function ArtworkGallery({ popularArtworks, latestArtworks, catego
       document.removeEventListener('pointerdown', handleOutside);
       document.removeEventListener('keydown', handleEsc);
     };
-  }, [mobileCatOpen]);
+  }, [catOpen]);
 
-  const handleMobileMenuKeyDown = (e) => {
+  const handleMenuKeyDown = (e) => {
     const options = Array.from(
-      mobileCatRef.current?.querySelectorAll('[role="option"]') || []
+      dropdownRef.current?.querySelectorAll('[role="option"]') || []
     );
     if (options.length === 0) return;
 
-    const currentIndex = options.indexOf(document.activeElement);
+    const focusedIdx = options.indexOf(document.activeElement);
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      const next = currentIndex < options.length - 1 ? currentIndex + 1 : 0;
+      const next = focusedIdx < options.length - 1 ? focusedIdx + 1 : 0;
       options[next]?.focus();
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      const prev = currentIndex > 0 ? currentIndex - 1 : options.length - 1;
+      const prev = focusedIdx > 0 ? focusedIdx - 1 : options.length - 1;
       options[prev]?.focus();
     } else if (e.key === 'Home') {
       e.preventDefault();
@@ -62,237 +111,435 @@ export default function ArtworkGallery({ popularArtworks, latestArtworks, catego
     }
   };
 
-  const activeCategoryLabel =
-    activeCategory === 'SEMUA'
-      ? 'All Categories'
-      : formatCategoryLabel(
-        categories.find((c) => c.name.toUpperCase() === activeCategory)?.name || activeCategory
-      );
+  const sourceList = useMemo(
+    () => (latestArtworks.length ? latestArtworks : artworks),
+    [latestArtworks, artworks]
+  );
 
-  const displayArtworks = activeTab === 'popular' ? popularArtworks : latestArtworks;
+  const filtered = useMemo(() => {
+    if (selectedCategory === 'ALL') return sourceList;
+    return sourceList.filter((item) => {
+      if (item.category_id != null && /^\d+$/.test(String(selectedCategory))) {
+        return String(item.category_id) === String(selectedCategory);
+      }
+      return item.category_name?.toLowerCase() === String(selectedCategory).toLowerCase();
+    });
+  }, [sourceList, selectedCategory]);
 
-  const filtered = activeCategory === 'SEMUA'
-    ? displayArtworks
-    : displayArtworks.filter(a =>
-      a.category_name?.toUpperCase() === activeCategory.toUpperCase()
+  const safeIndex = filtered.length > 0 ? Math.min(currentIndex, filtered.length - 1) : 0;
+  const activeArtwork = filtered[safeIndex] || null;
+
+  const selectedCategoryLabel = useMemo(() => {
+    if (selectedCategory === 'ALL') return 'All Categories';
+    const match = categories.find(
+      (c) => String(c.id) === String(selectedCategory) || c.name === selectedCategory
     );
+    return match?.name || 'All Categories';
+  }, [selectedCategory, categories]);
 
-  const gridModifier =
-    filtered.length === 1
-      ? 'gallery-grid--single'
-      : filtered.length === 2 || filtered.length === 4
-        ? 'gallery-grid--two'
-        : '';
+  const resetCardTilt = useCallback(() => {
+    const el = cardViewportRef.current;
+    if (!el) return;
+    el.style.setProperty('--tilt-x', '0deg');
+    el.style.setProperty('--tilt-y', '0deg');
+  }, []);
+
+  const navigateArtwork = useCallback(
+    (direction) => {
+      if (filtered.length === 0) return;
+      if (navLockRef.current) return;
+
+      navLockRef.current = true;
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+
+      setSlideDir(direction);
+      setIsRevealed(false);
+      resetCardTilt();
+      setTransitionTick((t) => t + 1);
+
+      setCurrentIndex((prev) => {
+        const len = filtered.length;
+        if (len <= 1) return 0;
+        const normalized = ((prev % len) + len) % len;
+        return direction === 'next'
+          ? (normalized + 1) % len
+          : (normalized - 1 + len) % len;
+      });
+
+      navTimerRef.current = setTimeout(() => {
+        navLockRef.current = false;
+      }, 360);
+    },
+    [filtered.length, resetCardTilt]
+  );
+
+  const goToPrev = useCallback(() => navigateArtwork('prev'), [navigateArtwork]);
+  const goToNext = useCallback(() => navigateArtwork('next'), [navigateArtwork]);
+
+  const goToIndex = useCallback(
+    (targetIdx) => {
+      if (filtered.length <= 1 || targetIdx === safeIndex) return;
+      if (navLockRef.current) return;
+
+      navLockRef.current = true;
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+
+      setSlideDir(targetIdx > safeIndex ? 'next' : 'prev');
+      setIsRevealed(false);
+      resetCardTilt();
+      setTransitionTick((t) => t + 1);
+      setCurrentIndex(targetIdx);
+
+      navTimerRef.current = setTimeout(() => {
+        navLockRef.current = false;
+      }, 360);
+    },
+    [filtered.length, safeIndex, resetCardTilt]
+  );
+
+  // Desktop keyboard arrow navigation when gallery is visible
+  useEffect(() => {
+    if (!isGalleryVisible) return;
+    const handleWindowKeyDown = (e) => {
+      if (catOpen) return;
+      const tag = e.target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goToPrev();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        goToNext();
+      }
+    };
+    window.addEventListener('keydown', handleWindowKeyDown);
+    return () => window.removeEventListener('keydown', handleWindowKeyDown);
+  }, [isGalleryVisible, catOpen, goToPrev, goToNext]);
+
+  const handleSelectCategory = (val) => {
+    setSelectedCategory(val);
+    setCurrentIndex(0);
+    setSlideDir('next');
+    setIsRevealed(false);
+    resetCardTilt();
+    setTransitionTick((t) => t + 1);
+    setCatOpen(false);
+  };
+
+  // Pointer & 3D tilt interactions (hover on desktop, tap on touch)
+  const handleCardPointerEnter = (e) => {
+    lastPointerTypeRef.current = e.pointerType || 'mouse';
+    if (e.pointerType === 'mouse') {
+      setIsRevealed(true);
+    }
+  };
+
+  const handleCardPointerMove = (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const el = cardViewportRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+    el.style.setProperty('--tilt-x', `${(-ny * 2.2).toFixed(2)}deg`);
+    el.style.setProperty('--tilt-y', `${(nx * 2.8).toFixed(2)}deg`);
+  };
+
+  const handleCardPointerLeave = (e) => {
+    if (e.pointerType === 'mouse') {
+      setIsRevealed(false);
+      resetCardTilt();
+    }
+  };
+
+  const handleCardPointerDown = (e) => {
+    lastPointerTypeRef.current = e.pointerType || 'touch';
+    if (e.pointerType === 'mouse') return;
+    touchSwipeRef.current = { x: e.clientX, y: e.clientY, active: true };
+  };
+
+  const handleCardPointerUp = (e) => {
+    const swipe = touchSwipeRef.current;
+    if (!swipe.active) return;
+    touchSwipeRef.current.active = false;
+    const dx = e.clientX - swipe.x;
+    const dy = e.clientY - swipe.y;
+    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+      if (dx < 0) goToNext();
+      else goToPrev();
+    }
+  };
+
+  const handleCardClick = (e) => {
+    if (e.target instanceof Element && e.target.closest('a, button')) return;
+    if (lastPointerTypeRef.current !== 'mouse') {
+      setIsRevealed((prev) => !prev);
+    }
+  };
+
+  const shortDescription = activeArtwork?.description
+    ? activeArtwork.description.length > 220
+      ? `${activeArtwork.description.slice(0, 217).trim()}...`
+      : activeArtwork.description
+    : '';
 
   return (
-    <section className="showcase-section" id="galeri">
-      <div className="showcase-container">
-        <div className="showcase-header">
-          <div className="showcase-title-area">
-            <h2 className="showcase-heading">ARTWORK GALLERY</h2>
-            <p className="showcase-subtitle">
-              Explore curated architectural works from creators on ARCHIVE
+    <section
+      ref={sectionRef}
+      className={`editorial-gallery-section ${isInView ? 'is-in-view' : ''}`}
+      id="galeri"
+      aria-label="Curated Architectural Exhibition"
+    >
+      <div className="editorial-container">
+        {/* Minimalist Gallery Header with Single All Categories Filter */}
+        <header className="editorial-gallery-header">
+          <div className="editorial-section-title-group">
+            <span className="editorial-eyebrow">CURATED EXHIBITION</span>
+            <h2 className="editorial-section-heading">Artwork Gallery</h2>
+          </div>
+
+          <div className="editorial-gallery-controls">
+            <div
+              className={`editorial-cat-dropdown ${catOpen ? 'is-open' : ''}`}
+              ref={dropdownRef}
+            >
+              <button
+                ref={triggerRef}
+                type="button"
+                id="gallery-category-filter"
+                className={`editorial-cat-trigger ${catOpen ? 'active' : ''}`}
+                onClick={() => setCatOpen((prev) => !prev)}
+                aria-haspopup="listbox"
+                aria-expanded={catOpen}
+                aria-label="Filter gallery by architecture category"
+              >
+                <span className="editorial-cat-label">{selectedCategoryLabel}</span>
+                <ChevronDown
+                  size={15}
+                  className={`editorial-cat-chevron ${catOpen ? 'rotated' : ''}`}
+                />
+              </button>
+
+              {catOpen && (
+                <div
+                  className="editorial-cat-menu"
+                  role="listbox"
+                  aria-label="Architecture categories"
+                  onKeyDown={handleMenuKeyDown}
+                >
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={selectedCategory === 'ALL'}
+                    className={`editorial-cat-option ${selectedCategory === 'ALL' ? 'selected' : ''}`}
+                    onClick={() => handleSelectCategory('ALL')}
+                  >
+                    <span>All Categories</span>
+                  </button>
+                  {categories.map((cat) => {
+                    const isSelected = String(selectedCategory) === String(cat.id);
+                    return (
+                      <button
+                        type="button"
+                        key={cat.id}
+                        role="option"
+                        aria-selected={isSelected}
+                        className={`editorial-cat-option ${isSelected ? 'selected' : ''}`}
+                        onClick={() => handleSelectCategory(String(cat.id))}
+                      >
+                        <span>{cat.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* Immersive Single-Artwork Tilted Exhibition Showcase */}
+        {!activeArtwork ? (
+          <div className="editorial-empty-state">
+            <p className="editorial-empty-title">
+              No works exhibited in this category yet.
             </p>
+            <div className="editorial-empty-actions">
+              <button
+                type="button"
+                className="btn-editorial-outline"
+                onClick={() => handleSelectCategory('ALL')}
+              >
+                Show All Categories
+              </button>
+              <Link href="/dashboard/member/artworks/create" className="btn-editorial-solid">
+                Submit Artwork
+              </Link>
+            </div>
           </div>
-
-          {/* Tab: Latest / Popular */}
-          <div className="gallery-sort-tabs">
-            <button
-              type="button"
-              className={`gallery-sort-btn ${activeTab === 'latest' ? 'active' : ''}`}
-              onClick={() => setActiveTab('latest')}
-              aria-pressed={activeTab === 'latest'}
+        ) : (
+          <div className="tilted-showcase-shell">
+            {/* 3D Tilted Artwork Monolith */}
+            <div
+              key={`plate-${activeArtwork.id}-${transitionTick}`}
+              className={`tilted-slide-stage tilted-slide-${slideDir}`}
             >
-              Latest
-            </button>
-            <button
-              type="button"
-              className={`gallery-sort-btn ${activeTab === 'popular' ? 'active' : ''}`}
-              onClick={() => setActiveTab('popular')}
-              aria-pressed={activeTab === 'popular'}
-            >
-              Popular
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Single-Row Controls: Left (Latest | Popular) + Right (All Categories Dropdown) */}
-        <div className="mobile-gallery-controls">
-          <div className="gallery-sort-tabs mobile-sort-tabs" role="group" aria-label="Sort artworks">
-            <button
-              type="button"
-              className={`gallery-sort-btn ${activeTab === 'latest' ? 'active' : ''}`}
-              onClick={() => setActiveTab('latest')}
-              aria-pressed={activeTab === 'latest'}
-            >
-              Latest
-            </button>
-            <button
-              type="button"
-              className={`gallery-sort-btn ${activeTab === 'popular' ? 'active' : ''}`}
-              onClick={() => setActiveTab('popular')}
-              aria-pressed={activeTab === 'popular'}
-            >
-              Popular
-            </button>
-          </div>
-
-          <div className={`mobile-cat-dropdown ${mobileCatOpen ? 'is-open' : ''}`} ref={mobileCatRef}>
-            <button
-              ref={mobileCatTriggerRef}
-              type="button"
-              className={`mobile-cat-trigger ${mobileCatOpen ? 'active' : ''}`}
-              onClick={() => setMobileCatOpen((prev) => !prev)}
-              aria-haspopup="listbox"
-              aria-expanded={mobileCatOpen}
-              aria-label="Filter gallery by category"
-            >
-              <Menu size={15} className="mobile-cat-icon" />
-              <span className="mobile-cat-label">{activeCategoryLabel}</span>
-              <ChevronDown
-                size={15}
-                className={`mobile-cat-chevron ${mobileCatOpen ? 'rotated' : ''}`}
-              />
-            </button>
-
-            {mobileCatOpen && (
               <div
-                className="mobile-cat-menu"
-                role="listbox"
-                aria-label="Gallery categories"
-                onKeyDown={handleMobileMenuKeyDown}
+                ref={cardViewportRef}
+                className={`tilted-card-viewport ${isRevealed ? 'is-revealed' : ''}`}
+                onPointerEnter={handleCardPointerEnter}
+                onPointerMove={handleCardPointerMove}
+                onPointerLeave={handleCardPointerLeave}
+                onPointerDown={handleCardPointerDown}
+                onPointerUp={handleCardPointerUp}
+                onClick={handleCardClick}
+                aria-label={`${activeArtwork.title} — hover or tap to view curatorial details`}
+              >
+                <div className="tilted-card-inner">
+                  {/* Front Layer: Dominant Full-Color Architectural Artwork */}
+                  <div className="tilted-face tilted-face-front" aria-hidden={isRevealed}>
+                    <ArtworkImage
+                      src={activeArtwork.image_url}
+                      alt={activeArtwork.title}
+                      fill
+                      className="tilted-artwork-image"
+                      sizes="(max-width: 767px) 100vw, (max-width: 1200px) 90vw, 1080px"
+                      priority
+                    />
+                  </div>
+
+                  {/* Back Layer: Minimal Essential Artwork Information */}
+                  <div className="tilted-face tilted-face-back" aria-hidden={!isRevealed}>
+                    <div className="tilted-back-content">
+                      <div className="tilted-back-header">
+                        <span className="tilted-back-category">
+                          {activeArtwork.category_name || 'Architecture'}
+                        </span>
+                      </div>
+
+                      <div className="tilted-back-body">
+                        <h4 className="tilted-back-title">
+                          <Link
+                            href={`/artworks/${activeArtwork.id}`}
+                            className="tilted-back-title-link"
+                            tabIndex={isRevealed ? 0 : -1}
+                          >
+                            {activeArtwork.title}
+                          </Link>
+                        </h4>
+
+                        <p className="tilted-back-artist">
+                          <span className="tilted-back-by">By </span>
+                          {activeArtwork.creator_id ? (
+                            <Link
+                              href={`/artists/${activeArtwork.creator_id}`}
+                              className="tilted-back-artist-link"
+                              tabIndex={isRevealed ? 0 : -1}
+                            >
+                              {activeArtwork.creator_name || 'ARCHIVE Creator'}
+                            </Link>
+                          ) : (
+                            <span className="tilted-back-artist-name">
+                              {activeArtwork.creator_name || 'ARCHIVE Creator'}
+                            </span>
+                          )}
+                        </p>
+
+                        {shortDescription && (
+                          <p className="tilted-back-description">{shortDescription}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hierarchy 2: Clickable Artwork Title Beneath the Artwork */}
+              <div className="tilted-caption-bar">
+                <div className="tilted-title-wrap">
+                  <span className="tilted-title-index">
+                    {formatPlateNumber(safeIndex + 1)}
+                  </span>
+                  <h3 className="tilted-artwork-title">
+                    <Link
+                      href={`/artworks/${activeArtwork.id}`}
+                      className="tilted-title-link"
+                    >
+                      {activeArtwork.title}
+                    </Link>
+                  </h3>
+                </div>
+
+                {/* Accessible / Mobile Details Toggle */}
+                <button
+                  type="button"
+                  className={`tilted-flip-toggle ${isRevealed ? 'active' : ''}`}
+                  onClick={() => {
+                    setIsRevealed((prev) => !prev);
+                    resetCardTilt();
+                  }}
+                  aria-pressed={isRevealed}
+                >
+                  {isRevealed ? 'View Artwork' : 'Artwork Info'}
+                </button>
+              </div>
+            </div>
+
+            {/* Hierarchy 3: Reused Featured Artists Minimal Navigation + Complete Archive Link */}
+            <div className="exhibition-nav-bar">
+              <div
+                className="artist-dossier-nav exhibition-dossier-nav"
+                role="navigation"
+                aria-label="Artwork gallery navigation"
               >
                 <button
                   type="button"
-                  role="option"
-                  aria-selected={activeCategory === 'SEMUA'}
-                  className={`mobile-cat-option ${activeCategory === 'SEMUA' ? 'selected' : ''}`}
-                  onClick={() => {
-                    setActiveCategory('SEMUA');
-                    setMobileCatOpen(false);
-                  }}
+                  className="artist-dossier-nav-btn exhibition-icon-nav-btn"
+                  onClick={goToPrev}
+                  disabled={filtered.length <= 1}
+                  aria-label="Previous artwork"
+                  id="btn-gallery-prev"
                 >
-                  <span>All Categories</span>
+                  Prev<ArrowLeft size={16} strokeWidth={1.75} />
                 </button>
 
-                {categories.map((cat) => {
-                  const keyUpper = cat.name.toUpperCase();
-                  const isSelected = activeCategory === keyUpper;
-                  return (
-                    <button
-                      type="button"
-                      key={cat.id}
-                      role="option"
-                      aria-selected={isSelected}
-                      className={`mobile-cat-option ${isSelected ? 'selected' : ''}`}
-                      onClick={() => {
-                        setActiveCategory(keyUpper);
-                        setMobileCatOpen(false);
-                      }}
-                    >
-                      <span>{formatCategoryLabel(cat.name)}</span>
-                    </button>
-                  );
-                })}
+                {filtered.length > 1 && (
+                  <div className="artist-dossier-nav-center">
+                    <div className="artist-dossier-dots" role="tablist" aria-label="Select featured artwork">
+                      {filtered.map((item, idx) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          role="tab"
+                          aria-selected={idx === safeIndex}
+                          aria-label={`View artwork ${idx + 1} of ${filtered.length}: ${item.title}`}
+                          className={`artist-dossier-dot${idx === safeIndex ? ' is-active' : ''}`}
+                          onClick={() => goToIndex(idx)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  className="artist-dossier-nav-btn exhibition-icon-nav-btn"
+                  onClick={goToNext}
+                  disabled={filtered.length <= 1}
+                  aria-label="Next artwork"
+                  id="btn-gallery-next"
+                >
+                  Next <ArrowRight size={16} strokeWidth={1.75} />
+                </button>
               </div>
-            )}
-          </div>
-        </div>
 
-        <div className="filter-tabs" role="tablist" aria-label="Category filter">
-          <button
-            type="button"
-            className={`filter-tab-btn ${activeCategory === 'SEMUA' ? 'active' : ''}`}
-            onClick={() => setActiveCategory('SEMUA')}
-            role="tab"
-            aria-selected={activeCategory === 'SEMUA'}
-            data-filter="SEMUA"
-          >
-            All
-          </button>
-          {categories.map((cat) => (
-            <button
-              type="button"
-              key={cat.id}
-              className={`filter-tab-btn ${activeCategory === cat.name.toUpperCase() ? 'active' : ''}`}
-              onClick={() => setActiveCategory(cat.name.toUpperCase())}
-              role="tab"
-              aria-selected={activeCategory === cat.name.toUpperCase()}
-              data-filter={cat.name.toUpperCase()}
-            >
-              {formatCategoryLabel(cat.name)}
-            </button>
-          ))}
-        </div>
-
-        {/* Grid */}
-        <div className={`masonry-grid ${gridModifier}`.trim()} id="masonry-grid">
-          {filtered.length === 0 ? (
-            <div className="gallery-empty-state">
-              <p className="gallery-empty-title">
-                NO WORKS IN THIS CATEGORY YET
-              </p>
-              <Link href="/dashboard/member/artworks/create" className="btn-primary">
-                Be the first to upload
+              <Link href="/explore" className="exhibition-archive-link" id="btn-load-more">
+                <span>View Complete Archive</span>
               </Link>
             </div>
-          ) : (
-            filtered.map((artwork, idx) => (
-              <ArtworkGridCard key={artwork.id} artwork={artwork} priority={idx < 3} />
-            ))
-          )}
-        </div>
-
-        <div className="gallery-footer-action">
-          <Link href="/explore" className="btn-secondary" id="btn-load-more">
-            View All Works
-          </Link>
-        </div>
+          </div>
+        )}
       </div>
     </section>
-  );
-}
-
-function ArtworkGridCard({ artwork, priority }) {
-  return (
-    <article className="project-card artwork-card" data-id={artwork.id}>
-      <Link href={`/artworks/${artwork.id}`} className="project-image-wrap" aria-label={artwork.title}>
-        <ArtworkImage
-          src={artwork.image_url}
-          alt={artwork.title}
-          fill
-          className="project-image"
-          sizes="(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 33vw"
-          priority={priority}
-        />
-      </Link>
-
-      <div className="card-top-bar">
-        <span className="card-tag-typology">{formatCategoryLabel(artwork.category_name) || 'Architecture'}</span>
-        <div className="card-actions-top">
-          <span className="card-like-count">
-            <Heart size={16} className="card-like-icon" />
-            <span className="card-like-num">{artwork.like_count || 0}</span>
-          </span>
-        </div>
-      </div>
-
-      <div className="card-bottom-info">
-        <Link href={`/artworks/${artwork.id}`}>
-          <h3 className="card-title">{artwork.title}</h3>
-        </Link>
-        <div className="card-meta-reveal">
-          <span>
-            {artwork.tags?.split(',').slice(0, 2).map(t => t.trim()).join(' · ')}
-          </span>
-          <Link href={`/artworks/${artwork.id}`} className="card-view-btn">
-            <span>VIEW WORK</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          </Link>
-        </div>
-      </div>
-    </article>
   );
 }

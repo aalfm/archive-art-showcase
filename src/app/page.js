@@ -5,47 +5,88 @@ import Footer from '@/components/layout/Footer';
 import HeroSection from '@/components/home/HeroSection';
 import ArtworkGallery from '@/components/home/ArtworkGallery';
 import ChallengesSection from '@/components/home/ChallengesSection';
+import ArtistsSection from '@/components/home/ArtistsSection';
 
 export const dynamic = 'force-dynamic';
 
 async function getHomepageData() {
   try {
-    const [artworksRes, challengesRes, categoriesRes] = await Promise.all([
+    const [artworksRes, challengesRes, categoriesRes, artistsRes] = await Promise.all([
       query(`
-        SELECT a.id, a.title, a.image_url, a.tags, a.like_count, a.created_at,
-               c.name as category_name,
+        SELECT a.id, a.title, a.description, a.image_url, a.tags, a.like_count, a.created_at,
+               c.id as category_id, c.name as category_name,
                u.id as creator_id, u.name as creator_name
         FROM artworks a
         LEFT JOIN categories c ON a.category_id = c.id
         LEFT JOIN users u ON a.user_id = u.id
         WHERE a.status = 'active'
         ORDER BY a.created_at DESC
-        LIMIT 12
+        LIMIT 48
       `),
       query(`
-        SELECT id, title, description, prize, banner_url, start_date, end_date,
-               curator_id,
+        SELECT c.id, c.title, c.description, c.prize, c.banner_url, c.start_date, c.end_date,
+               c.curator_id, u.name as curator_name,
                CASE 
-                 WHEN NOW() < start_date THEN 'upcoming'
-                 WHEN NOW() BETWEEN start_date AND end_date THEN 'active'
+                 WHEN NOW() < c.start_date THEN 'upcoming'
+                 WHEN NOW() BETWEEN c.start_date AND c.end_date THEN 'active'
                  ELSE 'ended'
                END as challenge_status
-        FROM challenges
-        WHERE end_date >= NOW()
-        ORDER BY end_date ASC
+        FROM challenges c
+        LEFT JOIN users u ON c.curator_id = u.id
+        WHERE c.end_date >= NOW()
+        ORDER BY c.end_date ASC
         LIMIT 3
       `),
       query('SELECT id, name FROM categories ORDER BY name ASC'),
+      query(`
+        SELECT u.id, u.name, u.bio, u.profile_image,
+               COUNT(a.id)::int as artwork_count,
+               COALESCE(SUM(a.like_count), 0)::int as total_likes,
+               (
+                 SELECT c2.name
+                 FROM artworks a2
+                 JOIN categories c2 ON a2.category_id = c2.id
+                 WHERE a2.user_id = u.id AND a2.status = 'active'
+                 GROUP BY c2.id, c2.name
+                 ORDER BY COUNT(*) DESC, MAX(a2.created_at) DESC
+                 LIMIT 1
+               ) as primary_category,
+               COALESCE(
+                 (
+                   SELECT json_agg(
+                     json_build_object(
+                       'id', a3.id,
+                       'title', a3.title,
+                       'image_url', a3.image_url,
+                       'category_name', c3.name
+                     )
+                     ORDER BY a3.like_count DESC, a3.created_at DESC
+                   )
+                   FROM artworks a3
+                   LEFT JOIN categories c3 ON a3.category_id = c3.id
+                   WHERE a3.user_id = u.id AND a3.status = 'active'
+                 ),
+                 '[]'::json
+               ) as artworks
+        FROM users u
+        LEFT JOIN artworks a ON a.user_id = u.id AND a.status = 'active'
+        WHERE u.role = 'member'
+        GROUP BY u.id
+        HAVING COUNT(a.id) > 0
+        ORDER BY total_likes DESC, u.created_at ASC
+        LIMIT 12
+      `),
     ]);
 
     return {
       artworks: artworksRes.rows,
       challenges: challengesRes.rows,
       categories: categoriesRes.rows,
+      artists: artistsRes.rows,
     };
   } catch (err) {
     console.error('[Homepage] Data fetch error:', err);
-    return { artworks: [], challenges: [], categories: [] };
+    return { artworks: [], challenges: [], categories: [], artists: [] };
   }
 }
 
@@ -71,6 +112,9 @@ export default async function HomePage() {
         />
         {data.challenges.length > 0 && (
           <ChallengesSection challenges={data.challenges} />
+        )}
+        {data.artists.length > 0 && (
+          <ArtistsSection artists={data.artists} />
         )}
       </main>
       <Footer />

@@ -43,7 +43,7 @@ export default async function AdminOverviewPage() {
     <div>
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">ADMIN OVERVIEW</h1>
+          <h1 className="dashboard-title">Admin Overview</h1>
           <p className="dashboard-subtitle">Central operations and governance control for the ARCHIVE platform.</p>
         </div>
       </div>

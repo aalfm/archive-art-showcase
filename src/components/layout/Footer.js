@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -9,12 +8,12 @@ export default function Footer() {
       <div className="footer-container">
         <div className="footer-top">
           <div className="footer-brand">
-            <div className="brand-wordmark" style={{ display: 'inline-flex'}}>
-              <span className="brand-text" style={{ fontSize: '1rem' }}>ARCHIVE</span>
-              <span className="brand-edition">DIGITAL GALLERY</span>
+            <div className="footer-wordmark">
+              <span className="footer-brand-name">ARCHIVE</span>
+              <span className="footer-brand-tag">DIGITAL ARCHITECTURE EXHIBITION</span>
             </div>
             <p className="footer-brand-desc">
-              A curated digital showcase platform for artists, architects, curators, and creative enthusiasts worldwide.
+              A minimalist editorial showcase platform for architects, visual artists, curators, and spatial design enthusiasts worldwide.
             </p>
           </div>
 
@@ -38,16 +37,14 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Divider */}
         <div className="footer-divider"></div>
 
-        {/* Bottom Section */}
         <div className="footer-bottom">
           <p className="footer-copyright">
             &copy; {currentYear} ARCHIVE Digital Architecture Showcase.
           </p>
-          <p className="footer-system-tag" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--surface)', letterSpacing: '0.08em' }}>
-            ARCHIVE | A Space for Architectural Expression.
+          <p className="footer-system-tag">
+            ARCHIVE — A Space for Architectural Expression.
           </p>
         </div>
       </div>

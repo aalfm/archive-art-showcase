@@ -1,0 +1,76 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { ArrowRight, UserRound } from '@/components/ui/Icons';
+
+function normalizeAvatarSrc(src) {
+  if (typeof src !== 'string') return '';
+  const trimmed = src.trim();
+  if (!trimmed) return '';
+  if (trimmed.startsWith('/')) return trimmed;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return '';
+}
+
+export default function ArtistDirectoryCard({ artist }) {
+  const cleanSrc = normalizeAvatarSrc(artist?.profile_image);
+  const [failedSrc, setFailedSrc] = useState('');
+  const hasImage = Boolean(cleanSrc) && failedSrc !== cleanSrc;
+
+  if (!artist) return null;
+
+  const workCount = Number(artist.artwork_count || 0);
+  const specialization = artist.primary_category || 'Architectural Creator';
+  const shortBio = typeof artist.bio === 'string' ? artist.bio.trim() : '';
+
+  return (
+    <article className="project-card artist-dir-card" data-id={artist.id}>
+      <Link
+        href={`/artists/${artist.id}`}
+        className="artist-dir-card-link"
+        aria-label={`View profile of ${artist.name}`}
+      >
+        <div className="project-image-wrap artist-dir-media">
+          {hasImage ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={cleanSrc}
+              alt={artist.name}
+              className="project-image artist-dir-photo"
+              loading="lazy"
+              onError={() => setFailedSrc(cleanSrc)}
+            />
+          ) : (
+            <div className="artist-dir-fallback" aria-hidden="true">
+              <div className="artist-dir-fallback-circle">
+                <UserRound size={38} strokeWidth={1.5} className="artist-dir-fallback-icon" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="card-editorial-body artist-dir-body">
+          <div className="card-top-bar">
+            <span className="card-tag-typology">{specialization}</span>
+            <span className="artist-dir-works">
+              {String(workCount).padStart(2, '0')} {workCount === 1 ? 'Work' : 'Works'}
+            </span>
+          </div>
+
+          <div className="card-bottom-info artist-dir-info">
+            <h2 className="card-title artist-dir-name">{artist.name}</h2>
+            <p className="artist-dir-bio">
+              {shortBio || `${specialization} creator publishing curated works on ARCHIVE.`}
+            </p>
+          </div>
+
+          <span className="artist-dir-cta">
+            <span>View Profile</span>
+            <ArrowRight size={14} strokeWidth={1.75} className="artist-dir-cta-arrow" />
+          </span>
+        </div>
+      </Link>
+    </article>
+  );
+}

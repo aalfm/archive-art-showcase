@@ -44,8 +44,8 @@ export default async function AdminUsersPage({ searchParams }) {
     <div>
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">USER MANAGEMENT</h1>
-          <p className="dashboard-subtitle">Manage all member accounts, curators, and access roles ({users.length} users).</p>
+          <h1 className="dashboard-title">User Management</h1>
+          <p className="dashboard-subtitle">Manage member accounts, curators, and access roles ({users.length} users).</p>
         </div>
       </div>
 

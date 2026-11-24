@@ -48,8 +48,8 @@ export default async function CuratorOverviewPage() {
     <div className="curator-overview-page">
       <div className="dashboard-header curator-page-header">
         <div>
-          <h1 className="curator-page-title">CURATOR OVERVIEW</h1>
-          <p className="curator-page-subtitle">Manage art challenge curation and select the finest submissions.</p>
+          <h1 className="curator-page-title">Curator Overview</h1>
+          <p className="curator-page-subtitle">Manage architectural challenges and curate submissions.</p>
         </div>
         <Link href="/dashboard/curator/challenges/create" className="btn-primary curator-cta-btn">
           + Create New Challenge
@@ -79,7 +79,7 @@ export default async function CuratorOverviewPage() {
       {/* Recent Challenges Table */}
       <section className="curator-challenges-section">
         <div className="curator-section-header">
-          <h2 className="curator-section-title">YOUR CHALLENGES</h2>
+          <h2 className="curator-section-title">Your Challenges</h2>
           <Link href="/dashboard/curator/challenges" className="curator-view-all">
             View All →
           </Link>

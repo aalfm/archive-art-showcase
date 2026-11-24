@@ -7,10 +7,10 @@ import ArtworkImage from '@/components/ui/ArtworkImage';
 const emptySubscribe = () => () => {};
 
 const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=85',
-  'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=1200&q=85',
   'https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1200&q=85',
-  'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=85',
+  'https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1200&q=85',
+  'https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=85',
+  'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=1200&q=85',
 ];
 
 export default function HeroSection({ artworks }) {
@@ -442,26 +442,22 @@ export default function HeroSection({ artworks }) {
 
         <div className="carousel-controls">
           <button type="button" className="carousel-btn" onClick={handlePrev} aria-label="Previous work" id="btn-carousel-prev">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
           </button>
           <span className="carousel-indicator" id="carousel-angle-indicator">
-            ARCHIVE DIGITAL GALLERY
+            CURATED ARCHITECTURAL PLATES
           </span>
           <button type="button" className="carousel-btn" onClick={handleNext} aria-label="Next work" id="btn-carousel-next">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </button>
         </div>
       </div>
 
-      <div className="convex-dome-divider">
-        <svg className="convex-dome-svg" viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0,0 C360,120 1080,120 1440,0 L1440,120 L0,120 Z" />
-        </svg>
-      </div>
+      <div className="hero-editorial-rule" aria-hidden="true"></div>
     </section>
   );
 }

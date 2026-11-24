@@ -51,8 +51,8 @@ export default async function MemberOverviewPage() {
     <div>
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">OVERVIEW</h1>
-          <p className="dashboard-subtitle">Welcome back, {user.name}!</p>
+          <h1 className="dashboard-title">Member Overview</h1>
+          <p className="dashboard-subtitle">Welcome back, {user.name}.</p>
         </div>
         <div className="dashboard-header-actions">
           <Link href="/dashboard/member/artworks/create" className="btn-primary">

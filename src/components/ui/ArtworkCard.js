@@ -79,35 +79,37 @@ export default function ArtworkCard({
         />
       </Link>
 
-      <div className="card-top-bar">
-        {category_name && (
-          <span className="card-tag-typology">{category_name}</span>
-        )}
-        <div className="card-actions-top">
-          <button
-            type="button"
-            className={`card-like-count card-like-btn ${liked ? 'liked' : ''} ${isPopping ? 'pop' : ''}`}
-            onClick={handleLike}
-            disabled={isPending}
-            aria-pressed={liked}
-            aria-label={liked ? `Unlike ${title} (${count} likes)` : `Like ${title} (${count} likes)`}
-            title={liked ? 'Unlike artwork' : 'Like artwork'}
-          >
-            <Heart size={16} filled={liked} className="card-like-icon" />
-            <span className="card-like-num">{count}</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="card-bottom-info">
-        <Link href={`/artworks/${id}`}>
-          <h3 className="card-title">{title}</h3>
-        </Link>
-        {tagList.length > 0 && (
-          <div className="card-meta-reveal">
-            <span>{tagList.join(' · ')}</span>
+      <div className="card-editorial-body">
+        <div className="card-top-bar">
+          {category_name && (
+            <span className="card-tag-typology">{category_name}</span>
+          )}
+          <div className="card-actions-top">
+            <button
+              type="button"
+              className={`card-like-count card-like-btn ${liked ? 'liked' : ''} ${isPopping ? 'pop' : ''}`}
+              onClick={handleLike}
+              disabled={isPending}
+              aria-pressed={liked}
+              aria-label={liked ? `Unlike ${title} (${count} likes)` : `Like ${title} (${count} likes)`}
+              title={liked ? 'Unlike artwork' : 'Like artwork'}
+            >
+              <Heart size={15} filled={liked} className="card-like-icon" />
+              <span className="card-like-num">{count}</span>
+            </button>
           </div>
-        )}
+        </div>
+
+        <div className="card-bottom-info">
+          <Link href={`/artworks/${id}`}>
+            <h3 className="card-title">{title}</h3>
+          </Link>
+          {tagList.length > 0 && (
+            <div className="card-meta-reveal">
+              <span>{tagList.join(' · ')}</span>
+            </div>
+          )}
+        </div>
       </div>
     </article>
   );

@@ -75,9 +75,10 @@ export default async function ExplorePage({ searchParams }) {
     <PublicPageContainer>
       <div className="showcase-header">
         <div className="showcase-title-area">
-          <h1 className="showcase-heading">EXPLORE ARTWORKS</h1>
+          <span className="editorial-eyebrow">ARCHIVE COLLECTION</span>
+          <h1 className="showcase-heading">Explore Artworks</h1>
           <p className="showcase-subtitle">
-            Discover curated works from creators on ARCHIVE.
+            Discover curated architectural works from creators on ARCHIVE.
           </p>
         </div>
       </div>

@@ -53,7 +53,8 @@ export default async function ChallengesPage() {
     <PublicPageContainer>
       <div className="showcase-header">
         <div className="showcase-title-area">
-          <h1 className="showcase-heading">ARCHITECTURE CHALLENGES</h1>
+          <span className="editorial-eyebrow">COMPETITIONS &amp; OPEN CALLS</span>
+          <h1 className="showcase-heading">Architecture Challenges</h1>
           <p className="showcase-subtitle">
             Explore architectural challenges, showcase your ideas, and turn creative visions into reality.
           </p>
