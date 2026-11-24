@@ -11,6 +11,7 @@ export default function ArtworkCard({
   artwork,
   priority = false,
   isLoggedIn = false,
+  isAdmin = false,
   initialLiked = false,
 }) {
   const {
@@ -39,6 +40,7 @@ export default function ArtworkCard({
     e.preventDefault();
     e.stopPropagation();
 
+    if (isAdmin) return;
     if (!isLoggedIn) {
       router.push('/login?redirect=%2Fexplore');
       return;
@@ -85,18 +87,29 @@ export default function ArtworkCard({
             <span className="card-tag-typology">{category_name}</span>
           )}
           <div className="card-actions-top">
-            <button
-              type="button"
-              className={`card-like-count card-like-btn ${liked ? 'liked' : ''} ${isPopping ? 'pop' : ''}`}
-              onClick={handleLike}
-              disabled={isPending}
-              aria-pressed={liked}
-              aria-label={liked ? `Unlike ${title} (${count} likes)` : `Like ${title} (${count} likes)`}
-              title={liked ? 'Unlike artwork' : 'Like artwork'}
-            >
-              <Heart size={15} filled={liked} className="card-like-icon" />
-              <span className="card-like-num">{count}</span>
-            </button>
+            {isAdmin ? (
+              <span
+                className="card-like-count"
+                aria-label={`${count} likes`}
+                title="Likes (view only for Admin)"
+              >
+                <Heart size={15} filled={false} className="card-like-icon" />
+                <span className="card-like-num">{count}</span>
+              </span>
+            ) : (
+              <button
+                type="button"
+                className={`card-like-count card-like-btn ${liked ? 'liked' : ''} ${isPopping ? 'pop' : ''}`}
+                onClick={handleLike}
+                disabled={isPending}
+                aria-pressed={liked}
+                aria-label={liked ? `Unlike ${title} (${count} likes)` : `Like ${title} (${count} likes)`}
+                title={liked ? 'Unlike artwork' : 'Like artwork'}
+              >
+                <Heart size={15} filled={liked} className="card-like-icon" />
+                <span className="card-like-num">{count}</span>
+              </button>
+            )}
           </div>
         </div>
 

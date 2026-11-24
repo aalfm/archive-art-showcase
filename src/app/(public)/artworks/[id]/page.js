@@ -76,11 +76,12 @@ export default async function ArtworkDetailPage(props) {
   const { artwork, comments, otherWorks } = data;
   const user = session?.user || null;
 
+  const isAdmin = user?.role === 'admin';
   let userLiked = false;
   let userFavorited = false;
   let userReported = false;
 
-  if (user) {
+  if (user && !isAdmin) {
     const [likeRes, favRes, repRes] = await Promise.all([
       query('SELECT id FROM artwork_likes WHERE user_id=$1 AND artwork_id=$2', [user.id, artwork.id]),
       query('SELECT id FROM favorites WHERE user_id=$1 AND artwork_id=$2', [user.id, artwork.id]),
@@ -149,6 +150,7 @@ export default async function ArtworkDetailPage(props) {
             userFavorited={userFavorited}
             userReported={userReported}
             isLoggedIn={!!user}
+            isAdmin={isAdmin}
             isOwner={user?.id === artwork.creator_id}
           />
 

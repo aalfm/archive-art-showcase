@@ -69,7 +69,8 @@ export default async function ExplorePage({ searchParams }) {
     getSession(),
     getArtworks(await searchParams),
   ]);
-  const likedIds = await getLikedArtworkIds(session?.user?.id);
+  const isAdmin = session?.user?.role === 'admin';
+  const likedIds = isAdmin ? new Set() : await getLikedArtworkIds(session?.user?.id);
 
   return (
     <PublicPageContainer>
@@ -102,6 +103,7 @@ export default async function ExplorePage({ searchParams }) {
               artwork={artwork}
               priority={idx < 6}
               isLoggedIn={Boolean(session?.user)}
+              isAdmin={isAdmin}
               initialLiked={likedIds.has(artwork.id)}
             />
           ))
