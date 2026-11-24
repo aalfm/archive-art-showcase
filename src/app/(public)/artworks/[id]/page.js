@@ -3,6 +3,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { query } from '@/lib/db';
 import { getSession } from '@/lib/auth';
+import { resolveUserAvatarSrc } from '@/lib/avatar';
+import UserAvatar from '@/components/ui/UserAvatar';
 import ArtworkInteractions from './ArtworkInteractions';
 import { toId } from '@/lib/utils';
 
@@ -13,7 +15,9 @@ async function getArtwork(id) {
     SELECT a.id, a.title, a.description, a.image_url, a.tags, a.like_count, a.status, a.created_at,
            c.name as category_name,
            u.id as creator_id, u.name as creator_name, u.bio as creator_bio,
-           u.profile_image as creator_image, u.external_link as creator_link
+           u.role as creator_role,
+           CASE WHEN LOWER(u.role) = 'member' THEN u.profile_image ELSE NULL END as creator_image,
+           u.external_link as creator_link
     FROM artworks a
     LEFT JOIN categories c ON a.category_id = c.id
     LEFT JOIN users u ON a.user_id = u.id
@@ -26,7 +30,8 @@ async function getArtwork(id) {
   const [commentsRes, otherWorksRes] = await Promise.all([
     query(`
       SELECT c.id, c.content, c.created_at,
-             u.id as user_id, u.name as user_name, u.profile_image as user_image
+             u.id as user_id, u.name as user_name, u.role as user_role,
+             CASE WHEN LOWER(u.role) = 'member' THEN u.profile_image ELSE NULL END as user_image
       FROM comments c
       LEFT JOIN users u ON c.user_id = u.id
       WHERE c.artwork_id = $1
@@ -45,9 +50,26 @@ async function getArtwork(id) {
     `, [id]),
   ]);
 
+  const rawArtwork = artworkRes.rows[0];
+  const artwork = {
+    ...rawArtwork,
+    creator_image: resolveUserAvatarSrc({
+      role: rawArtwork.creator_role,
+      profile_image: rawArtwork.creator_image,
+    }),
+  };
+
+  const comments = commentsRes.rows.map((comment) => ({
+    ...comment,
+    user_image: resolveUserAvatarSrc({
+      role: comment.user_role,
+      profile_image: comment.user_image,
+    }),
+  }));
+
   return {
-    artwork: artworkRes.rows[0],
-    comments: commentsRes.rows,
+    artwork,
+    comments,
     otherWorks: otherWorksRes.rows,
   };
 }
@@ -130,13 +152,13 @@ export default async function ArtworkDetailPage(props) {
           </div>
 
           <Link href={`/artists/${artwork.creator_id}`} className="artwork-creator-link">
-            <div className="artwork-creator-avatar">
-              {artwork.creator_image ? (
-                <Image src={artwork.creator_image} alt={artwork.creator_name} fill style={{ objectFit: 'cover', borderRadius: '50%' }} sizes="40px" />
-              ) : (
-                artwork.creator_name?.charAt(0).toUpperCase()
-              )}
-            </div>
+            <UserAvatar
+              src={artwork.creator_image}
+              role={artwork.creator_role}
+              name={artwork.creator_name || 'Artist'}
+              size={38}
+              className="artwork-creator-avatar"
+            />
             <div>
               <span className="artwork-creator-name">{artwork.creator_name}</span>
               <span className="artwork-creator-label">Artist</span>
