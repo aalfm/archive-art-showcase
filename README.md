@@ -1,6 +1,12 @@
+<div align="center">
+
+<img src="public/logo/Favicon_archive.svg" alt="ARTHIVE Official Logo" width="76" height="76" />
+
 # ARTHIVE
 
-> Where Architecture Meets Digital Expression.
+*Where Architecture Meets Digital Expression.*
+
+A digital space for architectural exploration, creative showcases, and curated design challenges.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.4.6-1A1917?style=flat-square&logo=nextdotjs&logoColor=F7F5F0)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.3.0-1A1917?style=flat-square&logo=react&logoColor=F7F5F0)](https://react.dev/)
@@ -8,27 +14,59 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.3-303438?style=flat-square&logo=tailwindcss&logoColor=F7F5F0)](https://tailwindcss.com/)
 [![GSAP](https://img.shields.io/badge/GSAP-3.13.0-8C7963?style=flat-square)](https://gsap.com/)
 
-**Quick Jump:** [About](#about-the-project) · [Features](#features) · [Preview](#preview) · [Tech Stack](#tech-stack) · [Getting Started](#getting-started) · [Project Structure](#project-structure) · [Usage](#usage) · [Contributing](#contributing)
+[Overview](#overview) · [Features](#features) · [Showcase](#showcase) · [Architecture](#architecture) · [Tech Stack](#tech-stack) · [Installation](#installation) · [Documentation](#documentation)
+
+[Explore Repository](https://github.com/aalfm/arthive-art-showcase) · [Report Issue](https://github.com/aalfm/arthive-art-showcase/issues)
+
+</div>
 
 ---
 
-## About The Project
+## Overview
 
 **ARTHIVE** is a digital architecture showcase platform designed to bring together architects, digital artists, curators, and spatial design enthusiasts through creative exhibitions, curated challenges, and architectural visual exploration.
 
-General-purpose social feeds rarely give spatial design the structure it needs. ARTHIVE solves this by organizing works around architectural movements (such as Modern, Brutalist, Organic, Parametric, and Sustainable Architecture), pairing editorial presentation with role-separated workflows for **Members**, **Curators**, and **Administrators**.
+Rather than burying spatial design inside general-purpose social feeds, ARTHIVE structures works around architectural movements—such as Modern, Brutalist, Organic, Parametric, and Sustainable Architecture—while providing dedicated workspaces for **Members**, **Curators**, and **Administrators**.
+
+### Core Objectives
+
+- **Curated Discovery**: Organize architectural renders, spatial studies, and photography by movement, popularity, and creator.
+- **Structured Competitions**: Enable verified curators to host time-bound design challenges with rules, prizes, and ranked winners.
+- **Role-Separated Governance**: Maintain clear boundaries between public browsing, creator publishing, curatorial judging, and administrative moderation.
 
 ---
 
 ## Features
 
-- **Interactive Public Exhibition** — Explore a GSAP-powered 3D `DepthCarousel` hero (`/`), filterable artwork gallery (`/explore`), artist directory (`/artists`), and active or upcoming design challenges (`/challenges`).
-- **Member Creative Studio** — Upload and manage artworks (`/dashboard/member/artworks`) via local `sharp`-processed uploads or external URLs, bookmark favorites, submit entries to challenges, and engage through likes and comments.
-- **Curator Challenge Management** — Create and manage time-bound architectural competitions (`/dashboard/curator/challenges`), review participant entries, and rank 1st–3rd place winners once judging closes.
-- **Admin Governance & Moderation** — Verify pending curator applications (`/dashboard/admin/curators`), manage user activation status (`/dashboard/admin/users`), maintain categories (`/dashboard/admin/categories`), and moderate reported artworks (`/dashboard/admin/reports`).
+### Public Exploration
+- **Exhibition Homepage** (`/`): Interactive 3D `DepthCarousel` hero powered by GSAP, curated artwork gallery (up to 48 active works), active challenges, and featured artists.
+- **Explore Gallery** (`/explore`): Keyword search by artwork title or artist name, architectural category filtering, and sorting by latest or most liked.
+- **Artwork Detail** (`/artworks/[id]`): Full artwork metadata, tags, category, creator attribution, like counts, comments, and content reporting.
+- **Artist Directory & Portfolios** (`/artists`, `/artists/[id]`): Searchable directory of active members with category filtering and individual portfolio pages.
+- **Challenge Discovery** (`/challenges`, `/challenges/[id]`): Live search and status filtering (`active`, `upcoming`) via `/api/challenges/search`, challenge briefs, and ranked winners (1st–3rd place).
+
+### Member Experience
+- **Member Dashboard** (`/dashboard/member`): Overview of published works, artworks under review, active challenge entries, and recent activity.
+- **Artwork Studio** (`/dashboard/member/artworks`): Create, edit, and delete personal artworks with local image uploads (`/api/upload` processed via `sharp`) or external image URLs.
+- **Favorites & Interactions** (`/dashboard/member/favorites`): Bookmark artworks, like works, post or delete personal comments, and report inappropriate content.
+- **Challenge Submissions** (`/dashboard/member/submissions`): Submit active artworks to ongoing challenges (one entry per challenge) and withdraw entries before the deadline.
+- **Profile & Security** (`/dashboard/member/profile`, `/dashboard/member/settings`): Manage display name, bio, external portfolio link, avatar, and password.
+
+### Curator Workspace
+- **Verification Gate** (`/dashboard/curator/pending`): Newly registered curators await administrator approval before accessing curatorial tools.
+- **Curator Dashboard** (`/dashboard/curator`): Metrics for managed challenges, active competitions, and entries awaiting review.
+- **Challenge Management** (`/dashboard/curator/challenges`): Create, edit, and delete architectural challenges with custom banners, rules, prizes, and schedules.
+- **Judging & Winner Selection** (`/dashboard/curator/challenges/[id]/submissions`): Review participant submissions and assign 1st, 2nd, and 3rd place winners after a challenge ends.
+
+### Admin Management
+- **Admin Overview** (`/dashboard/admin`): Real-time platform metrics and prioritized moderation queue.
+- **User Management** (`/dashboard/admin/users`): Search users, filter by role, and activate or deactivate non-admin accounts (deactivation revokes active sessions).
+- **Curator Verification** (`/dashboard/admin/curators`): Approve or reject pending curator applications.
+- **Category Management** (`/dashboard/admin/categories`): Create, rename, and delete architectural categories.
+- **Report Moderation** (`/dashboard/admin/reports`): Review user-submitted artwork reports (`SARA`, `Plagiarism`, `Inappropriate Content`, `Other`) and dismiss reports or take down artworks.
 
 <details>
-<summary><strong>Interactive Matrix: User Roles & Permissions</strong> (click to expand)</summary>
+<summary><strong>Detailed Role Permissions Matrix</strong> (click to expand)</summary>
 
 | Capability | Public User | Member | Curator (Pending) | Curator (Approved) | Admin |
 |---|---|---|---|---|---|
@@ -43,33 +81,56 @@ General-purpose social feeds rarely give spatial design the structure it needs. 
 | Activate or deactivate user accounts | No | No | No | No | Yes (non-admin) |
 | Manage categories & moderate reports | No | No | No | No | Yes |
 
-*\*Administrators are blocked from liking, favoriting, commenting on, or reporting artworks to keep moderation neutral.*
+*\*Administrators are restricted from liking, favoriting, commenting on, or reporting artworks to keep moderation neutral.*
 
 </details>
 
-<details>
-<summary><strong>Interactive Explorer: Routes & API Endpoints</strong> (click to expand)</summary>
+---
 
-| Area | Route / Endpoint | Access | Purpose |
-|---|---|---|---|
-| Public | `/` | Everyone | 3D `DepthCarousel` hero, gallery, challenges, featured artists |
-| Public | `/explore` | Everyone | Search, category filter, latest/popular sorting |
-| Public | `/artworks/[id]` | Everyone | Artwork detail, likes, favorites, comments, reporting |
-| Public | `/artists`, `/artists/[id]` | Everyone | Artist directory and individual portfolios |
-| Public | `/challenges`, `/challenges/[id]` | Everyone | Challenge discovery, rules, submissions, winners |
-| Auth | `/login`, `/register` | Public | Sign in and register as `member` or `curator` |
-| API | `POST /api/upload` | Authenticated | Validates & resizes image uploads (`sharp`) to `public/uploads/` |
-| API | `GET /api/challenges/search` | Public | Live challenge search and active/upcoming counts |
-| Member | `/dashboard/member/*` | Member | Overview, artworks CRUD, favorites, submissions, profile, settings |
-| Curator | `/dashboard/curator/*` | Approved Curator | Overview, challenges CRUD, submission judging, winner ranking |
-| Admin | `/dashboard/admin/*` | Admin | Overview, users, curator verification, categories, reports |
+## Showcase
 
-</details>
+> **Visual Captures Pending:** No application screenshots are currently stored in the repository.
+>
+> When adding genuine captures, place them in `public/` or `docs/` and link them here:
+> - **Homepage Exhibition (`/`)** — 3D `DepthCarousel` hero and curated architectural gallery.
+> - **Explore & Artwork Detail (`/explore`, `/artworks/[id]`)** — Category filtering, sorting, and community critique.
+> - **Challenges & Judging (`/challenges/[id]`)** — Competition briefs, submissions, and 1st–3rd place winners.
+> - **Role Dashboards (`/dashboard/*`)** — Member, Curator, and Admin workspaces.
 
-<details>
-<summary><strong>Interactive Diagrams: System Architecture & Database ER</strong> (click to expand)</summary>
+---
 
-### Application Architecture
+## Tech Stack
+
+### Frontend
+[![Next.js](https://img.shields.io/badge/Next.js-16.4.6-1A1917?style=flat-square&logo=nextdotjs&logoColor=F7F5F0)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.3.0-1A1917?style=flat-square&logo=react&logoColor=F7F5F0)](https://react.dev/)
+[![GSAP](https://img.shields.io/badge/GSAP-3.13.0-8C7963?style=flat-square)](https://gsap.com/)
+
+### Backend
+[![Node.js](https://img.shields.io/badge/Node.js-20+-303438?style=flat-square&logo=nodedotjs&logoColor=F7F5F0)](https://nodejs.org/)
+[![jose](https://img.shields.io/badge/jose-6.2.18-1A1917?style=flat-square)](https://github.com/panva/jose)
+[![bcryptjs](https://img.shields.io/badge/bcryptjs-3.0.3-1A1917?style=flat-square)](https://github.com/dcodeIO/bcrypt.js)
+[![sharp](https://img.shields.io/badge/sharp-0.35.5-8C7963?style=flat-square)](https://sharp.pixelplumbing.com/)
+
+### Database
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-303438?style=flat-square&logo=postgresql&logoColor=F7F5F0)](https://www.postgresql.org/)
+[![node-postgres](https://img.shields.io/badge/pg-8.23.1-303438?style=flat-square)](https://node-postgres.com/)
+
+### Styling
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.3-303438?style=flat-square&logo=tailwindcss&logoColor=F7F5F0)](https://tailwindcss.com/)
+[![Manrope](https://img.shields.io/badge/Font-Manrope-8C7963?style=flat-square)](https://fonts.google.com/specimen/Manrope)
+
+### Tools
+[![ESLint](https://img.shields.io/badge/ESLint-9-1A1917?style=flat-square&logo=eslint&logoColor=F7F5F0)](https://eslint.org/)
+[![npm](https://img.shields.io/badge/npm-Package_Manager-303438?style=flat-square&logo=npm&logoColor=F7F5F0)](https://www.npmjs.com/)
+
+---
+
+## Architecture
+
+ARTHIVE uses the Next.js 16 App Router as a unified full-stack architecture: Server Components handle data-heavy queries, Server Actions (`src/lib/actions/*.js`) execute authenticated mutations, Route Handlers (`src/app/api/*`) handle multipart image uploads and live challenge search, and PostgreSQL (`src/lib/db.js`) persists application state.
+
+### Application & Auth Flow
 
 ```mermaid
 flowchart TD
@@ -99,7 +160,10 @@ flowchart TD
     API --> DB
 ```
 
-### Database Entity-Relationship Diagram
+- **Two-Layer Authorization**: `src/proxy.js` validates the signed `arthive_session` JWT cookie on `/dashboard/:path*` and redirects unauthenticated visitors to `/login`. Authoritative checks run server-side in `requireAuth()` and `requireRole()` (`src/lib/auth.js`), querying `sessions` and `users` to verify session expiration, `is_active = TRUE`, `role`, and `curator_status = 'approved'`.
+- **Upload Pipeline**: `POST /api/upload` verifies the session, checks MIME type (`JPEG`, `PNG`, `WebP`, `GIF`) and file size (max 10 MB), sanitizes and resizes non-GIF images with `sharp` (up to `2400x2400`), and writes UUID-named files to `public/uploads/`.
+
+### Database Relationships
 
 ```mermaid
 erDiagram
@@ -154,33 +218,9 @@ erDiagram
     }
 ```
 
-</details>
-
-[↑ Back to Top](#arthive)
-
 ---
 
-## Preview
-
-> **Screenshots Pending:** Application screenshots have not been added to the repository yet.
->
-> Planned captures for this section:
-> - **Homepage Exhibition**: 3D `DepthCarousel` hero, curated artwork gallery, active challenges, and artist showcase.
-> - **Explore & Artwork Detail**: Search, category filters, sorting, likes, favorites, and community comments.
-> - **Role Dashboards**: Dedicated workspaces for Members, Curators, and Administrators.
-
----
-
-## Tech Stack
-
-- **Frontend:** Next.js `16.4.6` (App Router), React `19.3.0`, React DOM `19.3.0`, Tailwind CSS `4.3.3` (`@tailwindcss/turbopack`), GSAP `^3.13.0`, Manrope (`next/font/google`), Custom SVG Icons
-- **Backend:** Next.js Server Actions & Route Handlers, `jose` `^6.2.18` (HS256 JWT), `bcryptjs` `^3.0.3`, `sharp` `^0.35.5`, `uuid` `^14.0.3`
-- **Database:** PostgreSQL `14+` (`pg` `^8.23.1`) with parameterized SQL queries and DB-backed `sessions`
-- **Tools:** ESLint `^9`, `eslint-config-next` `16.4.6`, Node.js `20+`, npm
-
----
-
-## Getting Started
+## Installation
 
 ### Prerequisites
 
@@ -188,51 +228,49 @@ erDiagram
 - **npm**
 - **PostgreSQL** `14+`
 
-### Interactive Setup Checklist
+### Quick Start
 
-Track your local setup progress step by step:
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/aalfm/arthive-art-showcase.git
+   cd arthive-art-showcase
+   ```
 
-- [ ] **1. Clone the repository**
-  ```bash
-  git clone https://github.com/aalfm/arthive-art-showcase.git
-  ```
-- [ ] **2. Navigate to the project directory**
-  ```bash
-  cd arthive-art-showcase
-  ```
-- [ ] **3. Install dependencies**
-  ```bash
-  npm install
-  ```
-- [ ] **4. Configure environment variables**
-  ```bash
-  cp .env.example .env.local
-  ```
-  Update `DATABASE_URL` and `SESSION_SECRET` inside `.env.local`.
-- [ ] **5. Initialize PostgreSQL (`schema.sql` first, then `seed.sql`)**
-  ```bash
-  psql -U postgres -c "CREATE DATABASE arthive_db;"
-  psql -U postgres -d arthive_db -f database/schema.sql
-  psql -U postgres -d arthive_db -f database/seed.sql
-  ```
-- [ ] **6. Run the development server**
-  ```bash
-  npm run dev
-  ```
-  Open `http://localhost:3000` in your browser.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment variables**
+   ```bash
+   cp .env.example .env.local
+   ```
+   Update `DATABASE_URL` and `SESSION_SECRET` in `.env.local`.
+
+4. **Initialize PostgreSQL and start the server**
+   ```bash
+   psql -U postgres -c "CREATE DATABASE arthive_db;"
+   psql -U postgres -d arthive_db -f database/schema.sql
+   psql -U postgres -d arthive_db -f database/seed.sql
+   npm run dev
+   ```
+   Open `http://localhost:3000`.
 
 <details>
-<summary><strong>Environment Variables & Demo Credentials</strong> (click to expand)</summary>
-
-### Environment Variables (`.env.example`)
+<summary><strong>Environment Variables (`.env.example`)</strong> (click to expand)</summary>
 
 | Variable | Description | Required | Example |
 |---|---|---|---|
 | `DATABASE_URL` | PostgreSQL connection string used by `src/lib/db.js`. | Yes | `postgresql://postgres:your_password@localhost:5432/arthive_db` |
-| `SESSION_SECRET` | Secret key (32+ chars recommended) for HS256 JWT cookies. | Yes (Prod) | `replace-with-a-random-32-char-secret` |
+| `SESSION_SECRET` | Secret key (32+ chars recommended) for signing HS256 JWT cookies. | Yes (Prod) | `replace-with-a-random-32-char-secret` |
 | `NEXT_PUBLIC_APP_URL` | Public base URL of the application. | No | `http://localhost:3000` |
 
-### Demo Accounts (`database/seed.sql`)
+</details>
+
+<details>
+<summary><strong>Database Setup & Demo Accounts (`database/seed.sql`)</strong> (click to expand)</summary>
+
+Run `database/schema.sql` before `database/seed.sql`. The seed script is idempotent and provisions 10 tables plus demo accounts:
 
 | Role | Email | Password | Status |
 |---|---|---|---|
@@ -240,115 +278,55 @@ Track your local setup progress step by step:
 | Curator | `kurator@arthive.com` | `Curator@123` | Approved |
 | Member | `member@arthive.com` | `Member@123` | Active |
 
+Verify tables after setup:
+```bash
+psql -U postgres -d arthive_db -c "\dt"
+```
+
 </details>
 
 <details>
-<summary><strong>Troubleshooting FAQ</strong> (click an issue to see the fix)</summary>
+<summary><strong>Troubleshooting</strong> (click to expand)</summary>
 
-- **Database connection error (`[DB] Query error`)**: Ensure PostgreSQL is running and verify `DATABASE_URL` in `.env.local` matches your database name (`arthive_db`), port, and credentials.
-- **Redirected back to `/login` after signing in**: Ensure `database/schema.sql` has been executed (so the `sessions` table exists) and `SESSION_SECRET` is set in `.env.local`.
-- **`sharp` fails during install or image upload**: Run `npm rebuild sharp` or reinstall with Node.js `20+`.
-- **Port `3000` already in use**: Stop the other process or run `npx next dev -p 3001`.
-- **Seed script fails**: Always execute `database/schema.sql` before `database/seed.sql`.
+- **Database connection error (`[DB] Query error`)**: Verify PostgreSQL is running and confirm `DATABASE_URL` in `.env.local`.
+- **Redirected to `/login` after signing in**: Ensure `database/schema.sql` has been executed (`sessions` table exists) and `SESSION_SECRET` is configured.
+- **`sharp` install or upload error**: Run `npm rebuild sharp` using Node.js `20+`.
+- **Port `3000` already in use**: Stop the conflicting process or run `npx next dev -p 3001`.
+- **Seed script fails**: Execute `database/schema.sql` before `database/seed.sql`.
 
 </details>
 
-[↑ Back to Top](#arthive)
-
 ---
 
-## Project Structure
+## Documentation
+
+### Folder Structure
 
 ```text
 arthive-art-showcase/
 ├── database/
-│   ├── schema.sql                  # PostgreSQL schema, constraints, and indexes (10 tables)
-│   └── seed.sql                    # Idempotent demo users, categories, artworks, and challenges
+│   ├── schema.sql                  # PostgreSQL schema, constraints, and indexes
+│   └── seed.sql                    # Demo users, categories, artworks, and challenges
 ├── public/
-│   ├── logo/                       # Brand SVGs and favicons
-│   └── uploads/                    # Local storage for sharp-processed artwork uploads
+│   ├── logo/                       # Official ARTHIVE SVGs and favicons
+│   └── uploads/                    # Local storage for uploaded artwork images
 ├── src/
 │   ├── app/
-│   │   ├── (public)/               # Public routes: explore, artworks/[id], artists, challenges, login, register
-│   │   ├── api/
-│   │   │   ├── artworks/search/    # Placeholder route handler
-│   │   │   ├── challenges/search/  # Live challenge search & status counts API
-│   │   │   └── upload/             # Authenticated image upload & sharp processing
-│   │   ├── dashboard/
-│   │   │   ├── admin/              # Admin overview, users, curators, categories, reports
-│   │   │   ├── curator/            # Curator overview, pending gate, challenges, submissions
-│   │   │   ├── member/             # Member overview, artworks, favorites, submissions, profile, settings, inactive
-│   │   │   ├── layout.js           # Shared dashboard shell with sidebar
-│   │   │   └── page.js             # Role-based dashboard redirector
+│   │   ├── (public)/               # explore, artworks/[id], artists, challenges, login, register
+│   │   ├── api/                    # upload, challenges/search, artworks/search (placeholder)
+│   │   ├── dashboard/              # admin, curator, and member workspaces
 │   │   ├── globals.css             # Editorial design tokens and global styles
 │   │   ├── layout.js               # Root layout with Manrope font
 │   │   └── page.js                 # Public homepage
-│   ├── components/
-│   │   ├── artists/                # Artist directory, navigation, and profile components
-│   │   ├── dashboard/              # Account status notice components
-│   │   ├── home/                   # HeroSection, ArtworkGallery, ChallengesSection, ArtistsSection
-│   │   ├── layout/                 # Navbar, Footer, DashboardSidebar, PublicPageContainer
-│   │   └── ui/                     # DepthCarousel, ImageUpload, Modal, Toast, Icons, ArtworkCard
-│   ├── lib/
-│   │   ├── actions/                # Server Actions (admin, artwork, auth, challenge)
-│   │   ├── auth.js                 # JWT & DB session helpers, requireAuth, requireRole
-│   │   ├── db.js                   # PostgreSQL connection pool and query helper
-│   │   └── utils.js                # Positive integer ID validation helpers
+│   ├── components/                 # artists, dashboard, home, layout, ui (DepthCarousel, etc.)
+│   ├── lib/                        # actions/, auth.js, db.js, utils.js
 │   └── proxy.js                    # Optimistic session cookie guard for /dashboard/*
 ├── .env.example                    # Environment variable template
-├── eslint.config.mjs               # ESLint configuration
-├── jsconfig.json                   # Path alias configuration (@/* -> ./src/*)
-├── next.config.mjs                 # Next.js configuration (remote images, 10MB action body limit)
-├── package.json                    # Dependencies and npm scripts
-└── README.md                       # Project documentation
+├── next.config.mjs                 # Next.js configuration
+└── package.json                    # Dependencies and scripts
 ```
 
----
-
-## Usage
-
-Select your role below to expand the step-by-step workflow:
-
-<details>
-<summary><strong>Public Visitor Workflow</strong></summary>
-
-1. Open `/` to explore the 3D `DepthCarousel` hero, curated artworks, active challenges, and featured artists.
-2. Visit `/explore` to search by title or artist, filter by architectural category, and sort by latest or most liked.
-3. Visit `/artists` to browse member portfolios or `/challenges` to inspect active and upcoming competitions.
-
-</details>
-
-<details>
-<summary><strong>Member Workflow</strong></summary>
-
-1. Register as a `member` at `/register` or sign in at `/login` to open `/dashboard/member`.
-2. Go to **Artworks → Create** to upload an image (`JPEG`, `PNG`, `WebP`, `GIF` up to 10 MB) or provide an image URL.
-3. Like, favorite, comment on, or report artworks on `/artworks/[id]`.
-4. Submit an active artwork to an ongoing challenge on `/challenges/[id]` and track or withdraw it in **Submissions**.
-
-</details>
-
-<details>
-<summary><strong>Curator Workflow</strong></summary>
-
-1. Register as a `curator` at `/register`; your account starts in `pending` state at `/dashboard/curator/pending`.
-2. Once approved by an Admin, open `/dashboard/curator` to create and edit challenges with rules, prizes, and start/end dates.
-3. After a challenge's end date passes, open its **Submissions** page to select 1st, 2nd, and 3rd place winners.
-
-</details>
-
-<details>
-<summary><strong>Admin Workflow</strong></summary>
-
-1. Sign in as an Admin to open `/dashboard/admin` and monitor platform totals and pending items.
-2. Approve or reject pending curator applications in `/dashboard/admin/curators`.
-3. Activate or deactivate non-admin accounts in `/dashboard/admin/users` (deactivation revokes active sessions).
-4. Manage architectural categories in `/dashboard/admin/categories` and dismiss or take down reported artworks in `/dashboard/admin/reports`.
-
-</details>
-
-<details>
-<summary><strong>Available npm Scripts</strong></summary>
+### Available Scripts
 
 | Script | Command | Description |
 |---|---|---|
@@ -357,29 +335,22 @@ Select your role below to expand the step-by-step workflow:
 | `start` | `npm run start` | Runs the compiled production server. |
 | `lint` | `npm run lint` | Runs ESLint with `eslint-config-next` rules. |
 
-</details>
+### Security and Permissions
 
-[↑ Back to Top](#arthive)
+- **Session & Cookie Protection**: Sessions are stored in PostgreSQL (`sessions` table) and referenced by an `httpOnly`, `sameSite: 'lax'` JWT cookie (`secure: true` in production). Account deactivation immediately deletes all user sessions.
+- **Password Hashing**: Passwords are hashed with `bcryptjs` (salt factor `12`).
+- **Parameterized Queries**: All SQL queries in `src/lib/db.js` and `src/lib/actions/*.js` use parameterized `$1, $2, ...` bindings.
+- **Upload Sanitization**: `/api/upload` requires authentication, enforces a 10 MB limit, validates MIME types, and re-processes images with `sharp`.
 
----
-
-## Contributing
-
-Contributions, issues, and feature requests are welcome.
+### Contributing
 
 1. Fork the repository.
 2. Create a feature branch (`git checkout -b feat/your-feature`).
 3. Verify your changes with `npm run lint` and `npm run build`.
 4. Commit your changes and open a pull request.
 
----
+### License & Credits
 
-## License
-
-No `LICENSE` file is currently specified in this repository. All rights remain with the repository authors unless a license is added.
-
----
-
-## Author
-
-**aalfm** — [GitHub](https://github.com/aalfm)
+- **License**: No `LICENSE` file is currently specified in this repository. All rights remain with the repository authors unless a license is added.
+- **Credits**: Built with [Next.js](https://nextjs.org/), [React](https://react.dev/), [PostgreSQL](https://www.postgresql.org/), [Tailwind CSS](https://tailwindcss.com/), [GSAP](https://gsap.com/), [jose](https://github.com/panva/jose), [bcryptjs](https://github.com/dcodeIO/bcrypt.js), and [sharp](https://sharp.pixelplumbing.com/).
+- **Author**: **aalfm** — [GitHub](https://github.com/aalfm)
