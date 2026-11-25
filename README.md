@@ -4,8 +4,6 @@
 
 <br /><br />
 
-<img src="public/logo/Favicon_archive.svg" alt="ARCHIVE Official Logo" width="46" height="46" />
-
 ### Welcome to ARCHIVE
 
 A digital showcase platform dedicated to architectural creativity and digital expression.<br />
