@@ -47,4 +47,5 @@ yarn-error.log*
 next-env.d.ts
 
 # private curator CV uploads
-/storage/curator-cvs/
+/storage/curator-cvs/*
+!/storage/curator-cvs/seed-cv-*.pdf

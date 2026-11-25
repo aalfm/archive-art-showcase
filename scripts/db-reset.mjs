@@ -12,12 +12,12 @@ import {
 
 const EXPECTED_SEED_COUNTS = {
   users: 11,
-  categories: 12,
-  artworks: 18,
+  categories: 10,
+  artworks: 19,
   challenges: 6,
-  submissions: 12,
+  submissions: 13,
   curator_applications: 4,
-  comments: 7,
+  comments: 8,
   reports: 4,
   favorites: 8,
   sessions: 0,
