@@ -3,17 +3,24 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import ArtworkImage from '@/components/ui/ArtworkImage';
-import { ArrowRight, Clock3, FileText, Search, Trophy, X } from '@/components/ui/Icons';
+import { ArrowRight, Award, Clock3, FileText, Search, Trophy, X } from '@/components/ui/Icons';
+import { formatEditorialTitle } from '@/lib/utils';
 
 function getDaysLeft(startDate, endDate, status, nowMs) {
-  if (status === 'ended') return 'Ended';
+  if (status === 'completed' || status === 'ended') {
+    const end = new Date(endDate);
+    if (!Number.isNaN(end.getTime())) {
+      return `Ended ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+    }
+    return 'Completed';
+  }
   if (status === 'upcoming') {
     const diff = new Date(startDate).getTime() - nowMs;
     const days = Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
     return `Starts in ${days} ${days === 1 ? 'day' : 'days'}`;
   }
   const diff = new Date(endDate).getTime() - nowMs;
-  if (diff <= 0) return 'Ended';
+  if (diff <= 0) return 'Completed';
   const days = Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   return `${days} ${days === 1 ? 'day' : 'days'} left`;
 }
@@ -38,13 +45,16 @@ function formatSchedule(startDate, endDate) {
 
 export default function ChallengesGallery({
   initialChallenges,
+  initialCounts,
+  initialStatus = 'all',
   initialNow,
   userRole,
 }) {
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [searchResults, setSearchResults] = useState(null);
+  const [searchCounts, setSearchCounts] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [nowMs, setNowMs] = useState(initialNow);
@@ -79,6 +89,7 @@ export default function ChallengesGallery({
         const data = await res.json();
         if (active) {
           setSearchResults(Array.isArray(data.challenges) ? data.challenges : []);
+          if (data.counts) setSearchCounts(data.counts);
           if (typeof data.serverNow === 'number') setNowMs(data.serverNow);
         }
       } catch (err) {
@@ -103,6 +114,7 @@ export default function ChallengesGallery({
     if (!val.trim()) {
       setDebouncedQuery('');
       setSearchResults(null);
+      setSearchCounts(null);
       setIsSearching(false);
       setSearchError('');
     }
@@ -112,6 +124,7 @@ export default function ChallengesGallery({
     setSearchQuery('');
     setDebouncedQuery('');
     setSearchResults(null);
+    setSearchCounts(null);
     setIsSearching(false);
     setSearchError('');
     searchInputRef.current?.focus();
@@ -121,6 +134,7 @@ export default function ChallengesGallery({
     setSearchQuery('');
     setDebouncedQuery('');
     setSearchResults(null);
+    setSearchCounts(null);
     setIsSearching(false);
     setSearchError('');
     setStatusFilter('all');
@@ -128,10 +142,26 @@ export default function ChallengesGallery({
 
   const isSearchActive = Boolean(debouncedQuery);
 
+  const counts = useMemo(() => {
+    if (isSearchActive && searchCounts) return searchCounts;
+    if (initialCounts) return initialCounts;
+    return {
+      all: initialChallenges.length,
+      active: initialChallenges.filter((c) => c.challenge_status === 'active').length,
+      upcoming: initialChallenges.filter((c) => c.challenge_status === 'upcoming').length,
+      completed: initialChallenges.filter(
+        (c) => c.challenge_status === 'completed' || c.challenge_status === 'ended'
+      ).length,
+    };
+  }, [isSearchActive, searchCounts, initialCounts, initialChallenges]);
+
   const displayedChallenges = useMemo(() => {
     if (isSearchActive) return searchResults ?? [];
     if (statusFilter === 'all') return initialChallenges;
-    return initialChallenges.filter((ch) => ch.challenge_status === statusFilter);
+    return initialChallenges.filter((ch) => {
+      const normalized = ch.challenge_status === 'ended' ? 'completed' : ch.challenge_status;
+      return normalized === statusFilter;
+    });
   }, [isSearchActive, searchResults, statusFilter, initialChallenges]);
 
   return (
@@ -180,6 +210,7 @@ export default function ChallengesGallery({
               id="filter-challenges-all"
             >
               <span>All</span>
+              <span className="challenge-status-tab-count">{counts.all}</span>
             </button>
             <button
               type="button"
@@ -190,6 +221,7 @@ export default function ChallengesGallery({
               id="filter-challenges-active"
             >
               <span>Active</span>
+              <span className="challenge-status-tab-count">{counts.active}</span>
             </button>
             <button
               type="button"
@@ -200,6 +232,18 @@ export default function ChallengesGallery({
               id="filter-challenges-upcoming"
             >
               <span>Upcoming</span>
+              <span className="challenge-status-tab-count">{counts.upcoming}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={statusFilter === 'completed'}
+              className={`challenge-status-tab ${statusFilter === 'completed' ? 'active' : ''}`}
+              onClick={() => setStatusFilter('completed')}
+              id="filter-challenges-completed"
+            >
+              <span>Completed</span>
+              <span className="challenge-status-tab-count">{counts.completed}</span>
             </button>
           </div>
         </div>
@@ -218,21 +262,25 @@ export default function ChallengesGallery({
       <div className="masonry-grid">
         {displayedChallenges.length === 0 ? (
           <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--surface)' }}>
+            <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--ink-primary)' }}>
               {isSearchActive
-                ? 'NO MATCHING CHALLENGES'
+                ? 'No matching challenges'
                 : statusFilter === 'upcoming'
-                  ? 'NO UPCOMING CHALLENGES'
-                  : statusFilter === 'active'
-                    ? 'NO ACTIVE CHALLENGES'
-                    : 'NO CHALLENGES AVAILABLE'}
+                  ? 'No upcoming challenges'
+                  : statusFilter === 'completed'
+                    ? 'No completed challenges yet'
+                    : statusFilter === 'active'
+                      ? 'No active challenges'
+                      : 'No challenges available'}
             </p>
             <p style={{ marginTop: 8, color: 'var(--surface)', fontSize: '0.88rem' }}>
               {isSearchActive
                 ? 'Try adjusting your search keyword or status filter.'
                 : statusFilter === 'upcoming'
                   ? 'Check back soon for new architectural challenges.'
-                  : 'All active challenges have closed or none are currently running.'}
+                  : statusFilter === 'completed'
+                    ? 'Completed challenges and their winning entries will appear in this archive.'
+                    : 'No challenges are currently active in this category.'}
             </p>
             {(isSearchActive || statusFilter !== 'all') && (
               <button
@@ -241,19 +289,23 @@ export default function ChallengesGallery({
                 onClick={handleResetAll}
                 style={{ marginTop: 18 }}
               >
-                Reset Filters
+                Reset filters
               </button>
             )}
           </div>
         ) : (
           displayedChallenges.map((ch) => {
+            const normalizedStatus =
+              ch.challenge_status === 'ended' ? 'completed' : ch.challenge_status;
             const statusText =
-              ch.challenge_status === 'active'
+              normalizedStatus === 'active'
                 ? 'Active'
-                : ch.challenge_status === 'upcoming'
+                : normalizedStatus === 'upcoming'
                   ? 'Upcoming'
-                  : 'Ended';
-            const daysText = getDaysLeft(ch.start_date, ch.end_date, ch.challenge_status, nowMs);
+                  : 'Completed';
+            const isCompleted = normalizedStatus === 'completed';
+            const winnerCount = Number(ch.winner_count || 0);
+            const daysText = getDaysLeft(ch.start_date, ch.end_date, normalizedStatus, nowMs);
             const scheduleText = formatSchedule(ch.start_date, ch.end_date);
 
             return (
@@ -282,14 +334,14 @@ export default function ChallengesGallery({
 
                   <div className="card-editorial-body challenge-dir-body">
                     <div className="card-top-bar">
-                      <span className={`challenge-dir-status is-${ch.challenge_status}`}>
+                      <span className={`challenge-dir-status is-${normalizedStatus}`}>
                         {statusText}
                       </span>
                       <span className="challenge-dir-deadline">{daysText}</span>
                     </div>
 
                     <div className="card-bottom-info challenge-dir-info">
-                      <h2 className="card-title challenge-dir-title">{ch.title}</h2>
+                      <h2 className="card-title challenge-dir-title">{formatEditorialTitle(ch.title)}</h2>
                       {ch.description && (
                         <p className="challenge-dir-desc">{ch.description}</p>
                       )}
@@ -315,13 +367,27 @@ export default function ChallengesGallery({
                           {ch.submission_count === 1 ? 'submission' : 'submissions'}
                         </span>
                       </span>
+                      {isCompleted && (
+                        <span className={`challenge-dir-meta-item challenge-dir-winner-summary ${winnerCount > 0 ? 'has-winners' : 'is-pending'}`}>
+                          <Award size={13} className="challenge-dir-meta-icon" />
+                          <span>
+                            {winnerCount > 0
+                              ? `${winnerCount} ${winnerCount === 1 ? 'winner' : 'winners'} announced${ch.top_winner_name ? ` · 1st: ${ch.top_winner_name}` : ''}`
+                              : 'Results not yet announced'}
+                          </span>
+                        </span>
+                      )}
                     </div>
 
                     <span className="challenge-dir-cta">
                       <span>
-                        {userRole === 'member' && ch.challenge_status === 'active'
-                          ? 'Enter Challenge'
-                          : 'View Challenge'}
+                        {isCompleted
+                          ? winnerCount > 0
+                            ? 'View winners'
+                            : 'View archive'
+                          : userRole === 'member' && normalizedStatus === 'active'
+                            ? 'Enter challenge'
+                            : 'View challenge'}
                       </span>
                       <ArrowRight size={14} strokeWidth={1.75} className="challenge-dir-cta-arrow" />
                     </span>

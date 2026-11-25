@@ -17,7 +17,7 @@ export default function ChallengeSubmitForm({ challengeId, memberArtworks, userS
   if (userSubmission) {
     return (
       <div className="challenge-sidebar-card">
-        <h3 className="challenge-sidebar-title">YOUR SUBMISSION</h3>
+        <h3 className="challenge-sidebar-title">Your submission</h3>
         <div className="form-alert form-alert-success">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="20 6 9 17 4 12"></polyline>
@@ -27,7 +27,7 @@ export default function ChallengeSubmitForm({ challengeId, memberArtworks, userS
         <form action={async () => { await withdrawSubmission(userSubmission.id); }}>
           <button type="submit" className="btn-secondary" style={{ width: '100%', marginTop: 12 }}
             id="btn-withdraw-submission">
-            Withdraw Submission
+            Withdraw submission
           </button>
         </form>
       </div>
@@ -37,12 +37,12 @@ export default function ChallengeSubmitForm({ challengeId, memberArtworks, userS
   if (memberArtworks.length === 0) {
     return (
       <div className="challenge-sidebar-card">
-        <h3 className="challenge-sidebar-title">JOIN CHALLENGE</h3>
+        <h3 className="challenge-sidebar-title">Join challenge</h3>
         <p style={{ color: 'var(--surface)', fontSize: '0.88rem', marginBottom: 12 }}>
           You don&apos;t have any artworks yet. Upload an artwork first to join this challenge.
         </p>
         <a href="/dashboard/member/artworks/create" className="btn-primary" style={{ display: 'block', textAlign: 'center' }}>
-          Upload Artwork
+          Upload artwork
         </a>
       </div>
     );
@@ -50,7 +50,7 @@ export default function ChallengeSubmitForm({ challengeId, memberArtworks, userS
 
   return (
     <div className="challenge-sidebar-card">
-      <h3 className="challenge-sidebar-title">SUBMIT ARTWORK</h3>
+      <h3 className="challenge-sidebar-title">Submit artwork</h3>
 
       {submitState?.error && (
         <div className="form-alert form-alert-error" role="alert" style={{ marginBottom: 12 }}>
@@ -72,11 +72,11 @@ export default function ChallengeSubmitForm({ challengeId, memberArtworks, userS
         <input type="hidden" name="challenge_id" value={challengeId} />
         <input type="hidden" name="artwork_id" value={selectedArtworkId} />
         <div className="form-group">
-          <label htmlFor="submit-artwork-select" className="form-label">Select Artwork</label>
+          <label htmlFor="submit-artwork-select" className="form-label">Select artwork</label>
           <FilterDropdown
             id="submit-artwork-select"
             className="challenge-artwork-dropdown"
-            ariaLabel="Select Artwork"
+            ariaLabel="Select artwork"
             value={selectedArtworkId}
             options={artworkOptions}
             placeholder="Select your artwork..."
@@ -94,7 +94,7 @@ export default function ChallengeSubmitForm({ challengeId, memberArtworks, userS
           disabled={submitPending}
           id="btn-submit-challenge"
         >
-          {submitPending ? 'Submitting...' : 'Submit Artwork'}
+          {submitPending ? 'Submitting...' : 'Submit artwork'}
         </button>
       </form>
     </div>

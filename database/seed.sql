@@ -617,39 +617,78 @@ INSERT INTO submissions (
     challenge_id,
     artwork_id,
     member_id,
-    winner_rank
+    winner_rank,
+    winner_note
 )
 SELECT
     ch.id,
     a.id,
     u.id,
-    v.winner_rank
+    v.winner_rank,
+    v.winner_note
 FROM (
     VALUES
     -- Active Challenge: ARCHITECTURAL SPECULATIONS (awaiting curator review)
-    ('ARCHITECTURAL SPECULATIONS', 'member@arthive.com', 'Menara Phinisi UNM', NULL::INT),
-    ('ARCHITECTURAL SPECULATIONS', 'raka@arthive.com',   'The Shard',          NULL::INT),
-    ('ARCHITECTURAL SPECULATIONS', 'nadia@arthive.com',  'Marina Bay Sands',   NULL::INT),
+    ('ARCHITECTURAL SPECULATIONS', 'member@arthive.com', 'Menara Phinisi UNM', NULL::INT, NULL::TEXT),
+    ('ARCHITECTURAL SPECULATIONS', 'raka@arthive.com',   'The Shard',          NULL::INT, NULL::TEXT),
+    ('ARCHITECTURAL SPECULATIONS', 'nadia@arthive.com',  'Marina Bay Sands',   NULL::INT, NULL::TEXT),
 
     -- Active Challenge: BRUTALIST EXPRESSIONS (awaiting curator review)
-    ('BRUTALIST EXPRESSIONS', 'dimas@arthive.com', 'Barbican Estate', NULL::INT),
-    ('BRUTALIST EXPRESSIONS', 'kevin@arthive.com', 'Habitat 67',      NULL::INT),
+    ('BRUTALIST EXPRESSIONS', 'dimas@arthive.com', 'Barbican Estate', NULL::INT, NULL::TEXT),
+    ('BRUTALIST EXPRESSIONS', 'kevin@arthive.com', 'Habitat 67',      NULL::INT, NULL::TEXT),
 
-    -- Ended Challenge: TROPICAL MODERNISM ARCHIVE (judged with winners + 1 non-winner)
-    ('TROPICAL MODERNISM ARCHIVE', 'raka@arthive.com',   'Masjid 99 Kubah',           1),
-    ('TROPICAL MODERNISM ARCHIVE', 'nadia@arthive.com',  'Fort Rotterdam',            2),
-    ('TROPICAL MODERNISM ARCHIVE', 'kevin@arthive.com',  'Masjid Al-Markaz Al-Islami', 3),
-    ('TROPICAL MODERNISM ARCHIVE', 'member@arthive.com', 'Sydney Opera House',        NULL::INT),
+    -- Completed Challenge: TROPICAL MODERNISM ARCHIVE (judged with winners + 1 non-winner)
+    (
+        'TROPICAL MODERNISM ARCHIVE',
+        'raka@arthive.com',
+        'Masjid 99 Kubah',
+        1,
+        'Komposisi ritmis 99 kubah dan respons pencahayaan tropis menampilkan interpretasi monumental yang kontekstual terhadap iklim pesisir.'
+    ),
+    (
+        'TROPICAL MODERNISM ARCHIVE',
+        'nadia@arthive.com',
+        'Fort Rotterdam',
+        2,
+        'Dokumentasi proporsi batu karang dan pelestarian ruang halaman tropis memperlihatkan kontinuitas arsitektur historis secara jernih.'
+    ),
+    (
+        'TROPICAL MODERNISM ARCHIVE',
+        'kevin@arthive.com',
+        'Masjid Al-Markaz Al-Islami',
+        3,
+        'Harmoni atap berundak dan ventilasi silang alami menghadirkan keterbukaan ruang publik yang tenang dan berkarakter.'
+    ),
+    ('TROPICAL MODERNISM ARCHIVE', 'member@arthive.com', 'Sydney Opera House', NULL::INT, NULL::TEXT),
 
-    -- Ended Challenge: MONOLITH & MATERIALITY (judged winners)
-    ('MONOLITH & MATERIALITY', 'kevin@arthive.com', 'Church of the Light', 1),
-    ('MONOLITH & MATERIALITY', 'raka@arthive.com',  'Villa Savoye',        2),
-    ('MONOLITH & MATERIALITY', 'dimas@arthive.com', 'Heydar Aliyev Center', 3)
+    -- Completed Challenge: MONOLITH & MATERIALITY (judged winners)
+    (
+        'MONOLITH & MATERIALITY',
+        'kevin@arthive.com',
+        'Church of the Light',
+        1,
+        'Kejujuran beton ekspos dan presisi bukaan cahaya salib menghasilkan pengalaman ruang kontemplatif yang sangat kuat.'
+    ),
+    (
+        'MONOLITH & MATERIALITY',
+        'raka@arthive.com',
+        'Villa Savoye',
+        2,
+        'Kejernihan grid struktur, bidang putih minimalis, dan transisi interior-eksterior menjadi studi modernisme yang presisi.'
+    ),
+    (
+        'MONOLITH & MATERIALITY',
+        'dimas@arthive.com',
+        'Heydar Aliyev Center',
+        3,
+        'Eksplorasi kontinuitas permukaan monolitik tanpa sudut tajam menampilkan penguasaan bentuk dan material yang halus.'
+    )
 ) AS v(
     challenge_title,
     member_email,
     artwork_title,
-    winner_rank
+    winner_rank,
+    winner_note
 )
 JOIN challenges ch ON ch.title = v.challenge_title
 JOIN users u ON u.email = v.member_email AND u.role = 'member'
@@ -665,6 +704,25 @@ WHERE NOT EXISTS (
       )
 )
 ON CONFLICT DO NOTHING;
+
+-- Backfill winner notes idempotently on existing seeded winners when empty
+UPDATE submissions s
+SET winner_note = v.winner_note
+FROM (
+    VALUES
+    ('TROPICAL MODERNISM ARCHIVE', 'Masjid 99 Kubah',           'Komposisi ritmis 99 kubah dan respons pencahayaan tropis menampilkan interpretasi monumental yang kontekstual terhadap iklim pesisir.'),
+    ('TROPICAL MODERNISM ARCHIVE', 'Fort Rotterdam',            'Dokumentasi proporsi batu karang dan pelestarian ruang halaman tropis memperlihatkan kontinuitas arsitektur historis secara jernih.'),
+    ('TROPICAL MODERNISM ARCHIVE', 'Masjid Al-Markaz Al-Islami', 'Harmoni atap berundak dan ventilasi silang alami menghadirkan keterbukaan ruang publik yang tenang dan berkarakter.'),
+    ('MONOLITH & MATERIALITY',     'Church of the Light',       'Kejujuran beton ekspos dan presisi bukaan cahaya salib menghasilkan pengalaman ruang kontemplatif yang sangat kuat.'),
+    ('MONOLITH & MATERIALITY',     'Villa Savoye',              'Kejernihan grid struktur, bidang putih minimalis, dan transisi interior-eksterior menjadi studi modernisme yang presisi.'),
+    ('MONOLITH & MATERIALITY',     'Heydar Aliyev Center',      'Eksplorasi kontinuitas permukaan monolitik tanpa sudut tajam menampilkan penguasaan bentuk dan material yang halus.')
+) AS v(challenge_title, artwork_title, winner_note)
+JOIN challenges ch ON ch.title = v.challenge_title
+JOIN artworks a ON a.title = v.artwork_title
+WHERE s.challenge_id = ch.id
+  AND s.artwork_id = a.id
+  AND s.winner_rank IS NOT NULL
+  AND (s.winner_note IS NULL OR BTRIM(s.winner_note) = '');
 
 
 -- ================================================================

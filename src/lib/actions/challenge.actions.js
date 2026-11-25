@@ -5,6 +5,30 @@ import { query, getClient } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { isUploadedImagePath, toId } from '@/lib/utils';
 
+function revalidateChallengePaths(challengeId) {
+  revalidatePath('/');
+  revalidatePath('/challenges');
+  if (challengeId) {
+    revalidatePath(`/challenges/${challengeId}`);
+    revalidatePath(`/dashboard/admin/challenges/${challengeId}`);
+    revalidatePath(`/dashboard/curator/challenges/${challengeId}`);
+    revalidatePath(`/dashboard/curator/challenges/${challengeId}/submissions`);
+  }
+  revalidatePath('/dashboard/admin/challenges');
+  revalidatePath('/dashboard/curator/challenges');
+  revalidatePath('/dashboard/member/submissions');
+}
+
+function canManageChallengeWinners(user, challenge) {
+  if (!user || !challenge) return false;
+  if (user.role === 'admin') return true;
+  return (
+    user.role === 'curator' &&
+    user.curator_status === 'approved' &&
+    Number(challenge.curator_id) === Number(user.id)
+  );
+}
+
 export async function createChallenge(prevState, formData) {
   const session = await getSession();
   if (!session || session.user.role !== 'curator' || session.user.curator_status !== 'approved') {
@@ -36,9 +60,7 @@ export async function createChallenge(prevState, formData) {
       [session.user.id, title, description, rules, prize, bannerUrl, startDate, endDate]
     );
 
-    revalidatePath('/');
-    revalidatePath('/challenges');
-    revalidatePath('/dashboard/curator/challenges');
+    revalidateChallengePaths(result.rows[0].id);
     return { success: true, challengeId: result.rows[0].id };
   } catch (err) {
     console.error('[Challenge] Create error:', err);
@@ -87,10 +109,7 @@ export async function updateChallenge(prevState, formData) {
       [title, description, rules, prize, bannerUrl, startDate, endDate, challengeId]
     );
 
-    revalidatePath('/');
-    revalidatePath('/challenges');
-    revalidatePath(`/challenges/${challengeId}`);
-    revalidatePath('/dashboard/curator/challenges');
+    revalidateChallengePaths(challengeId);
     return { success: true };
   } catch (err) {
     console.error('[Challenge] Update error:', err);
@@ -113,9 +132,7 @@ export async function deleteChallenge(rawChallengeId) {
     }
 
     await query('DELETE FROM challenges WHERE id=$1', [challengeId]);
-    revalidatePath('/');
-    revalidatePath('/challenges');
-    revalidatePath('/dashboard/curator/challenges');
+    revalidateChallengePaths(challengeId);
     return { success: true };
   } catch (err) {
     console.error('[Challenge] Delete error:', err);
@@ -215,77 +232,131 @@ export async function withdrawSubmission(rawSubmissionId) {
 
 export async function selectWinner(prevState, formData) {
   const session = await getSession();
-  if (!session || session.user.role !== 'curator' || session.user.curator_status !== 'approved') {
-    return { error: 'Not authorized.' };
+  if (
+    !session ||
+    (session.user.role !== 'admin' &&
+      !(session.user.role === 'curator' && session.user.curator_status === 'approved'))
+  ) {
+    return { error: 'Not authorized to manage challenge winners.' };
   }
 
   const challengeId = toId(formData.get('challenge_id'));
   const submissionId = toId(formData.get('submission_id'));
   const rank = parseInt(formData.get('rank')?.toString(), 10);
+  const rawNote = formData.get('winner_note')?.toString().trim() ?? '';
+  const winnerNote = rawNote.length > 0 ? rawNote.slice(0, 400) : null;
 
   if (!challengeId || !submissionId || ![1, 2, 3].includes(rank)) {
-    return { error: 'Invalid selection data.' };
+    return { error: 'Please choose a valid rank (1st, 2nd, or 3rd Place).' };
   }
 
   const client = await getClient();
   try {
     await client.query('BEGIN');
 
-    // Verify challenge belongs to this curator and has ended
-    const challenge = await client.query(
-      'SELECT curator_id, end_date FROM challenges WHERE id=$1',
+    // Verify challenge exists, actor has permission, and competition has ended
+    const challengeRes = await client.query(
+      'SELECT id, curator_id, end_date FROM challenges WHERE id = $1',
       [challengeId]
     );
-    if (challenge.rows.length === 0) {
+    if (challengeRes.rows.length === 0) {
       await client.query('ROLLBACK');
       return { error: 'Challenge not found.' };
     }
-    if (challenge.rows[0].curator_id !== session.user.id) {
+    const challenge = challengeRes.rows[0];
+    if (!canManageChallengeWinners(session.user, challenge)) {
       await client.query('ROLLBACK');
-      return { error: 'You do not own this challenge.' };
+      return { error: 'You are not authorized to manage winners for this challenge.' };
     }
-    if (new Date(challenge.rows[0].end_date) > new Date()) {
+    if (new Date(challenge.end_date) > new Date()) {
       await client.query('ROLLBACK');
-      return { error: 'Challenge has not ended yet.' };
+      return { error: 'Winners can only be selected after the challenge has ended.' };
     }
 
-    // Verify submission belongs to this challenge
-    const submission = await client.query(
-      'SELECT challenge_id FROM submissions WHERE id=$1',
+    // Verify submission belongs to this challenge and artwork is valid & active
+    const submissionRes = await client.query(
+      `SELECT s.id, s.challenge_id, a.status AS artwork_status
+       FROM submissions s
+       JOIN artworks a ON a.id = s.artwork_id
+       WHERE s.id = $1`,
       [submissionId]
     );
-    if (submission.rows.length === 0 || submission.rows[0].challenge_id !== parseInt(challengeId)) {
+    if (
+      submissionRes.rows.length === 0 ||
+      Number(submissionRes.rows[0].challenge_id) !== Number(challengeId)
+    ) {
       await client.query('ROLLBACK');
-      return { error: 'Invalid submission.' };
+      return { error: 'Selected submission does not belong to this challenge.' };
+    }
+    if (submissionRes.rows[0].artwork_status !== 'active') {
+      await client.query('ROLLBACK');
+      return { error: 'Cannot assign a winner to an unavailable or taken-down artwork.' };
     }
 
-    // Clear previous winner for this rank (if any)
+    // Clear previous occupant of this rank on this challenge (if another submission)
     await client.query(
-      'UPDATE submissions SET winner_rank=NULL WHERE challenge_id=$1 AND winner_rank=$2',
-      [challengeId, rank]
+      'UPDATE submissions SET winner_rank = NULL, winner_note = NULL WHERE challenge_id = $1 AND winner_rank = $2 AND id != $3',
+      [challengeId, rank, submissionId]
     );
 
-    // Clear previous rank for this submission (if any)
+    // Assign rank and optional selection note to target submission
     await client.query(
-      'UPDATE submissions SET winner_rank=NULL WHERE id=$1',
-      [submissionId]
-    );
-
-    // Set winner
-    await client.query(
-      'UPDATE submissions SET winner_rank=$1 WHERE id=$2',
-      [rank, submissionId]
+      'UPDATE submissions SET winner_rank = $1, winner_note = $2 WHERE id = $3',
+      [rank, winnerNote, submissionId]
     );
 
     await client.query('COMMIT');
-    revalidatePath(`/challenges/${challengeId}`);
-    revalidatePath(`/dashboard/curator/challenges/${challengeId}/submissions`);
-    return { success: true };
+    revalidateChallengePaths(challengeId);
+    return { success: true, rank, winnerNote };
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('[Winner] Select error:', err);
-    return { error: 'Failed to select winner.' };
+    return { error: 'Failed to save winner assignment.' };
   } finally {
     client.release();
+  }
+}
+
+export async function clearWinner(rawChallengeId, rawSubmissionId) {
+  const session = await getSession();
+  if (
+    !session ||
+    (session.user.role !== 'admin' &&
+      !(session.user.role === 'curator' && session.user.curator_status === 'approved'))
+  ) {
+    return { error: 'Not authorized to manage challenge winners.' };
+  }
+
+  const challengeId = toId(rawChallengeId);
+  const submissionId = toId(rawSubmissionId);
+  if (!challengeId || !submissionId) {
+    return { error: 'Invalid challenge or submission ID.' };
+  }
+
+  try {
+    const challengeRes = await query(
+      'SELECT id, curator_id, end_date FROM challenges WHERE id = $1',
+      [challengeId]
+    );
+    if (challengeRes.rows.length === 0) {
+      return { error: 'Challenge not found.' };
+    }
+    if (!canManageChallengeWinners(session.user, challengeRes.rows[0])) {
+      return { error: 'You are not authorized to manage winners for this challenge.' };
+    }
+
+    const updated = await query(
+      'UPDATE submissions SET winner_rank = NULL, winner_note = NULL WHERE id = $1 AND challenge_id = $2 RETURNING id',
+      [submissionId, challengeId]
+    );
+    if (updated.rows.length === 0) {
+      return { error: 'Submission not found for this challenge.' };
+    }
+
+    revalidateChallengePaths(challengeId);
+    return { success: true };
+  } catch (err) {
+    console.error('[Winner] Clear error:', err);
+    return { error: 'Failed to remove winner assignment.' };
   }
 }

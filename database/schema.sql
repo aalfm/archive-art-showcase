@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS submissions (
     artwork_id INT NOT NULL REFERENCES artworks(id) ON DELETE CASCADE,
     member_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     winner_rank INT CHECK (winner_rank BETWEEN 1 AND 3),
+    winner_note TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(challenge_id, member_id),
     UNIQUE(challenge_id, winner_rank),
@@ -127,6 +128,7 @@ ALTER TABLE artworks ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'active
 ALTER TABLE artworks ADD COLUMN IF NOT EXISTS like_count INT DEFAULT 0;
 ALTER TABLE reports ADD COLUMN IF NOT EXISTS admin_note TEXT;
 ALTER TABLE reports ADD COLUMN IF NOT EXISTS details TEXT;
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS winner_note TEXT;
 
 DO $$
 BEGIN
@@ -201,6 +203,7 @@ CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorites(user_id);
 CREATE INDEX IF NOT EXISTS idx_comments_artwork_id ON comments(artwork_id);
 CREATE INDEX IF NOT EXISTS idx_reports_status ON reports(status);
 CREATE INDEX IF NOT EXISTS idx_submissions_challenge_id ON submissions(challenge_id);
+CREATE INDEX IF NOT EXISTS idx_submissions_challenge_winner ON submissions(challenge_id, winner_rank) WHERE winner_rank IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_curator_applications_one_pending ON curator_applications(user_id) WHERE status = 'pending';
