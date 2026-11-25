@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/archive-hero-banner.svg" alt="ARCHIVE — Where Architecture Meets Digital Expression." width="100%" />
+<img src="docs/assets/Archive_Gallery_identity.6s.gif" alt="ARCHIVE — Where Architecture Meets Digital Expression." width="100%" />
 
 <br /><br />
 
@@ -298,24 +298,36 @@ erDiagram
    Update `.env.local` with your PostgreSQL credentials and a strong random session secret:
 
    ```env
-   DATABASE_URL=postgresql://postgres:your_password@localhost:5432/arthive_db
+   DATABASE_URL=postgresql://postgres:PASSWORD_KAMU@localhost:5432/archive_db
    SESSION_SECRET=replace-with-a-random-32-char-secret
    NEXT_PUBLIC_APP_URL=http://localhost:3000
    ```
 
    > **Important:** Always keep `.env.local` out of version control. If `SESSION_SECRET` is omitted, `src/lib/auth.js` and `src/proxy.js` fall back to a built-in development key—never rely on that fallback in production.
 
-5. **Database Setup**
+5. **Database Setup & Seeding**
 
-   Create `arthive_db`, then execute `database/schema.sql` before `database/seed.sql`:
+   Create the PostgreSQL database (`archive_db`), then initialize the schema and official seed data:
 
    ```bash
-   psql -U postgres -c "CREATE DATABASE arthive_db;"
-   psql -U postgres -d arthive_db -f database/schema.sql
-   psql -U postgres -d arthive_db -f database/seed.sql
+   psql -U postgres -c "CREATE DATABASE archive_db;"
+   npm run db:seed
    ```
 
-   > **Note:** `database/seed.sql` is safe to re-run and prints summary counts for users, categories, artworks, likes, and challenges upon completion.
+   Or run the raw SQL files directly with `psql`:
+
+   ```bash
+   psql -U postgres -d archive_db -f database/schema.sql
+   psql -U postgres -d archive_db -f database/seed.sql
+   ```
+
+   To wipe all local development/test data and restore a clean, deterministic seed-only state:
+
+   ```bash
+   npm run db:reset
+   ```
+
+   > **Safety Note:** `npm run db:seed` is idempotent and safe to re-run without duplicating records. `npm run db:reset` truncates all application tables (`RESTART IDENTITY CASCADE`) and re-applies `database/schema.sql` + `database/seed.sql`; it is strictly blocked on production or non-local databases.
 
 6. **Run Development Server**
 
@@ -332,7 +344,7 @@ erDiagram
 
 | Variable | Description | Required | Example |
 |---|---|---|---|
-| `DATABASE_URL` | PostgreSQL connection string used by `src/lib/db.js`. | Yes | `postgresql://postgres:your_password@localhost:5432/arthive_db` |
+| `DATABASE_URL` | PostgreSQL connection string used by `src/lib/db.js`. | Yes | `postgresql://postgres:PASSWORD_KAMU@localhost:5432/archive_db` |
 | `SESSION_SECRET` | Secret key (32+ chars recommended) for HS256 JWT cookies. | Yes (Prod) | `replace-with-a-random-32-char-secret` |
 | `NEXT_PUBLIC_APP_URL` | Base application URL defined in `.env.example`. | No | `http://localhost:3000` |
 
@@ -357,6 +369,8 @@ erDiagram
 | `build` | `npm run build` | Builds the application for production. |
 | `start` | `npm run start` | Runs the compiled production server. |
 | `lint` | `npm run lint` | Runs ESLint with `eslint-config-next` rules. |
+| `db:seed` | `npm run db:seed` | Initializes missing tables (`schema.sql`) and runs `database/seed.sql` idempotently. |
+| `db:reset` | `npm run db:reset` | Resets local dev/test database tables (`RESTART IDENTITY CASCADE`), runs `schema.sql`, and restores seed-only data. |
 
 **Common Troubleshooting**
 - **`[DB] Query error` / connection refused**: Ensure PostgreSQL is running and verify `DATABASE_URL` in `.env.local`.
@@ -381,6 +395,10 @@ arthive-art-showcase/
 ├── public/
 │   ├── logo/                       # Official ARCHIVE SVGs and favicons
 │   └── uploads/                    # Local storage for sharp-processed artwork uploads
+├── scripts/
+│   ├── db-reset.mjs                # Protected local dev/test DB reset + deterministic reseed
+│   ├── db-seed.mjs                 # Idempotent schema + official seed runner
+│   └── db-utils.mjs                # Environment safety guards & table count audit helpers
 ├── src/
 │   ├── app/
 │   │   ├── (public)/               # Public pages: explore, artworks/[id], artists, challenges, auth
