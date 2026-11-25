@@ -1,4 +1,5 @@
-import { getSession } from '@/lib/auth';
+import { restrictAdminFromPublic } from '@/lib/auth';
+import { applyAvatarPolicy } from '@/lib/avatar';
 import { query } from '@/lib/db';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -39,7 +40,8 @@ async function getHomepageData() {
       `),
       query('SELECT id, name FROM categories ORDER BY name ASC'),
       query(`
-        SELECT u.id, u.name, u.bio, u.profile_image,
+        SELECT u.id, u.name, u.bio, u.role,
+               CASE WHEN LOWER(u.role) = 'member' THEN u.profile_image ELSE NULL END as profile_image,
                COUNT(a.id)::int as artwork_count,
                COALESCE(SUM(a.like_count), 0)::int as total_likes,
                (
@@ -88,7 +90,7 @@ async function getHomepageData() {
       artworks: artworksRes.rows,
       challenges: serializedChallenges,
       categories: categoriesRes.rows,
-      artists: artistsRes.rows,
+      artists: artistsRes.rows.map((row) => applyAvatarPolicy(row)),
       serverNow: Date.now(),
     };
   } catch (err) {
@@ -98,24 +100,25 @@ async function getHomepageData() {
 }
 
 export default async function HomePage() {
-  const [session, data] = await Promise.all([
-    getSession(),
-    getHomepageData(),
-  ]);
+  const session = await restrictAdminFromPublic();
+  const data = await getHomepageData();
 
   const popularArtworks = [...data.artworks].sort((a, b) => Number(b.like_count || 0) - Number(a.like_count || 0));
   const latestArtworks = data.artworks;
+
+  const userRole = session?.user?.role || null;
 
   return (
     <>
       <Navbar user={session?.user || null} />
       <main>
-        <HeroSection artworks={data.artworks.slice(0, 4)} />
+        <HeroSection artworks={data.artworks.slice(0, 4)} userRole={userRole} />
         <ArtworkGallery
           artworks={data.artworks}
           popularArtworks={popularArtworks}
           latestArtworks={latestArtworks}
           categories={data.categories}
+          userRole={userRole}
         />
         {data.challenges.length > 0 && (
           <ChallengesSection challenges={data.challenges} initialNow={data.serverNow} />
@@ -124,7 +127,7 @@ export default async function HomePage() {
           <ArtistsSection artists={data.artists} />
         )}
       </main>
-      <Footer />
+      <Footer user={session?.user || null} />
     </>
   );
 }

@@ -1,33 +1,70 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { updateProfile } from '@/lib/actions/artwork.actions';
 import ImageUpload from '@/components/ui/ImageUpload';
 import UserAvatar from '@/components/ui/UserAvatar';
+import { canUseProfileImage, resolveUserAvatarSrc } from '@/lib/avatar';
 
-export default function ProfileForm({ user }) {
+export default function ProfileForm({ user, publicProfileHref }) {
   const router = useRouter();
-  const [profileImage, setProfileImage] = useState(user.profile_image || '');
+  const allowProfilePhoto = canUseProfileImage(user?.role);
+  const [profileImage, setProfileImage] = useState(
+    allowProfilePhoto ? resolveUserAvatarSrc(user) || '' : ''
+  );
   const [state, formAction, isPending] = useActionState(async (prevState, formData) => {
     const res = await updateProfile(prevState, formData);
     if (res?.success) {
-      setProfileImage(res.profileImage || '');
+      setProfileImage(allowProfilePhoto ? res.profileImage || '' : '');
       router.refresh();
     }
     return res;
   }, null);
 
   return (
-    <div className="dashboard-form-panel">
+    <div className="member-form-panel member-profile-panel">
       <div className="profile-identity-preview">
-        <UserAvatar src={profileImage} name={user.name} size={64} />
-        <div className="profile-identity-meta">
-          <span className="profile-identity-name">{user.name}</span>
-          <span className="profile-identity-hint">
-            {profileImage ? 'Current profile photo preview' : 'No profile photo uploaded — default icon is shown'}
-          </span>
-        </div>
+        {publicProfileHref ? (
+          <Link
+            href={publicProfileHref}
+            className="profile-identity-lead profile-identity-lead-link"
+            aria-label={`View public artist profile: ${user.name}`}
+          >
+            <UserAvatar src={profileImage} role={user.role} name={user.name} size={56} />
+            <div className="profile-identity-meta">
+              <span className="profile-identity-name">{user.name}</span>
+              <span className="profile-identity-hint">
+                {!allowProfilePhoto
+                  ? 'Default role avatar is used for this account'
+                  : profileImage
+                    ? 'Current profile photo preview'
+                    : 'No profile photo uploaded — default icon is shown'}
+              </span>
+            </div>
+          </Link>
+        ) : (
+          <div className="profile-identity-lead">
+            <UserAvatar src={profileImage} role={user.role} name={user.name} size={56} />
+            <div className="profile-identity-meta">
+              <span className="profile-identity-name">{user.name}</span>
+              <span className="profile-identity-hint">
+                {!allowProfilePhoto
+                  ? 'Default role avatar is used for this account'
+                  : profileImage
+                    ? 'Current profile photo preview'
+                    : 'No profile photo uploaded — default icon is shown'}
+              </span>
+            </div>
+          </div>
+        )}
+        {user.email && (
+          <div className="profile-identity-aside">
+            <span className="profile-identity-email">{user.email}</span>
+            <span className="badge badge-role-member">Member</span>
+          </div>
+        )}
       </div>
 
       {state?.error && (
@@ -41,15 +78,18 @@ export default function ProfileForm({ user }) {
         </div>
       )}
 
-      <form action={formAction} className="dashboard-form">
-        <div className="form-group">
-          <label className="form-label">Profile Photo</label>
-          <ImageUpload
-            currentImage={profileImage}
-            onUpload={(url) => setProfileImage(url)}
-            name="profile_image"
-          />
-        </div>
+      <form action={formAction} className="dashboard-form member-profile-form">
+        {allowProfilePhoto && (
+          <div className="form-group member-profile-photo-group">
+            <label className="form-label">Profile Photo</label>
+            <ImageUpload
+              currentImage={profileImage}
+              onUpload={(url) => setProfileImage(url)}
+              name="profile_image"
+              label="profile photo"
+            />
+          </div>
+        )}
 
         <div className="dashboard-form-grid-2">
           <div className="form-group">

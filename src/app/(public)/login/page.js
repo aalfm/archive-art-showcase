@@ -15,12 +15,12 @@ function LoginForm() {
       <div className="auth-container">
         <div className="auth-brand">
           <h1 className="auth-title">ARCHIVE</h1>
-          <p className="auth-subtitle">Digital Art Showcase Platform</p>
+          <p className="auth-subtitle">Digital art showcase platform</p>
         </div>
 
         <div className="auth-card">
           <h2 className="auth-heading">Welcome Back</h2>
-          <p className="auth-desc">Sign in to your ARCHIVE account</p>
+          <p className="auth-desc">Sign in to your ARCHIVE account.</p>
 
           {state?.error && (
             <div className="form-alert form-alert-error" role="alert">
@@ -67,7 +67,7 @@ function LoginForm() {
             <button
               type="submit"
               className="btn-primary"
-              style={{ width: '100%', padding: '12px', fontSize: '0.9rem', letterSpacing: '0.08em' }}
+              style={{ width: '100%', padding: '12px', fontSize: '0.9rem' }}
               disabled={isPending}
               id="btn-login-submit"
             >
@@ -76,7 +76,7 @@ function LoginForm() {
                   <span className="spinner-sm"></span>
                   Verifying...
                 </span>
-              ) : 'SIGN IN'}
+              ) : 'Sign In'}
             </button>
           </form>
 
@@ -94,15 +94,6 @@ function LoginForm() {
                 Register as Curator
               </Link>
             </div>
-          </div>
-
-          {/* Demo credentials hint */}
-          <div className="auth-demo-hint">
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--surface)', textAlign: 'center', marginTop: 20, lineHeight: 1.8 }}>
-              Demo: admin@arthive.com / Admin@123<br/>
-              kurator@arthive.com / Curator@123<br/>
-              member@arthive.com / Member@123
-            </p>
           </div>
         </div>
       </div>

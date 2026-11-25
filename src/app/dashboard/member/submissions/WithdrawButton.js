@@ -10,6 +10,8 @@ export default function WithdrawButton({ submissionId, challengeTitle }) {
       title="Withdraw Submission"
       message={`Are you sure you want to withdraw your submission for "${challengeTitle}"?`}
       confirmLabel="Yes, Withdraw"
+      buttonClass="btn-danger table-action-btn"
+      buttonStyle={undefined}
       onConfirm={() => withdrawSubmission(submissionId)}
     />
   );

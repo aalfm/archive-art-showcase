@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
+import { formatEditorialTitle } from '@/lib/utils';
+import { buildMemberDetailHref } from '@/lib/member-navigation';
 import DashboardStatCard from '@/components/ui/DashboardStatCard';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,8 +20,11 @@ function formatShortDate(value) {
   });
 }
 
-export default async function MemberOverviewPage() {
-  const user = await requireRole('member');
+export default async function MemberOverviewPage(props) {
+  const [user, searchParams] = await Promise.all([
+    requireRole('member'),
+    props?.searchParams,
+  ]);
 
   const [statsRes, recentArtworksRes, recentSubmissionsRes] = await Promise.all([
     query(
@@ -58,7 +64,7 @@ export default async function MemberOverviewPage() {
       SELECT s.id, s.winner_rank, s.created_at,
              c.id AS challenge_id, c.title AS challenge_title,
              (c.end_date < NOW()) AS challenge_ended,
-             a.title AS artwork_title
+             a.id AS artwork_id, a.title AS artwork_title, a.status AS artwork_status
       FROM submissions s
       JOIN challenges c ON s.challenge_id = c.id
       JOIN artworks a ON s.artwork_id = a.id
@@ -89,26 +95,40 @@ export default async function MemberOverviewPage() {
         : sub.challenge_ended
           ? 'Judging Closed'
           : 'Under Review';
+      const challengeHref = buildMemberDetailHref(`/challenges/${sub.challenge_id}`, 'overview', searchParams);
+      const artworkHref =
+        sub.artwork_status === 'active'
+          ? buildMemberDetailHref(`/artworks/${sub.artwork_id}`, 'overview', searchParams)
+          : null;
 
       return {
         key: `sub-${sub.id}`,
         kicker: 'Challenge Entry',
-        title: sub.challenge_title,
-        meta: `${sub.artwork_title} · ${statusText} · ${formatShortDate(sub.created_at)}`,
-        href: '/dashboard/member/submissions',
-        actionLabel: 'Status',
+        title: formatEditorialTitle(sub.challenge_title),
+        metaLeadLabel: sub.artwork_title,
+        metaLeadHref: artworkHref,
+        metaSuffix: ` · ${statusText} · ${formatShortDate(sub.created_at)}`,
+        href: challengeHref,
+        actionLabel: 'View Challenge',
         createdAt: new Date(sub.created_at).getTime(),
       };
     }),
-    ...recentArtworksRes.rows.map((art) => ({
-      key: `art-${art.id}`,
-      kicker: art.status === 'active' ? 'Published Work' : 'Taken Down',
-      title: art.title,
-      meta: `${art.category_name} · ${art.like_count} ${art.like_count === 1 ? 'like' : 'likes'} · ${formatShortDate(art.created_at)}`,
-      href: `/dashboard/member/artworks/${art.id}/edit`,
-      actionLabel: 'Manage',
-      createdAt: new Date(art.created_at).getTime(),
-    })),
+    ...recentArtworksRes.rows.map((art) => {
+      const isPublished = art.status === 'active';
+      const artworkHref = isPublished
+        ? buildMemberDetailHref(`/artworks/${art.id}`, 'overview', searchParams)
+        : `/dashboard/member/artworks/${art.id}/edit`;
+
+      return {
+        key: `art-${art.id}`,
+        kicker: isPublished ? 'Published Work' : 'Taken Down',
+        title: formatEditorialTitle(art.title),
+        meta: `${art.category_name} · ${art.like_count} ${art.like_count === 1 ? 'like' : 'likes'} · ${formatShortDate(art.created_at)}`,
+        href: artworkHref,
+        actionLabel: isPublished ? 'View Artwork' : 'Manage',
+        createdAt: new Date(art.created_at).getTime(),
+      };
+    }),
   ]
     .sort((a, b) => b.createdAt - a.createdAt)
     .slice(0, 4);
@@ -117,6 +137,12 @@ export default async function MemberOverviewPage() {
 
   return (
     <div className="dash-overview">
+      <Breadcrumb
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Overview' },
+        ]}
+      />
       <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Member Overview</h1>
@@ -203,7 +229,22 @@ export default async function MemberOverviewPage() {
                     <Link href={item.href} className="dash-item-title dash-item-title-link">
                       {item.title}
                     </Link>
-                    <span className="dash-item-meta">{item.meta}</span>
+                    <span className="dash-item-meta">
+                      {item.metaLeadLabel ? (
+                        <>
+                          {item.metaLeadHref ? (
+                            <Link href={item.metaLeadHref} className="dash-item-meta-link">
+                              {item.metaLeadLabel}
+                            </Link>
+                          ) : (
+                            item.metaLeadLabel
+                          )}
+                          {item.metaSuffix}
+                        </>
+                      ) : (
+                        item.meta
+                      )}
+                    </span>
                   </div>
                   <Link href={item.href} className="dash-row-link">
                     {item.actionLabel} →
@@ -213,31 +254,6 @@ export default async function MemberOverviewPage() {
             </ul>
           </div>
         )}
-      </section>
-
-      {/* Quick Navigation to Full Sections */}
-      <section className="dash-section">
-        <div className="dash-section-head">
-          <h2 className="dash-section-title">Manage Workspace</h2>
-        </div>
-        <div className="dash-quick-links">
-          <Link href="/dashboard/member/artworks" className="dash-quick-link">
-            <span>My Artworks</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-          <Link href="/dashboard/member/submissions" className="dash-quick-link">
-            <span>Challenge Submissions</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-          <Link href="/dashboard/member/favorites" className="dash-quick-link">
-            <span>Saved Favorites</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-          <Link href="/dashboard/member/profile" className="dash-quick-link">
-            <span>Profile &amp; Settings</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-        </div>
       </section>
     </div>
   );

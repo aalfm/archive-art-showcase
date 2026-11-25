@@ -71,9 +71,11 @@ export default function AccountInactiveNotice({ user }) {
         </p>
 
         <div className="account-inactive-actions">
-          <Link href="/" className="btn-secondary">
-            Back to Home
-          </Link>
+          {user.role !== 'admin' && user.role !== 'curator' && (
+            <Link href="/" className="btn-secondary">
+              Back to Home
+            </Link>
+          )}
           <form action={logoutUser}>
             <button type="submit" className="btn-primary">
               Sign Out

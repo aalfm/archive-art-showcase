@@ -3,7 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { query } from '@/lib/db';
 import { getSession } from '@/lib/auth';
-import { toId } from '@/lib/utils';
+import { canUseProfileImage } from '@/lib/avatar';
+import { isUploadedImagePath, toId } from '@/lib/utils';
 
 export async function createArtwork(prevState, formData) {
   const session = await getSession();
@@ -18,6 +19,9 @@ export async function createArtwork(prevState, formData) {
 
   if (!title || !description || !categoryId || !tags || !imageUrl) {
     return { error: 'All fields are required.' };
+  }
+  if (!isUploadedImagePath(imageUrl)) {
+    return { error: 'Please upload an artwork image file from your device (JPG, PNG, or WebP).' };
   }
   if (title.length < 3 || title.length > 200) {
     return { error: 'Title must be between 3–200 characters.' };
@@ -49,6 +53,9 @@ export async function createArtwork(prevState, formData) {
 export async function updateArtwork(prevState, formData) {
   const session = await getSession();
   if (!session) return { error: 'Please sign in first.' };
+  if (session.user.role !== 'member' && session.user.role !== 'admin') {
+    return { error: 'Only members can edit artworks.' };
+  }
 
   const artworkId = toId(formData.get('artwork_id'));
   const title = formData.get('title')?.toString().trim();
@@ -93,6 +100,9 @@ export async function updateArtwork(prevState, formData) {
 export async function deleteArtwork(rawArtworkId) {
   const session = await getSession();
   if (!session) return { error: 'Please sign in first.' };
+  if (session.user.role !== 'member' && session.user.role !== 'admin') {
+    return { error: 'Only members can delete artworks.' };
+  }
 
   const artworkId = toId(rawArtworkId);
   if (!artworkId) return { error: 'Invalid artwork ID.' };
@@ -121,8 +131,8 @@ export async function deleteArtwork(rawArtworkId) {
 export async function toggleLike(rawArtworkId) {
   const session = await getSession();
   if (!session) return { error: 'login_required' };
-  if (session.user.role === 'admin') {
-    return { error: 'Administrators cannot like artworks.' };
+  if (session.user.role !== 'member') {
+    return { error: 'Only members can like artworks.' };
   }
 
   const artworkId = toId(rawArtworkId);
@@ -162,8 +172,8 @@ export async function toggleLike(rawArtworkId) {
 export async function toggleFavorite(rawArtworkId) {
   const session = await getSession();
   if (!session) return { error: 'login_required' };
-  if (session.user.role === 'admin') {
-    return { error: 'Administrators cannot save favorites.' };
+  if (session.user.role !== 'member') {
+    return { error: 'Only members can save favorites.' };
   }
 
   const artworkId = toId(rawArtworkId);
@@ -195,8 +205,8 @@ export async function toggleFavorite(rawArtworkId) {
 export async function addComment(prevState, formData) {
   const session = await getSession();
   if (!session) return { error: 'login_required' };
-  if (session.user.role === 'admin') {
-    return { error: 'Administrators cannot post comments.' };
+  if (session.user.role !== 'member') {
+    return { error: 'Only members can post comments.' };
   }
 
   const artworkId = formData.get('artwork_id')?.toString();
@@ -221,6 +231,9 @@ export async function addComment(prevState, formData) {
 export async function deleteComment(commentId, artworkId) {
   const session = await getSession();
   if (!session) return { error: 'Please sign in.' };
+  if (session.user.role !== 'member' && session.user.role !== 'admin') {
+    return { error: 'Not authorized to delete comments.' };
+  }
 
   try {
     const comment = await query('SELECT user_id FROM comments WHERE id=$1', [commentId]);
@@ -241,8 +254,8 @@ export async function deleteComment(commentId, artworkId) {
 export async function reportArtwork(prevState, formData) {
   const session = await getSession();
   if (!session) return { error: 'login_required' };
-  if (session.user.role === 'admin') {
-    return { error: 'Administrators cannot report artworks.' };
+  if (session.user.role !== 'member') {
+    return { error: 'Only members can report artworks.' };
   }
 
   const artworkId = formData.get('artwork_id')?.toString();
@@ -300,22 +313,45 @@ export async function reportArtwork(prevState, formData) {
 export async function updateProfile(prevState, formData) {
   const session = await getSession();
   if (!session) return { error: 'Please sign in.' };
+  if (session.user.role !== 'member') {
+    return { error: 'Only members can update creator profiles.' };
+  }
 
+  const allowProfilePhoto = canUseProfileImage(session.user.role);
   const name = formData.get('name')?.toString().trim();
   const bio = formData.get('bio')?.toString().trim() || null;
   const externalLink = formData.get('external_link')?.toString().trim() || null;
-  const rawProfileImage = formData.get('profile_image')?.toString().trim() || '';
-  const profileImage = rawProfileImage.length > 0 ? rawProfileImage : null;
+  const rawProfileImage = allowProfilePhoto
+    ? formData.get('profile_image')?.toString().trim() || ''
+    : '';
+  const profileImage = allowProfilePhoto && rawProfileImage.length > 0 ? rawProfileImage : null;
 
   if (!name || name.length < 2) return { error: 'Name must be at least 2 characters.' };
 
   try {
-    await query(
-      `UPDATE users
-       SET name = $1, bio = $2, external_link = $3, profile_image = $4
-       WHERE id = $5`,
-      [name, bio, externalLink, profileImage, session.user.id]
-    );
+    if (allowProfilePhoto) {
+      const existingRes = await query('SELECT profile_image FROM users WHERE id = $1', [session.user.id]);
+      const currentProfileImage = existingRes.rows[0]?.profile_image || null;
+
+      if (profileImage && profileImage !== currentProfileImage && !isUploadedImagePath(profileImage)) {
+        return { error: 'Please upload a profile photo file from your device (JPG, PNG, or WebP).' };
+      }
+
+      await query(
+        `UPDATE users
+         SET name = $1, bio = $2, external_link = $3, profile_image = $4
+         WHERE id = $5`,
+        [name, bio, externalLink, profileImage, session.user.id]
+      );
+    } else {
+      // Non-member roles (Admin, Curator) never update profile_image; existing DB column data is left untouched
+      await query(
+        `UPDATE users
+         SET name = $1, bio = $2, external_link = $3
+         WHERE id = $4`,
+        [name, bio, externalLink, session.user.id]
+      );
+    }
 
     revalidatePath('/dashboard', 'layout');
     revalidatePath('/dashboard/member');
@@ -324,7 +360,7 @@ export async function updateProfile(prevState, formData) {
     revalidatePath(`/artists/${session.user.id}`);
     revalidatePath('/explore');
     revalidatePath('/');
-    return { success: true, profileImage };
+    return { success: true, profileImage: allowProfilePhoto ? profileImage : null };
   } catch (err) {
     console.error('[Profile] Update error:', err);
     return { error: 'Failed to update profile.' };

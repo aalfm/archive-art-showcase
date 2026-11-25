@@ -12,7 +12,7 @@ export default function ConfirmActionButton({
   confirmLabel = 'Confirm',
   danger = true,
   buttonClass = 'btn-danger',
-  buttonStyle = { padding: '6px 12px', fontSize: '0.78rem' },
+  buttonStyle,
   buttonTitle,
   onConfirm,
 }) {

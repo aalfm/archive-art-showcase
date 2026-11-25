@@ -109,7 +109,7 @@ export default function UserFilters({ initialSearch = '', initialRole = '' }) {
         ariaLabel="Filter by role"
         value={role}
         options={ROLE_OPTIONS}
-        placeholder="All Roles"
+        placeholder="All roles"
         onSelect={handleRoleSelect}
       />
     </form>

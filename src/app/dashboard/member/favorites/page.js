@@ -1,18 +1,31 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
+import { buildMemberDetailHref } from '@/lib/member-navigation';
+import ArtworkImage from '@/components/ui/ArtworkImage';
 import RemoveFavoriteButton from './RemoveFavoriteButton';
-import { Heart } from '@/components/ui/Icons';
+import { Bookmark } from '@/components/ui/Icons';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 
 export const dynamic = 'force-dynamic';
+
+function formatSavedDate(value) {
+  return new Date(value).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
 
 export const metadata = {
   title: 'Favorite Collection — ARCHIVE',
 };
 
-export default async function MemberFavoritesPage() {
-  const user = await requireRole('member');
+export default async function MemberFavoritesPage(props) {
+  const [user, searchParams] = await Promise.all([
+    requireRole('member'),
+    props?.searchParams,
+  ]);
 
   const res = await query(`
     SELECT f.id as favorite_id, f.created_at as favorited_at,
@@ -31,6 +44,12 @@ export default async function MemberFavoritesPage() {
 
   return (
     <div>
+      <Breadcrumb
+        items={[
+          { label: 'Dashboard', href: '/dashboard/member' },
+          { label: 'Favorites' },
+        ]}
+      />
       <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">My Favorites</h1>
@@ -52,33 +71,55 @@ export default async function MemberFavoritesPage() {
         </div>
       ) : (
         <div className="masonry-grid">
-          {favorites.map((fav) => (
-            <article key={fav.favorite_id} className="project-card aspect-square">
-              <Link href={`/artworks/${fav.artwork_id}`} className="project-image-wrap">
-                <Image src={fav.image_url} alt={fav.title} fill className="project-image" sizes="300px" />
-              </Link>
-              <div className="card-editorial-body">
-                <div className="card-top-bar">
-                  <span className="card-tag-typology">{fav.category_name}</span>
-                  <span className="card-like-count">
-                    <Heart size={15} className="card-like-icon" />
-                    <span className="card-like-num">{fav.like_count}</span>
-                  </span>
-                </div>
-                <div className="card-bottom-info">
-                  <Link href={`/artworks/${fav.artwork_id}`}>
-                    <h3 className="card-title">{fav.title}</h3>
-                  </Link>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                    <Link href={`/artists/${fav.creator_id}`} className="card-author">
-                      by {fav.creator_name}
+          {favorites.map((fav) => {
+            const artworkHref = buildMemberDetailHref(`/artworks/${fav.artwork_id}`, 'favorites', searchParams);
+            const artistHref = buildMemberDetailHref(`/artists/${fav.creator_id}`, 'favorites', searchParams);
+
+            return (
+              <article key={fav.favorite_id} className="project-card aspect-square">
+                <Link
+                  href={artworkHref}
+                  className="project-image-wrap"
+                  aria-label={`View artwork: ${fav.title}`}
+                >
+                  <ArtworkImage
+                    src={fav.image_url}
+                    alt={fav.title}
+                    fill
+                    className="project-image"
+                    style={{ objectFit: 'cover' }}
+                    sizes="(max-width: 639px) 100vw, (max-width: 1079px) 50vw, 33vw"
+                  />
+                </Link>
+                <div className="card-editorial-body">
+                  <div className="card-top-bar">
+                    <span className="card-tag-typology">{fav.category_name}</span>
+                    <span
+                      className="card-favorite-badge"
+                      title={`Saved to favorites on ${formatSavedDate(fav.favorited_at)}`}
+                    >
+                      <Bookmark size={13} filled className="card-favorite-icon" />
+                      <span>Favorited</span>
+                    </span>
+                  </div>
+                  <div className="card-bottom-info">
+                    <Link href={artworkHref}>
+                      <h3 className="card-title">{fav.title}</h3>
                     </Link>
-                    <RemoveFavoriteButton artworkId={fav.artwork_id} />
+                    <span className="card-favorite-date">
+                      Saved {formatSavedDate(fav.favorited_at)}
+                    </span>
+                    <div className="card-favorite-footer">
+                      <Link href={artistHref} className="card-author">
+                        by {fav.creator_name}
+                      </Link>
+                      <RemoveFavoriteButton artworkId={fav.artwork_id} artworkTitle={fav.title} />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       )}
     </div>

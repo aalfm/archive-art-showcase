@@ -18,7 +18,7 @@ export default function CreateChallengeForm() {
   }, null);
 
   return (
-    <div className="dashboard-form-panel">
+    <div className="dashboard-form-panel curator-form-card">
       {state?.error && (
         <div className="form-alert form-alert-error" role="alert">
           {state.error}
@@ -32,6 +32,7 @@ export default function CreateChallengeForm() {
             currentImage={bannerUrl}
             onUpload={(url) => setBannerUrl(url)}
             name="banner_url"
+            label="challenge banner"
           />
         </div>
 
@@ -43,7 +44,7 @@ export default function CreateChallengeForm() {
               name="title"
               type="text"
               className="form-input"
-              placeholder="e.g., ARCHITECTURAL SPECULATIONS 2026"
+              placeholder="e.g., Architectural Speculations 2026"
               required
               minLength={3}
             />
@@ -100,7 +101,7 @@ export default function CreateChallengeForm() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="rules" className="form-label">Rules (One rule per line) *</label>
+            <label htmlFor="rules" className="form-label">Rules (One Rule Per Line) *</label>
             <textarea
               id="rules"
               name="rules"

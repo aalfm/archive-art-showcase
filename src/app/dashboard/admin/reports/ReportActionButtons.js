@@ -1,34 +1,26 @@
 'use client';
 
+import Link from 'next/link';
 import ConfirmActionButton from '@/components/ui/ConfirmActionButton';
-import ReportDetailsButton from './ReportDetailsButton';
 import { dismissReport, takeDownArtwork } from '@/lib/actions/admin.actions';
 
 export default function ReportActionButtons({
   reportId,
   artworkId,
   artworkTitle,
-  reporterName,
-  reason,
-  details,
-  createdAt,
 }) {
   return (
     <div className="moderation-actions-stack">
-      {reason === 'Other' && (
-        <ReportDetailsButton
-          reportId={reportId}
-          artworkId={artworkId}
-          artworkTitle={artworkTitle}
-          reporterName={reporterName}
-          reason={reason}
-          details={details}
-          createdAt={createdAt}
-        />
-      )}
+      <Link
+        href={`/dashboard/admin/reports/${reportId}`}
+        className="btn-secondary moderation-action-btn"
+        id={`btn-view-report-details-${reportId}`}
+      >
+        View details
+      </Link>
       <ConfirmActionButton
         label="Dismiss"
-        title="Dismiss Report"
+        title="Dismiss report"
         message={`Dismiss report for artwork "${artworkTitle}"? The artwork will remain visible in the public gallery.`}
         confirmLabel="Dismiss"
         danger={false}
@@ -38,10 +30,10 @@ export default function ReportActionButtons({
         onConfirm={() => dismissReport(reportId)}
       />
       <ConfirmActionButton
-        label="Take Down"
-        title="Take Down Artwork"
-        message={`WARNING: Take down artwork "${artworkTitle}"? This work will be removed from the public gallery.`}
-        confirmLabel="Yes, Take Down"
+        label="Take down"
+        title="Take down artwork"
+        message={`Take down artwork "${artworkTitle}"? This work will be removed from the public gallery.`}
+        confirmLabel="Yes, take down"
         buttonClass="btn-danger moderation-action-btn"
         buttonStyle={undefined}
         buttonTitle="Take down artwork"

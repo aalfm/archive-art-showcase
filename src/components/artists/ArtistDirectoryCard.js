@@ -3,18 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, UserRound } from '@/components/ui/Icons';
-
-function normalizeAvatarSrc(src) {
-  if (typeof src !== 'string') return '';
-  const trimmed = src.trim();
-  if (!trimmed) return '';
-  if (trimmed.startsWith('/')) return trimmed;
-  if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  return '';
-}
+import { resolveUserAvatarSrc } from '@/lib/avatar';
 
 export default function ArtistDirectoryCard({ artist }) {
-  const cleanSrc = normalizeAvatarSrc(artist?.profile_image);
+  const cleanSrc =
+    resolveUserAvatarSrc({
+      role: artist?.role || 'member',
+      profile_image: artist?.profile_image,
+    }) || '';
   const [failedSrc, setFailedSrc] = useState('');
   const hasImage = Boolean(cleanSrc) && failedSrc !== cleanSrc;
 
@@ -76,7 +72,7 @@ export default function ArtistDirectoryCard({ artist }) {
           </div>
 
           <span className="artist-dir-cta">
-            <span>View Profile</span>
+            <span>View profile</span>
             <ArrowRight size={14} strokeWidth={1.75} className="artist-dir-cta-arrow" />
           </span>
         </div>

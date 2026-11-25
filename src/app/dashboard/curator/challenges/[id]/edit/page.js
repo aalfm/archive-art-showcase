@@ -1,8 +1,10 @@
 import { notFound, redirect } from 'next/navigation';
+import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
 import EditChallengeForm from './EditChallengeForm';
-import { toId } from '@/lib/utils';
+import { formatEditorialTitle, toId } from '@/lib/utils';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,16 +25,32 @@ export default async function EditChallengePage(props) {
 
   const challenge = res.rows[0];
 
-  if (challenge.curator_id !== user.id && user.role !== 'admin') {
+  if (Number(challenge.curator_id) !== Number(user.id)) {
     redirect('/dashboard/curator/challenges');
   }
 
+  const title = formatEditorialTitle(challenge.title);
+
   return (
-    <div className="curator-overview-page">
-      <div className="dashboard-header curator-page-header">
+    <div className="admin-detail-page">
+      <Breadcrumb
+        items={[
+          { label: 'Dashboard', href: '/dashboard/curator' },
+          { label: 'My Challenges', href: '/dashboard/curator/challenges' },
+          { label: title, href: `/dashboard/curator/challenges/${challenge.id}` },
+          { label: 'Edit' },
+        ]}
+      />
+
+      <div className="dashboard-header admin-detail-header">
         <div>
-          <h1 className="curator-page-title">EDIT CHALLENGE</h1>
-          <p className="curator-page-subtitle">Update details for curatorial program &ldquo;{challenge.title}&rdquo;.</p>
+          <h1 className="dashboard-title">Edit Challenge</h1>
+          <p className="dashboard-subtitle">Update details for curatorial program &ldquo;{title}&rdquo;.</p>
+        </div>
+        <div className="admin-detail-header-actions">
+          <Link href={`/dashboard/curator/challenges/${challenge.id}`} className="btn-secondary">
+            ← Back to Details
+          </Link>
         </div>
       </div>
 

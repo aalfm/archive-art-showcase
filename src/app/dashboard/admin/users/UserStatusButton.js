@@ -12,7 +12,7 @@ export default function UserStatusButton({
 }) {
   if (userRole === 'admin' || userId === currentAdminId) {
     return (
-      <span style={{ fontSize: '0.74rem', color: 'var(--surface)', fontFamily: 'var(--font-mono)' }}>
+      <span className="table-cell-protected">
         Protected
       </span>
     );
@@ -22,12 +22,12 @@ export default function UserStatusButton({
     return (
       <ConfirmActionButton
         label="Deactivate"
-        title="Deactivate Account"
+        title="Deactivate account"
         message={`Deactivate "${userName}" (${userRole})? This user will no longer be able to sign in or access authenticated features, while all artworks and activity data will remain preserved.`}
-        confirmLabel="Deactivate Account"
+        confirmLabel="Deactivate account"
         danger={true}
-        buttonClass="btn-danger"
-        buttonStyle={{ padding: '5px 12px', fontSize: '0.74rem' }}
+        buttonClass="btn-danger table-action-btn"
+        buttonStyle={undefined}
         buttonTitle={`Deactivate ${userName}`}
         onConfirm={() => setUserActiveStatus(userId, false)}
       />
@@ -37,12 +37,12 @@ export default function UserStatusButton({
   return (
     <ConfirmActionButton
       label="Activate"
-      title="Activate Account"
+      title="Activate account"
       message={`Reactivate "${userName}" (${userRole})? This user will regain sign-in access with all existing data and history intact.`}
-      confirmLabel="Activate Account"
+      confirmLabel="Activate account"
       danger={false}
-      buttonClass="btn-secondary"
-      buttonStyle={{ padding: '5px 12px', fontSize: '0.74rem' }}
+      buttonClass="btn-secondary table-action-btn"
+      buttonStyle={undefined}
       buttonTitle={`Activate ${userName}`}
       onConfirm={() => setUserActiveStatus(userId, true)}
     />

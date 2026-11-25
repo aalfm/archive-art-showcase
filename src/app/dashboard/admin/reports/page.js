@@ -2,8 +2,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import ReportActionButtons from './ReportActionButtons';
-import ReportDetailsButton from './ReportDetailsButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +31,7 @@ export default async function AdminReportsPage() {
     query(`
       SELECT r.id as report_id, r.reason, r.details, r.status, r.created_at,
              a.id as artwork_id, COALESCE(a.title, 'Deleted Artwork') as artwork_title, a.image_url, a.status as artwork_status,
-             COALESCE(creator.name, '—') as creator_name,
+             creator.id as creator_id, COALESCE(creator.name, '—') as creator_name,
              COALESCE(reporter.name, 'Deleted User') as reporter_name
       FROM reports r
       LEFT JOIN artworks a ON r.artwork_id = a.id
@@ -54,6 +54,12 @@ export default async function AdminReportsPage() {
 
   return (
     <div className="moderation-page">
+      <Breadcrumb
+        items={[
+          { label: 'Dashboard', href: '/dashboard/admin' },
+          { label: 'Content Moderation' },
+        ]}
+      />
       <div className="dashboard-header moderation-page-header">
         <div>
           <h1 className="dashboard-title">Content Moderation</h1>
@@ -73,7 +79,7 @@ export default async function AdminReportsPage() {
           </div>
         ) : (
           <div className="data-table-wrap moderation-table-wrap">
-            <table className="data-table moderation-table moderation-pending-table">
+            <table className="data-table dashboard-responsive-table moderation-table moderation-pending-table">
               <colgroup>
                 <col className="col-thumb" />
                 <col className="col-title" />
@@ -99,33 +105,37 @@ export default async function AdminReportsPage() {
                   const totalReports = parseInt(r.total_artwork_reports, 10) || 1;
                   return (
                     <tr key={r.report_id}>
-                      <td>
-                        <Link href={`/artworks/${r.artwork_id}`} target="_blank" className="moderation-thumb-link">
+                      <td data-label="Artwork" data-cell="thumb">
+                        <Link href={`/dashboard/admin/reports/${r.report_id}`} className="moderation-thumb-link">
                           <div className="moderation-thumb">
                             <Image src={r.image_url} alt={r.artwork_title} fill style={{ objectFit: 'cover' }} sizes="88px" />
                           </div>
                         </Link>
                       </td>
-                      <td>
-                        <Link href={`/artworks/${r.artwork_id}`} target="_blank" className="moderation-artwork-link">
-                          {r.artwork_title} ↗
+                      <td data-label="Artwork title" data-cell="primary">
+                        <Link href={`/dashboard/admin/reports/${r.report_id}`} className="moderation-artwork-link dashboard-table-link">
+                          {r.artwork_title}
                         </Link>
                       </td>
-                      <td>
-                        <Link href={`/artists/${r.creator_id}`} target="_blank" className="moderation-creator-link dashboard-user-link">
-                          {r.creator_name}
-                        </Link>
+                      <td data-label="Creator">
+                        {r.creator_id ? (
+                          <Link href={`/dashboard/admin/users/${r.creator_id}`} className="moderation-creator-link dashboard-user-link">
+                            {r.creator_name}
+                          </Link>
+                        ) : (
+                          <span className="moderation-creator-text">{r.creator_name}</span>
+                        )}
                       </td>
-                      <td className="moderation-muted-cell">{r.reporter_name}</td>
-                      <td>
+                      <td data-label="Reporter" className="moderation-muted-cell">{r.reporter_name}</td>
+                      <td data-label="Report reason">
                         <span className="badge badge-neutral moderation-badge">{r.reason}</span>
                       </td>
-                      <td className="moderation-total-cell">
+                      <td data-label="Total reports" className="moderation-total-cell">
                         <span className={totalReports > 1 ? 'moderation-count-highlight' : ''}>
                           {totalReports} {totalReports === 1 ? 'report' : 'reports'}
                         </span>
                       </td>
-                      <td>
+                      <td data-label="Moderation actions" data-cell="actions">
                         <ReportActionButtons
                           reportId={r.report_id}
                           artworkId={r.artwork_id}
@@ -152,7 +162,7 @@ export default async function AdminReportsPage() {
         </h2>
 
         <div className="data-table-wrap moderation-table-wrap">
-          <table className="data-table moderation-table moderation-history-table">
+          <table className="data-table dashboard-responsive-table moderation-table moderation-history-table">
             <colgroup>
               <col className="col-history-artwork" />
               <col className="col-history-creator" />
@@ -174,43 +184,50 @@ export default async function AdminReportsPage() {
             <tbody>
               {historyReports.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="moderation-history-empty">
+                  <td colSpan={6} className="moderation-history-empty data-table-empty-cell">
                     No moderation history yet.
                   </td>
                 </tr>
               ) : (
                 historyReports.map((r) => (
                   <tr key={r.report_id}>
-                    <td className="moderation-artwork-title-text">{r.artwork_title}</td>
-                    <td className="moderation-creator-text">{r.creator_name}</td>
-                    <td>
+                    <td data-label="Artwork" data-cell="primary">
+                      <Link href={`/dashboard/admin/reports/${r.report_id}`} className="moderation-artwork-link dashboard-table-link">
+                        {r.artwork_title}
+                      </Link>
+                    </td>
+                    <td data-label="Creator">
+                      {r.creator_id ? (
+                        <Link href={`/dashboard/admin/users/${r.creator_id}`} className="moderation-creator-link dashboard-user-link">
+                          {r.creator_name}
+                        </Link>
+                      ) : (
+                        <span className="moderation-creator-text">{r.creator_name}</span>
+                      )}
+                    </td>
+                    <td data-label="Reason">
                       <span className="badge badge-neutral moderation-badge">
                         {r.reason}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Decision / status">
                       <span className={`badge moderation-badge ${r.status === 'taken_down' ? 'badge-rejected' : 'badge-approved'}`}>
-                        {r.status === 'taken_down' ? 'Artwork Taken Down' : 'Report Dismissed'}
+                        {r.status === 'taken_down' ? 'Artwork taken down' : 'Report dismissed'}
                       </span>
                     </td>
-                    <td className="moderation-date-cell">
+                    <td data-label="Reported at" className="moderation-date-cell">
                       {new Date(r.created_at).toLocaleDateString('en-US')}
                     </td>
-                    <td>
-                      {r.reason === 'Other' ? (
-                        <ReportDetailsButton
-                          reportId={r.report_id}
-                          artworkId={r.artwork_id}
-                          artworkTitle={r.artwork_title}
-                          reporterName={r.reporter_name}
-                          reason={r.reason}
-                          details={r.details}
-                          createdAt={r.created_at}
-                          buttonStyle={{ minWidth: 104 }}
-                        />
-                      ) : (
-                        <span className="moderation-muted-dash">—</span>
-                      )}
+                    <td data-label="Details" data-cell="actions">
+                      <div className="table-actions-group">
+                        <Link
+                          href={`/dashboard/admin/reports/${r.report_id}`}
+                          className="btn-secondary moderation-action-btn"
+                          id={`btn-history-view-report-${r.report_id}`}
+                        >
+                          View Details
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))

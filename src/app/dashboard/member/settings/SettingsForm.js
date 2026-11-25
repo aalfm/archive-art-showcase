@@ -14,7 +14,7 @@ export default function SettingsForm() {
   }, null);
 
   return (
-    <div style={{ maxWidth: 540 }}>
+    <div className="member-settings-form-wrap">
       {state?.error && (
         <div className="form-alert form-alert-error" role="alert">
           {state.error}
@@ -26,7 +26,7 @@ export default function SettingsForm() {
         </div>
       )}
 
-      <form ref={formRef} action={formAction} className="dashboard-form">
+      <form ref={formRef} action={formAction} className="dashboard-form member-profile-form">
         <div className="form-group">
           <label htmlFor="current_password" className="form-label">Current Password *</label>
           <input
@@ -50,8 +50,8 @@ export default function SettingsForm() {
             minLength={8}
             autoComplete="new-password"
           />
-          <span style={{ fontSize: '0.74rem', color: 'var(--surface)', fontFamily: 'var(--font-mono)' }}>
-            Minimum 8 characters
+          <span className="member-field-hint">
+            Minimum 8 characters.
           </span>
         </div>
 
@@ -68,14 +68,15 @@ export default function SettingsForm() {
           />
         </div>
 
-        <button
-          type="submit"
-          className="btn-primary"
-          disabled={isPending}
-          style={{ width: '100%', marginTop: 12 }}
-        >
-          {isPending ? 'Updating Password...' : 'Change Password'}
-        </button>
+        <div className="dashboard-form-actions">
+          <button
+            type="submit"
+            className="btn-primary dashboard-submit-btn"
+            disabled={isPending}
+          >
+            {isPending ? 'Updating Password...' : 'Change Password'}
+          </button>
+        </div>
       </form>
     </div>
   );

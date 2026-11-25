@@ -3,6 +3,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { query } from '@/lib/db';
 import { getSession } from '@/lib/auth';
+import { resolveUserAvatarSrc } from '@/lib/avatar';
+import { resolveRoleReturnContext } from '@/lib/member-navigation';
+import UserAvatar from '@/components/ui/UserAvatar';
+import DetailContextBar from '@/components/ui/DetailContextBar';
 import ArtworkInteractions from './ArtworkInteractions';
 import { toId } from '@/lib/utils';
 
@@ -11,9 +15,11 @@ export const dynamic = 'force-dynamic';
 async function getArtwork(id) {
   const artworkRes = await query(`
     SELECT a.id, a.title, a.description, a.image_url, a.tags, a.like_count, a.status, a.created_at,
-           c.name as category_name,
+           c.id as category_id, c.name as category_name,
            u.id as creator_id, u.name as creator_name, u.bio as creator_bio,
-           u.profile_image as creator_image, u.external_link as creator_link
+           u.role as creator_role,
+           CASE WHEN LOWER(u.role) = 'member' THEN u.profile_image ELSE NULL END as creator_image,
+           u.external_link as creator_link
     FROM artworks a
     LEFT JOIN categories c ON a.category_id = c.id
     LEFT JOIN users u ON a.user_id = u.id
@@ -26,7 +32,8 @@ async function getArtwork(id) {
   const [commentsRes, otherWorksRes] = await Promise.all([
     query(`
       SELECT c.id, c.content, c.created_at,
-             u.id as user_id, u.name as user_name, u.profile_image as user_image
+             u.id as user_id, u.name as user_name, u.role as user_role,
+             CASE WHEN LOWER(u.role) = 'member' THEN u.profile_image ELSE NULL END as user_image
       FROM comments c
       LEFT JOIN users u ON c.user_id = u.id
       WHERE c.artwork_id = $1
@@ -45,9 +52,26 @@ async function getArtwork(id) {
     `, [id]),
   ]);
 
+  const rawArtwork = artworkRes.rows[0];
+  const artwork = {
+    ...rawArtwork,
+    creator_image: resolveUserAvatarSrc({
+      role: rawArtwork.creator_role,
+      profile_image: rawArtwork.creator_image,
+    }),
+  };
+
+  const comments = commentsRes.rows.map((comment) => ({
+    ...comment,
+    user_image: resolveUserAvatarSrc({
+      role: comment.user_role,
+      profile_image: comment.user_image,
+    }),
+  }));
+
   return {
-    artwork: artworkRes.rows[0],
-    comments: commentsRes.rows,
+    artwork,
+    comments,
     otherWorks: otherWorksRes.rows,
   };
 }
@@ -64,7 +88,10 @@ export async function generateMetadata(props) {
 }
 
 export default async function ArtworkDetailPage(props) {
-  const params = await props.params;
+  const [params, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
   if (!toId(params.id)) notFound();
   const [data, session] = await Promise.all([
     getArtwork(params.id),
@@ -75,13 +102,17 @@ export default async function ArtworkDetailPage(props) {
 
   const { artwork, comments, otherWorks } = data;
   const user = session?.user || null;
+  const memberContext = resolveRoleReturnContext(searchParams, user);
+  const withContext = (href) => (memberContext ? memberContext.appendContext(href) : href);
 
   const isAdmin = user?.role === 'admin';
+  const isCurator = user?.role === 'curator';
+  const isMember = user?.role === 'member';
   let userLiked = false;
   let userFavorited = false;
   let userReported = false;
 
-  if (user && !isAdmin) {
+  if (isMember) {
     const [likeRes, favRes, repRes] = await Promise.all([
       query('SELECT id FROM artwork_likes WHERE user_id=$1 AND artwork_id=$2', [user.id, artwork.id]),
       query('SELECT id FROM favorites WHERE user_id=$1 AND artwork_id=$2', [user.id, artwork.id]),
@@ -97,15 +128,29 @@ export default async function ArtworkDetailPage(props) {
     day: 'numeric', month: 'long', year: 'numeric'
   });
 
+  const breadcrumbItems = memberContext
+    ? memberContext.buildBreadcrumbs(artwork.title)
+    : [
+        { label: 'Home', href: '/' },
+        { label: 'Explore', href: '/explore' },
+        ...(artwork.category_name
+          ? [
+              {
+                label: artwork.category_name,
+                href: artwork.category_id ? `/explore?category=${artwork.category_id}` : '/explore',
+              },
+            ]
+          : []),
+        { label: artwork.title },
+      ];
+
   return (
     <div className="artwork-detail-page">
-      <div className="detail-breadcrumb">
-        <Link href="/explore">Explore</Link>
-        <span>›</span>
-        <span>{artwork.category_name}</span>
-        <span>›</span>
-        <span className="detail-breadcrumb-current">{artwork.title}</span>
-      </div>
+      <DetailContextBar
+        breadcrumbItems={breadcrumbItems}
+        returnHref={memberContext?.returnHref}
+        backLabel={memberContext?.backLabel}
+      />
 
       <div className="artwork-detail-layout">
         <div className="artwork-detail-image-col">
@@ -113,9 +158,10 @@ export default async function ArtworkDetailPage(props) {
             <Image
               src={artwork.image_url}
               alt={artwork.title}
-              fill
+              width={0}
+              height={0}
               className="artwork-detail-image"
-              sizes="(max-width: 768px) 100vw, 60vw"
+              sizes="(max-width: 900px) 100vw, 58vw"
               priority
             />
           </div>
@@ -129,14 +175,14 @@ export default async function ArtworkDetailPage(props) {
             <h1 className="artwork-detail-title">{artwork.title}</h1>
           </div>
 
-          <Link href={`/artists/${artwork.creator_id}`} className="artwork-creator-link">
-            <div className="artwork-creator-avatar">
-              {artwork.creator_image ? (
-                <Image src={artwork.creator_image} alt={artwork.creator_name} fill style={{ objectFit: 'cover', borderRadius: '50%' }} sizes="40px" />
-              ) : (
-                artwork.creator_name?.charAt(0).toUpperCase()
-              )}
-            </div>
+          <Link href={withContext(`/artists/${artwork.creator_id}`)} className="artwork-creator-link">
+            <UserAvatar
+              src={artwork.creator_image}
+              role={artwork.creator_role}
+              name={artwork.creator_name || 'Artist'}
+              size={38}
+              className="artwork-creator-avatar"
+            />
             <div>
               <span className="artwork-creator-name">{artwork.creator_name}</span>
               <span className="artwork-creator-label">Artist</span>
@@ -151,6 +197,7 @@ export default async function ArtworkDetailPage(props) {
             userReported={userReported}
             isLoggedIn={!!user}
             isAdmin={isAdmin}
+            isCurator={isCurator}
             isOwner={user?.id === artwork.creator_id}
           />
 
@@ -173,9 +220,9 @@ export default async function ArtworkDetailPage(props) {
         </div>
       </div>
 
-      <div className="artwork-comments-section">
-        <div className="showcase-container" style={{ maxWidth: '900px' }}>
-          <h2 className="showcase-heading" style={{ fontSize: '1.25rem' }}>
+      <section className="artwork-comments-section" aria-labelledby="artwork-comments-heading">
+        <div className="artwork-comments-container">
+          <h2 id="artwork-comments-heading" className="showcase-heading artwork-comments-heading">
             Comments ({comments.length})
           </h2>
 
@@ -183,12 +230,13 @@ export default async function ArtworkDetailPage(props) {
             artworkId={artwork.id}
             comments={comments}
             isLoggedIn={!!user}
-            isAdmin={user?.role === 'admin'}
+            isAdmin={isAdmin}
+            isCurator={isCurator}
             userId={user?.id}
             showComments
           />
         </div>
-      </div>
+      </section>
 
       {otherWorks.length > 0 && (
         <div className="artwork-other-works">
@@ -197,20 +245,23 @@ export default async function ArtworkDetailPage(props) {
               More from {artwork.creator_name}
             </h2>
             <div className="masonry-grid" style={{ marginTop: '1.5rem' }}>
-              {otherWorks.map((w) => (
-                <article key={w.id} className="project-card aspect-wide">
-                  <Link href={`/artworks/${w.id}`} className="project-image-wrap">
-                    <Image src={w.image_url} alt={w.title} fill className="project-image" sizes="300px" />
-                  </Link>
-                  <div className="card-editorial-body">
-                    <div className="card-bottom-info">
-                      <Link href={`/artworks/${w.id}`}>
-                        <h3 className="card-title">{w.title}</h3>
-                      </Link>
+              {otherWorks.map((w) => {
+                const otherWorkHref = withContext(`/artworks/${w.id}`);
+                return (
+                  <article key={w.id} className="project-card aspect-wide">
+                    <Link href={otherWorkHref} className="project-image-wrap">
+                      <Image src={w.image_url} alt={w.title} fill className="project-image" sizes="300px" />
+                    </Link>
+                    <div className="card-editorial-body">
+                      <div className="card-bottom-info">
+                        <Link href={otherWorkHref}>
+                          <h3 className="card-title">{w.title}</h3>
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           </div>
         </div>

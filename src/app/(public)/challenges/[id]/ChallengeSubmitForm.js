@@ -17,16 +17,26 @@ export default function ChallengeSubmitForm({ challengeId, memberArtworks, userS
   if (userSubmission) {
     return (
       <div className="challenge-sidebar-card">
-        <h3 className="challenge-sidebar-title">YOUR SUBMISSION</h3>
-        <div className="form-alert form-alert-success">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-          Your artwork has been submitted!
+        <h3 className="challenge-sidebar-title">Your Submission</h3>
+        <div className="challenge-submit-success" role="status">
+          <span className="challenge-submit-success-icon" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+          <div className="challenge-submit-success-body">
+            <span className="challenge-submit-success-title">Successfully Submitted</span>
+            <span className="challenge-submit-success-text">
+              Your artwork has been entered into this challenge.
+            </span>
+          </div>
         </div>
         <form action={async () => { await withdrawSubmission(userSubmission.id); }}>
-          <button type="submit" className="btn-secondary" style={{ width: '100%', marginTop: 12 }}
-            id="btn-withdraw-submission">
+          <button
+            type="submit"
+            className="btn-secondary challenge-sidebar-cta challenge-sidebar-cta--spaced"
+            id="btn-withdraw-submission"
+          >
             Withdraw Submission
           </button>
         </form>
@@ -37,11 +47,11 @@ export default function ChallengeSubmitForm({ challengeId, memberArtworks, userS
   if (memberArtworks.length === 0) {
     return (
       <div className="challenge-sidebar-card">
-        <h3 className="challenge-sidebar-title">JOIN CHALLENGE</h3>
-        <p style={{ color: 'var(--surface)', fontSize: '0.88rem', marginBottom: 12 }}>
+        <h3 className="challenge-sidebar-title">Join Challenge</h3>
+        <p className="challenge-sidebar-note challenge-sidebar-note--spaced">
           You don&apos;t have any artworks yet. Upload an artwork first to join this challenge.
         </p>
-        <a href="/dashboard/member/artworks/create" className="btn-primary" style={{ display: 'block', textAlign: 'center' }}>
+        <a href="/dashboard/member/artworks/create" className="btn-primary challenge-sidebar-cta">
           Upload Artwork
         </a>
       </div>
@@ -50,7 +60,7 @@ export default function ChallengeSubmitForm({ challengeId, memberArtworks, userS
 
   return (
     <div className="challenge-sidebar-card">
-      <h3 className="challenge-sidebar-title">SUBMIT ARTWORK</h3>
+      <h3 className="challenge-sidebar-title">Join Challenge</h3>
 
       {submitState?.error && (
         <div className="form-alert form-alert-error" role="alert" style={{ marginBottom: 12 }}>
@@ -89,8 +99,7 @@ export default function ChallengeSubmitForm({ challengeId, memberArtworks, userS
         </div>
         <button
           type="submit"
-          className="btn-primary"
-          style={{ width: '100%' }}
+          className="btn-primary challenge-sidebar-cta"
           disabled={submitPending}
           id="btn-submit-challenge"
         >

@@ -13,6 +13,7 @@ export default function ArtworkGallery({
   artworks = [],
   latestArtworks = [],
   categories = [],
+  userRole = null,
 }) {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [catOpen, setCatOpen] = useState(false);
@@ -372,9 +373,11 @@ export default function ArtworkGallery({
               >
                 Show All Categories
               </button>
-              <Link href="/dashboard/member/artworks/create" className="btn-editorial-solid">
-                Submit Artwork
-              </Link>
+              {userRole !== 'curator' && userRole !== 'admin' && (
+                <Link href="/dashboard/member/artworks/create" className="btn-editorial-solid">
+                  Submit Artwork
+                </Link>
+              )}
             </div>
           </div>
         ) : (
@@ -497,7 +500,7 @@ export default function ArtworkGallery({
                   aria-label="Previous artwork"
                   id="btn-gallery-prev"
                 >
-                  Prev<ArrowLeft size={16} strokeWidth={1.75} />
+                  Prev
                 </button>
 
                 {filtered.length > 1 && (
@@ -526,7 +529,7 @@ export default function ArtworkGallery({
                   aria-label="Next artwork"
                   id="btn-gallery-next"
                 >
-                  Next <ArrowRight size={16} strokeWidth={1.75} />
+                  Next
                 </button>
               </div>
 

@@ -1,5 +1,6 @@
 import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import CategoryManager from './CategoryManager';
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +22,12 @@ export default async function AdminCategoriesPage() {
 
   return (
     <div>
+      <Breadcrumb
+        items={[
+          { label: 'Dashboard', href: '/dashboard/admin' },
+          { label: 'Categories' },
+        ]}
+      />
       <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Category Management</h1>

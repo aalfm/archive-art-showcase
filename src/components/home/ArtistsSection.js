@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Folder from '@/components/ui/Folder';
 import { UserRound } from '@/components/ui/Icons';
+import { resolveUserAvatarSrc } from '@/lib/avatar';
 
 const CREAM_FOLDER_VARS = {
   '--folder-base': '#F2EEE6',
@@ -33,8 +34,8 @@ function normalizeImageSrc(src) {
   return trimmed;
 }
 
-function ArtistCoverAvatar({ src, name }) {
-  const cleanSrc = normalizeImageSrc(src);
+function ArtistCoverAvatar({ src, role = 'member', name }) {
+  const cleanSrc = resolveUserAvatarSrc({ role, profile_image: src }) || '';
   const [failedSrc, setFailedSrc] = useState('');
   const hasImage = Boolean(cleanSrc) && failedSrc !== cleanSrc;
 
@@ -101,7 +102,11 @@ function ArtistFolderCover({ artist }) {
       </div>
 
       <div className="artist-cover-body">
-        <ArtistCoverAvatar src={artist.profile_image} name={artist.name} />
+        <ArtistCoverAvatar
+          src={artist.profile_image}
+          role={artist.role || 'member'}
+          name={artist.name}
+        />
 
         <div className="artist-cover-info">
           <span className="artist-cover-spec">{specialization}</span>
@@ -121,7 +126,7 @@ function GalleryPreviewImage({ src, alt }) {
   if (!showImage) {
     return (
       <div className="artist-dossier-work-fallback" aria-hidden="true">
-        <span>Preview Unavailable</span>
+        <span>Preview unavailable</span>
       </div>
     );
   }

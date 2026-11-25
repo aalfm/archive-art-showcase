@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toggleLike, toggleFavorite, reportArtwork, addComment, deleteComment } from '@/lib/actions/artwork.actions';
 import FilterDropdown from '@/components/ui/FilterDropdown';
 import UserAvatar from '@/components/ui/UserAvatar';
+import { formatRoleLabel } from '@/lib/utils';
 
 const REPORT_REASON_OPTIONS = [
   { value: 'SARA', label: 'Hate Speech / Discrimination' },
@@ -18,7 +19,7 @@ const MAX_REPORT_DETAILS = 500;
 export default function ArtworkInteractions({
   artworkId, likeCount = 0, userLiked = false, userFavorited = false,
   userReported = false, isLoggedIn = false, isOwner = false, isAdmin = false,
-  comments = [], userId, showComments = false,
+  isCurator = false, comments = [], userId, showComments = false,
 }) {
   const router = useRouter();
   const commentFormRef = useRef(null);
@@ -39,7 +40,7 @@ export default function ArtworkInteractions({
   const loginRedirectUrl = `/login?redirect=${encodeURIComponent(`/artworks/${artworkId}`)}`;
 
   const handleLike = async () => {
-    if (isAdmin) return;
+    if (isAdmin || isCurator) return;
     if (!isLoggedIn) { router.push(loginRedirectUrl); return; }
     if (loading.like) return;
     setLoading(l => ({ ...l, like: true }));
@@ -53,7 +54,7 @@ export default function ArtworkInteractions({
   };
 
   const handleFavorite = async () => {
-    if (isAdmin) return;
+    if (isAdmin || isCurator) return;
     if (!isLoggedIn) { router.push(loginRedirectUrl); return; }
     if (loading.fav) return;
     setLoading(l => ({ ...l, fav: true }));
@@ -90,6 +91,10 @@ export default function ArtworkInteractions({
           <div className="comment-guest-notice">
             <p>Administrator accounts can moderate comments below but cannot post comments.</p>
           </div>
+        ) : isCurator ? (
+          <div className="comment-guest-notice">
+            <p>Curator accounts browse in read-only mode and cannot post comments.</p>
+          </div>
         ) : isLoggedIn ? (
           <form ref={commentFormRef} action={commentAction} className="comment-form">
             <input type="hidden" name="artwork_id" value={artworkId} />
@@ -121,7 +126,7 @@ export default function ArtworkInteractions({
         ) : (
           <div className="comment-guest-notice">
             <p>
-              <a href={loginRedirectUrl} className="comment-guest-link">Sign In</a> to leave a comment.
+              <a href={loginRedirectUrl} className="comment-guest-link">Sign in</a> to leave a comment.
             </p>
           </div>
         )}
@@ -136,6 +141,7 @@ export default function ArtworkInteractions({
               <div key={comment.id} className="comment-item">
                 <UserAvatar
                   src={comment.user_image}
+                  role={comment.user_role}
                   name={comment.user_name || 'User'}
                   size={38}
                   className="comment-avatar"
@@ -145,13 +151,13 @@ export default function ArtworkInteractions({
                     <div className="comment-author-meta">
                       <span className="comment-author">{comment.user_name || 'User'}</span>
                       {comment.user_role && (
-                        <span className="comment-role-tag">{comment.user_role}</span>
+                        <span className="comment-role-tag">{formatRoleLabel(comment.user_role)}</span>
                       )}
                       <span className="comment-date">
                         {new Date(comment.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
                     </div>
-                    {(userId === comment.user_id || isAdmin) && (
+                    {((!isCurator && userId === comment.user_id) || isAdmin) && (
                       <form action={async () => { await deleteComment(comment.id, artworkId); }}>
                         <button type="submit" className="comment-delete-btn" aria-label="Delete comment">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -172,8 +178,8 @@ export default function ArtworkInteractions({
     );
   }
 
-  // Admin view: read-only like count, no member social interactions (like, favorite, report)
-  if (isAdmin) {
+  // Admin & Curator views: read-only like count, no member social interactions (like, favorite, report)
+  if (isAdmin || isCurator) {
     return (
       <div className="artwork-interactions">
         <div className="interaction-buttons">
@@ -187,7 +193,7 @@ export default function ArtworkInteractions({
             <span>{likeCountState}</span>
           </span>
           <span className="interaction-admin-note">
-            View &amp; moderation access only
+            {isAdmin ? 'View & moderation access only' : 'Read-only browsing mode'}
           </span>
         </div>
       </div>

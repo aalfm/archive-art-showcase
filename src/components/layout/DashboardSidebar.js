@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { logoutUser } from '@/lib/actions/auth.actions';
+import { formatCuratorStatusLabel, formatRoleLabel } from '@/lib/utils';
 import UserAvatar from '@/components/ui/UserAvatar';
 import { Menu, X } from '@/components/ui/Icons';
 
@@ -41,8 +42,7 @@ export default function DashboardSidebar({ user, isInactive = false }) {
 
   const curatorLinks = [
     { href: '/dashboard/curator', label: 'Overview', icon: 'grid' },
-    { href: '/dashboard/curator/challenges', label: 'Challenges', icon: 'award' },
-    { href: '/dashboard/curator/challenges/create', label: 'Create Challenge', icon: 'plus-square' },
+    { href: '/dashboard/curator/challenges', label: 'My Challenges', icon: 'award' },
   ];
 
   const pendingCuratorLinks = [
@@ -53,6 +53,7 @@ export default function DashboardSidebar({ user, isInactive = false }) {
     { href: '/dashboard/admin', label: 'Overview', icon: 'grid' },
     { href: '/dashboard/admin/users', label: 'User Management', icon: 'users' },
     { href: '/dashboard/admin/curators', label: 'Curator Verification', icon: 'shield' },
+    { href: '/dashboard/admin/challenges', label: 'Challenges', icon: 'award' },
     { href: '/dashboard/admin/categories', label: 'Categories', icon: 'tag' },
     { href: '/dashboard/admin/reports', label: 'Content Moderation', icon: 'flag' },
   ];
@@ -93,11 +94,25 @@ export default function DashboardSidebar({ user, isInactive = false }) {
     flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line>',
   };
 
+  const isAdmin = user.role === 'admin';
+  const isCurator = user.role === 'curator';
+  const isDashboardOnly = isAdmin;
+  const brandHref = isAdmin
+    ? '/dashboard/admin'
+    : isCurator
+      ? (user.curator_status === 'approved' ? '/dashboard/curator' : '/dashboard/curator/pending')
+      : '/';
+  const brandAriaLabel = isAdmin
+    ? 'ARCHIVE Admin Dashboard'
+    : isCurator
+      ? 'ARCHIVE Curator Dashboard'
+      : 'ARCHIVE Home';
+
   return (
     <>
       {/* Mobile & Tablet Topbar */}
       <header className="dashboard-mobile-topbar">
-        <Link href="/" className="dashboard-topbar-brand" aria-label="ARCHIVE Home">
+        <Link href={brandHref} className="dashboard-topbar-brand" aria-label={brandAriaLabel}>
           <Image
             src="/logo/Logo_archive_white.svg"
             alt="ARCHIVE"
@@ -127,9 +142,9 @@ export default function DashboardSidebar({ user, isInactive = false }) {
       >
         <div className="dashboard-drawer-head">
           <Link
-            href="/"
+            href={brandHref}
             className="dashboard-topbar-brand"
-            aria-label="ARCHIVE Home"
+            aria-label={brandAriaLabel}
             onClick={() => setDrawerOpen(false)}
           >
             <Image
@@ -155,6 +170,7 @@ export default function DashboardSidebar({ user, isInactive = false }) {
         <div className="sidebar-user">
           <UserAvatar
             src={user.profile_image}
+            role={user.role}
             name={user.name}
             size={42}
             className="sidebar-avatar"
@@ -163,10 +179,10 @@ export default function DashboardSidebar({ user, isInactive = false }) {
             <span className="sidebar-user-name">{user.name}</span>
             <span className={`sidebar-user-role${isInactive ? ' is-inactive' : ''}`}>
               {isInactive
-                ? `${user.role} · inactive`
+                ? `${formatRoleLabel(user.role)} · Inactive`
                 : user.role === 'curator' && user.curator_status
-                  ? `${user.role} · ${user.curator_status}`
-                  : user.role}
+                  ? `${formatRoleLabel(user.role)} · ${formatCuratorStatusLabel(user.curator_status)}`
+                  : formatRoleLabel(user.role)}
             </span>
           </div>
         </div>
@@ -192,15 +208,17 @@ export default function DashboardSidebar({ user, isInactive = false }) {
 
         <div className="sidebar-divider" style={{ marginTop: 'auto' }}></div>
 
-        {/* Back to site + logout */}
+        {/* Explore / Back to site (non-admin) + logout */}
         <div className="sidebar-footer">
-          <Link href="/" className="sidebar-nav-item" onClick={() => setDrawerOpen(false)}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-              <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            <span>Back to Site</span>
-          </Link>
+          {!isDashboardOnly && (
+            <Link href="/" className="sidebar-nav-item" onClick={() => setDrawerOpen(false)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              <span>{isCurator ? 'Explore Site' : 'Back to Site'}</span>
+            </Link>
+          )}
           <form action={logoutUser}>
             <button type="submit" className="sidebar-nav-item sidebar-logout" style={{ width: '100%', textAlign: 'left' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -12,7 +12,8 @@ export default function EditChallengeForm({ challenge }) {
   const [state, formAction, isPending] = useActionState(async (prevState, formData) => {
     const res = await updateChallenge(prevState, formData);
     if (res?.success) {
-      router.push('/dashboard/curator/challenges');
+      router.push(`/dashboard/curator/challenges/${challenge.id}`);
+      router.refresh();
     }
     return res;
   }, null);
@@ -26,7 +27,7 @@ export default function EditChallengeForm({ challenge }) {
   };
 
   return (
-    <div className="dashboard-form-panel">
+    <div className="dashboard-form-panel curator-form-card">
       {state?.error && (
         <div className="form-alert form-alert-error" role="alert">
           {state.error}
@@ -42,6 +43,7 @@ export default function EditChallengeForm({ challenge }) {
             currentImage={bannerUrl}
             onUpload={(url) => setBannerUrl(url)}
             name="banner_url"
+            label="challenge banner"
           />
         </div>
 
@@ -112,7 +114,7 @@ export default function EditChallengeForm({ challenge }) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="rules" className="form-label">Rules (One rule per line) *</label>
+            <label htmlFor="rules" className="form-label">Rules (One Rule Per Line) *</label>
             <textarea
               id="rules"
               name="rules"

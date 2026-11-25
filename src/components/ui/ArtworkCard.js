@@ -12,8 +12,10 @@ export default function ArtworkCard({
   priority = false,
   isLoggedIn = false,
   isAdmin = false,
+  isReadOnly = false,
   initialLiked = false,
 }) {
+  const readOnly = isAdmin || isReadOnly;
   const {
     id,
     title,
@@ -40,7 +42,7 @@ export default function ArtworkCard({
     e.preventDefault();
     e.stopPropagation();
 
-    if (isAdmin) return;
+    if (readOnly) return;
     if (!isLoggedIn) {
       router.push('/login?redirect=%2Fexplore');
       return;
@@ -87,11 +89,10 @@ export default function ArtworkCard({
             <span className="card-tag-typology">{category_name}</span>
           )}
           <div className="card-actions-top">
-            {isAdmin ? (
+            {readOnly ? (
               <span
                 className="card-like-count"
                 aria-label={`${count} likes`}
-                title="Likes (view only for Admin)"
               >
                 <Heart size={15} filled={false} className="card-like-icon" />
                 <span className="card-like-num">{count}</span>

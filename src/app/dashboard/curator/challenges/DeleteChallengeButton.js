@@ -7,10 +7,10 @@ export default function DeleteChallengeButton({ challengeId, challengeTitle }) {
   return (
     <ConfirmActionButton
       label="Delete"
-      title="Delete Challenge"
+      title="Delete challenge"
       message={`Delete challenge "${challengeTitle}" along with all its submissions? This action cannot be undone.`}
-      confirmLabel="Delete Challenge"
-      buttonClass="btn-secondary curator-table-btn curator-delete-btn"
+      confirmLabel="Delete challenge"
+      buttonClass="btn-secondary table-action-btn curator-delete-btn"
       buttonStyle={{}}
       onConfirm={() => deleteChallenge(challengeId)}
     />

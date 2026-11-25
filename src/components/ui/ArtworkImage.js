@@ -48,7 +48,7 @@ function ArtworkImageInner({ src, alt, fill, className, sizes, priority, style }
     );
   }
 
-  const isExternal = /^https?:\/\//i.test(src);
+  const shouldSkipOptimization = /^https?:\/\//i.test(src) || src.startsWith('/uploads/');
 
   return (
     <Image
@@ -59,7 +59,7 @@ function ArtworkImageInner({ src, alt, fill, className, sizes, priority, style }
       sizes={sizes}
       priority={priority}
       style={style}
-      unoptimized={isExternal}
+      unoptimized={shouldSkipOptimization}
       onError={() => setFailed(true)}
     />
   );
