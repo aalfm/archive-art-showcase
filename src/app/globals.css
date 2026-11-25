@@ -18283,3 +18283,23 @@ body,
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* ============================================================
+   30. AUTH LAYOUT VARIANT (MINIMALIST NAVBAR & FOOTER)
+   ============================================================ */
+
+.site-footer.site-footer--auth {
+  padding: 20px 0 16px;
+}
+
+.footer-top.footer-top--auth {
+  grid-template-columns: 1fr;
+}
+
+.footer-top.footer-top--auth .footer-brand {
+  max-width: 560px;
+}
+
+.site-footer.site-footer--auth .footer-divider {
+  margin: 14px 0 12px;
+}

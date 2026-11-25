@@ -10,9 +10,6 @@ const SECRET = new TextEncoder().encode(
 const SESSION_DURATION_DAYS = 7;
 const COOKIE_NAME = 'archive_session';
 
-/**
- * Create a session for a user and set the cookie
- */
 export async function createSession(userId) {
   const sessionId = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + SESSION_DURATION_DAYS * 24 * 60 * 60 * 1000);

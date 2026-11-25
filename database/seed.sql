@@ -1,9 +1,3 @@
--- ================================================================
--- ARCHIVE DATABASE SEED v3.0
--- PostgreSQL
---
--- Run AFTER database/schema.sql
---
 -- Demo accounts & statuses:
 --   admin@archive.com     / Admin@123    | admin   | Active   | -
 --   member@archive.com    / Member@123   | member  | Active   | -
@@ -16,20 +10,6 @@
 --   adrian@archive.com    / Curator@123  | curator | Active   | Approved
 --   clara@archive.com     / Curator@123  | curator | Active   | Rejected
 --   pending@archive.com   / Curator@123  | curator | Active   | Pending
---
--- Idempotent & safe to rerun:
---   1. Users upsert by unique email (preserving separated is_active & curator_status).
---   2. Categories insert with ON CONFLICT (name) DO NOTHING.
---   3. Artworks insert with WHERE NOT EXISTS (owner + title) and never hide Inactive owners' active works.
---   4. Challenges insert with WHERE NOT EXISTS (title) across Active, Upcoming, and Ended periods.
---   5. Submissions, likes, favorites, comments, and reports guard against duplicates via ON CONFLICT / WHERE NOT EXISTS.
---   6. Admin never creates social interactions (likes, favorites, comments, or reports).
--- ================================================================
-
-
--- ================================================================
--- 1. USERS (Varied Role, Account Status, and Curator Status)
--- ================================================================
 
 INSERT INTO users (
     name,
@@ -252,11 +232,6 @@ ON CONFLICT (user_id, attempt_number) DO UPDATE SET
 DELETE FROM sessions
 WHERE user_id IN (SELECT id FROM users WHERE is_active = FALSE);
 
-
--- ================================================================
--- 2. CATEGORIES
--- ================================================================
-
 INSERT INTO categories (name)
 VALUES
     ('Modern Architecture'),
@@ -272,12 +247,6 @@ VALUES
     ('Parametric Architecture'),
     ('Minimalist Architecture')
 ON CONFLICT (name) DO NOTHING;
-
-
--- ================================================================
--- 3. ARTWORKS (Original 14 Retained + Expanded Demo Variations)
---    Note: Sofia Anindya (Inactive) retains all published active artworks.
--- ================================================================
 
 INSERT INTO artworks (
     user_id,
@@ -481,11 +450,6 @@ WHERE NOT EXISTS (
       AND existing.title = v.title
 );
 
-
--- ================================================================
--- 4. CHALLENGES (Approved Curators · Active, Upcoming, and Ended)
--- ================================================================
-
 -- Reassign previously seeded 'SPACES OF TOMORROW' to an approved curator if Clara is rejected
 UPDATE challenges
 SET curator_id = (SELECT id FROM users WHERE email = 'adrian@archive.com')
@@ -608,11 +572,6 @@ WHERE NOT EXISTS (
     WHERE LOWER(BTRIM(existing.title)) = LOWER(BTRIM(v.title))
 );
 
-
--- ================================================================
--- 5. SUBMISSIONS (Active Pending Review & Ended Ranked Winners)
--- ================================================================
-
 INSERT INTO submissions (
     challenge_id,
     artwork_id,
@@ -724,11 +683,6 @@ WHERE s.challenge_id = ch.id
   AND s.winner_rank IS NOT NULL
   AND (s.winner_note IS NULL OR BTRIM(s.winner_note) = '');
 
-
--- ================================================================
--- 6. ARTWORK LIKES & FAVORITES (Active Members Only — Never Admin)
--- ================================================================
-
 INSERT INTO artwork_likes (
     user_id,
     artwork_id
@@ -781,11 +735,6 @@ JOIN users u ON u.email = v.member_email AND u.role = 'member' AND u.is_active =
 JOIN artworks a ON a.title = v.artwork_title AND a.status = 'active'
 ON CONFLICT (user_id, artwork_id) DO NOTHING;
 
-
--- ================================================================
--- 7. COMMENTS (Active Members Only — Never Admin)
--- ================================================================
-
 INSERT INTO comments (
     user_id,
     artwork_id,
@@ -814,12 +763,6 @@ WHERE NOT EXISTS (
       AND existing.artwork_id = a.id
       AND existing.content = v.content
 );
-
-
--- ================================================================
--- 8. CONTENT REPORTS & MODERATION HISTORY (Active Member Reporters Only)
---    Covers all schema statuses: pending, dismissed, taken_down
--- ================================================================
 
 INSERT INTO reports (
     user_id,
@@ -882,12 +825,7 @@ JOIN users u ON u.email = v.reporter_email AND u.role = 'member' AND u.is_active
 JOIN artworks a ON a.title = v.artwork_title
 ON CONFLICT (user_id, artwork_id) DO NOTHING;
 
-
--- ================================================================
--- 9. DATASET VERIFICATION QUERIES
--- ================================================================
-
--- 9.1 Users by role
+-- Users by role
 SELECT
     role,
     COUNT(*) AS total_users
@@ -895,7 +833,7 @@ FROM users
 GROUP BY role
 ORDER BY role;
 
--- 9.2 Users by account status
+-- Users by account status
 SELECT
     CASE WHEN is_active THEN 'Active' ELSE 'Inactive' END AS account_status,
     COUNT(*) AS total_users
@@ -903,7 +841,7 @@ FROM users
 GROUP BY is_active
 ORDER BY is_active DESC;
 
--- 9.3 Curators by curator_status
+-- Curators by curator_status
 SELECT
     curator_status,
     COUNT(*) AS total_curators
@@ -912,7 +850,7 @@ WHERE role = 'curator'
 GROUP BY curator_status
 ORDER BY curator_status;
 
--- 9.4 Artworks by owner (with account status) & artwork status
+-- Artworks by owner (with account status) & artwork status
 SELECT
     u.name AS owner_name,
     u.email AS owner_email,
@@ -924,7 +862,7 @@ JOIN users u ON u.id = a.user_id
 GROUP BY u.name, u.email, u.is_active, a.status
 ORDER BY u.name, a.status;
 
--- 9.5 Artworks by category
+-- Artworks by category
 SELECT
     c.name AS category,
     COUNT(a.id) AS total_artworks
@@ -933,7 +871,7 @@ LEFT JOIN artworks a ON a.category_id = c.id
 GROUP BY c.id, c.name
 ORDER BY c.name;
 
--- 9.6 Challenges by computed status
+-- Challenges by computed status
 SELECT
     CASE
         WHEN NOW() < start_date THEN 'upcoming'
@@ -945,7 +883,7 @@ FROM challenges
 GROUP BY 1
 ORDER BY 1;
 
--- 9.7 Submissions summary by challenge
+-- Submissions summary by challenge
 SELECT
     ch.title AS challenge_title,
     COUNT(s.id) AS total_submissions,
@@ -956,7 +894,7 @@ LEFT JOIN submissions s ON s.challenge_id = ch.id
 GROUP BY ch.id, ch.title
 ORDER BY ch.title;
 
--- 9.8 Reports by moderation status
+-- Reports by moderation status
 SELECT
     status AS report_status,
     COUNT(*) AS total_reports
@@ -964,7 +902,7 @@ FROM reports
 GROUP BY status
 ORDER BY status;
 
--- 9.9 Overall summary counts
+-- Overall summary counts
 SELECT
     (SELECT COUNT(*) FROM users) AS total_users,
     (SELECT COUNT(*) FROM categories) AS total_categories,

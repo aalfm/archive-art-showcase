@@ -9,6 +9,7 @@ import {
   getActivePageLabel,
   getCuratorActivePageLabel,
   getMemberActivePageLabel,
+  isAuthPagePath,
 } from '@/lib/navigation';
 import { resolveNavbarDashboardOrigin } from '@/lib/member-navigation';
 import { formatCuratorStatusLabel, formatRoleLabel } from '@/lib/utils';
@@ -135,8 +136,9 @@ function getRoleDropdownConfig(user, isInactive) {
   };
 }
 
-function NavbarContent({ user, isInactive = false, fromParam = '' }) {
+function NavbarContent({ user, isInactive = false, fromParam = '', variant = 'default' }) {
   const pathname = usePathname();
+  const isAuthVariant = variant === 'auth' || isAuthPagePath(pathname);
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -309,12 +311,12 @@ function NavbarContent({ user, isInactive = false, fromParam = '' }) {
 
   return (
     <>
-      <header className={`site-header ${scrolled ? 'scrolled' : ''}`}>
+      <header className={`site-header${scrolled ? ' scrolled' : ''}${isAuthVariant ? ' site-header--auth' : ''}`}>
         <div className="header-left">
           <Link
-            href={isDashboardOnlyUser ? getDashboardLink() : '/'}
+            href={isAuthVariant ? '/' : isDashboardOnlyUser ? getDashboardLink() : '/'}
             className="brand-wordmark brand-logo-only"
-            aria-label={isAdminUser ? 'ARCHIVE Admin Dashboard' : 'ARCHIVE Home'}
+            aria-label={!isAuthVariant && isAdminUser ? 'ARCHIVE Admin Dashboard' : 'ARCHIVE Home'}
           >
             <Image
               src="/logo/Logo_archive_white.svg"
@@ -327,7 +329,7 @@ function NavbarContent({ user, isInactive = false, fromParam = '' }) {
           </Link>
         </div>
 
-        {!isDashboardOnlyUser && (
+        {!isDashboardOnlyUser && !isAuthVariant && (
           <nav className="header-center" aria-label="Main Navigation">
             <div className="nav-pill-bar">
               <Link href="/" className={`nav-pill-item ${isNavActive('/') ? 'active' : ''}`} data-nav="beranda">
@@ -346,7 +348,8 @@ function NavbarContent({ user, isInactive = false, fromParam = '' }) {
           </nav>
         )}
 
-        <div className="header-right">
+        {!isAuthVariant && (
+          <div className="header-right">
           <div className="header-actions">
             {user ? (
               <div className="user-menu-wrapper" ref={userMenuRef}>
@@ -578,10 +581,11 @@ function NavbarContent({ user, isInactive = false, fromParam = '' }) {
               </button>
             )}
           </div>
-        </div>
+          </div>
+        )}
       </header>
 
-      {!isDashboardOnlyUser && (
+      {!isDashboardOnlyUser && !isAuthVariant && (
         <>
           <div
             className={`mobile-drawer ${drawerOpen ? 'active' : ''}`}
@@ -629,16 +633,16 @@ function NavbarContent({ user, isInactive = false, fromParam = '' }) {
   );
 }
 
-function NavbarWithSearchParams({ user, isInactive }) {
+function NavbarWithSearchParams({ user, isInactive, variant }) {
   const searchParams = useSearchParams();
   const fromParam = searchParams?.get('from') || '';
-  return <NavbarContent user={user} isInactive={isInactive} fromParam={fromParam} />;
+  return <NavbarContent user={user} isInactive={isInactive} fromParam={fromParam} variant={variant} />;
 }
 
-export default function Navbar({ user, isInactive = false }) {
+export default function Navbar({ user, isInactive = false, variant = 'default' }) {
   return (
-    <Suspense fallback={<NavbarContent user={user} isInactive={isInactive} fromParam="" />}>
-      <NavbarWithSearchParams user={user} isInactive={isInactive} />
+    <Suspense fallback={<NavbarContent user={user} isInactive={isInactive} fromParam="" variant={variant} />}>
+      <NavbarWithSearchParams user={user} isInactive={isInactive} variant={variant} />
     </Suspense>
   );
 }

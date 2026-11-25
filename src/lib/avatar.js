@@ -1,12 +1,3 @@
-/**
- * Centralized role-based avatar resolution for ARCHIVE.
- *
- * Rules:
- * - admin: never uses profile_image; always renders the Admin default avatar.
- * - curator (approved, pending, rejected): never uses profile_image; always renders the Curator default avatar.
- * - member: renders their saved/uploaded profile_image if valid, otherwise the Member default avatar.
- */
-
 export function normalizeUserRole(role) {
   if (typeof role !== 'string') return '';
   return role.trim().toLowerCase();
@@ -39,10 +30,6 @@ export function getDefaultAvatarLabel(role) {
   return 'Member default avatar';
 }
 
-/**
- * Resolves the permitted avatar image URL for a user based strictly on their database role.
- * Returns null for Admin and Curator regardless of whether profile_image exists in the database.
- */
 export function resolveUserAvatarSrc(input) {
   if (!input || typeof input !== 'object') return null;
   const role = input.role ?? input.user_role ?? input.creator_role;
@@ -53,10 +40,6 @@ export function resolveUserAvatarSrc(input) {
   return cleanSrc || null;
 }
 
-/**
- * Normalizes a user row from the database so non-member roles never expose profile_image to UI components.
- * Does not modify or delete any database data.
- */
 export function applyAvatarPolicy(user) {
   if (!user || typeof user !== 'object') return user;
   return {

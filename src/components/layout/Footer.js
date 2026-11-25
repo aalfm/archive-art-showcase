@@ -1,15 +1,25 @@
-import Link from 'next/link';
-import { getSession } from '@/lib/auth';
+'use client';
 
-export default async function Footer({ user }) {
-  const resolvedUser = user === undefined ? (await getSession())?.user ?? null : user;
-  const isAuthenticated = Boolean(resolvedUser);
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { isAuthPagePath } from '@/lib/navigation';
+
+export default function Footer({ user = null, variant = 'default' }) {
+  const pathname = usePathname();
+  const isAuthenticated = Boolean(user);
+  const isAuthVariant = variant === 'auth' || isAuthPagePath(pathname);
   const currentYear = new Date().getFullYear();
 
+  const topGridClass = isAuthVariant
+    ? 'footer-top--auth'
+    : isAuthenticated
+      ? 'footer-top--2col'
+      : 'footer-top--3col';
+
   return (
-    <footer className="site-footer">
+    <footer className={`site-footer${isAuthVariant ? ' site-footer--auth' : ''}`}>
       <div className="footer-container">
-        <div className={`footer-top ${isAuthenticated ? 'footer-top--2col' : 'footer-top--3col'}`}>
+        <div className={`footer-top ${topGridClass}`}>
           <div className="footer-brand">
             <div className="footer-wordmark">
               <span className="footer-brand-name">ARCHIVE</span>
@@ -20,20 +30,22 @@ export default async function Footer({ user }) {
             </p>
           </div>
 
-          <div className="footer-links-col footer-links-col--platform">
-            <h4 className="footer-links-heading">Platform</h4>
-            <ul
-              className={`footer-links-list ${
-                isAuthenticated ? 'footer-links-list--horizontal' : 'footer-links-list--vertical'
-              }`}
-            >
-              <li><Link href="/explore">Explore Works</Link></li>
-              <li><Link href="/challenges">Challenges</Link></li>
-              <li><Link href="/artists">Artists</Link></li>
-            </ul>
-          </div>
+          {!isAuthVariant && (
+            <div className="footer-links-col footer-links-col--platform">
+              <h4 className="footer-links-heading">Platform</h4>
+              <ul
+                className={`footer-links-list ${
+                  isAuthenticated ? 'footer-links-list--horizontal' : 'footer-links-list--vertical'
+                }`}
+              >
+                <li><Link href="/explore">Explore Works</Link></li>
+                <li><Link href="/challenges">Challenges</Link></li>
+                <li><Link href="/artists">Artists</Link></li>
+              </ul>
+            </div>
+          )}
 
-          {!isAuthenticated && (
+          {!isAuthVariant && !isAuthenticated && (
             <div className="footer-links-col footer-links-col--account">
               <h4 className="footer-links-heading">Account</h4>
               <ul className="footer-links-list footer-links-list--vertical">

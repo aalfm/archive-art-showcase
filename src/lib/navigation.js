@@ -165,3 +165,17 @@ export function getCuratorActivePageLabel(pathname) {
 
   return '';
 }
+
+/**
+ * Return true when pathname corresponds to an authentication page (/login or /register)
+ * that renders the minimal Logo-only Navbar and navigation-free Footer.
+ */
+export function isAuthPagePath(pathname) {
+  const normalized = normalizePathname(pathname);
+  return (
+    normalized === '/login' ||
+    normalized.startsWith('/login/') ||
+    normalized === '/register' ||
+    normalized.startsWith('/register/')
+  );
+}
