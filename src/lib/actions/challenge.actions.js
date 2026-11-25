@@ -7,7 +7,38 @@ import {
   authorizeChallengeOwner,
   authorizeCuratorChallengeActor,
 } from '@/lib/challenge-auth';
+import {
+  DUPLICATE_CHALLENGE_NAME_ERROR,
+  cleanChallengeTitle,
+  normalizeChallengeName,
+} from '@/lib/challenge-validation';
 import { isUploadedImagePath, toId } from '@/lib/utils';
+
+function buildDuplicateChallengeError() {
+  return {
+    error: DUPLICATE_CHALLENGE_NAME_ERROR,
+    fieldErrors: { title: DUPLICATE_CHALLENGE_NAME_ERROR },
+    status: 409,
+    code: 'DUPLICATE_CHALLENGE_NAME',
+  };
+}
+
+function isDuplicateChallengeTitleError(err) {
+  if (err?.code !== '23505') return false;
+  return !err.constraint || err.constraint === 'idx_challenges_unique_title';
+}
+
+async function findChallengeConflictByTitle(title, excludeChallengeId = null) {
+  const normalized = normalizeChallengeName(title);
+  if (!normalized) return null;
+
+  const sql = excludeChallengeId
+    ? 'SELECT id FROM challenges WHERE LOWER(BTRIM(title)) = $1 AND id <> $2 LIMIT 1'
+    : 'SELECT id FROM challenges WHERE LOWER(BTRIM(title)) = $1 LIMIT 1';
+  const params = excludeChallengeId ? [normalized, excludeChallengeId] : [normalized];
+  const res = await query(sql, params);
+  return res.rows[0] || null;
+}
 
 function revalidateChallengePaths(challengeId) {
   revalidatePath('/');
@@ -35,7 +66,7 @@ export async function createChallenge(prevState, formData) {
     return { error: auth.error, status: auth.status, code: auth.code };
   }
 
-  const title = formData.get('title')?.toString().trim();
+  const title = cleanChallengeTitle(formData.get('title')?.toString());
   const description = formData.get('description')?.toString().trim();
   const rules = formData.get('rules')?.toString().trim();
   const prize = formData.get('prize')?.toString().trim();
@@ -56,6 +87,11 @@ export async function createChallenge(prevState, formData) {
   }
 
   try {
+    const conflict = await findChallengeConflictByTitle(title);
+    if (conflict) {
+      return buildDuplicateChallengeError();
+    }
+
     const result = await query(
       `INSERT INTO challenges (curator_id, title, description, rules, prize, banner_url, start_date, end_date)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
@@ -65,6 +101,9 @@ export async function createChallenge(prevState, formData) {
     revalidateChallengePaths(result.rows[0].id);
     return { success: true, challengeId: result.rows[0].id };
   } catch (err) {
+    if (isDuplicateChallengeTitleError(err)) {
+      return buildDuplicateChallengeError();
+    }
     console.error('[Challenge] Create error:', err);
     return { error: 'Failed to create challenge.' };
   }
@@ -78,7 +117,7 @@ export async function updateChallenge(prevState, formData) {
   }
 
   const challengeId = toId(formData.get('challenge_id'));
-  const title = formData.get('title')?.toString().trim();
+  const title = cleanChallengeTitle(formData.get('title')?.toString());
   const description = formData.get('description')?.toString().trim();
   const rules = formData.get('rules')?.toString().trim();
   const prize = formData.get('prize')?.toString().trim();
@@ -108,6 +147,11 @@ export async function updateChallenge(prevState, formData) {
       return { error: 'Please upload a challenge banner file from your device (JPG, PNG, or WebP).' };
     }
 
+    const conflict = await findChallengeConflictByTitle(title, challengeId);
+    if (conflict) {
+      return buildDuplicateChallengeError();
+    }
+
     await query(
       `UPDATE challenges SET title=$1, description=$2, rules=$3, prize=$4, 
        banner_url=$5, start_date=$6, end_date=$7 WHERE id=$8`,
@@ -117,6 +161,9 @@ export async function updateChallenge(prevState, formData) {
     revalidateChallengePaths(challengeId);
     return { success: true };
   } catch (err) {
+    if (isDuplicateChallengeTitleError(err)) {
+      return buildDuplicateChallengeError();
+    }
     console.error('[Challenge] Update error:', err);
     return { error: 'Failed to update challenge.' };
   }

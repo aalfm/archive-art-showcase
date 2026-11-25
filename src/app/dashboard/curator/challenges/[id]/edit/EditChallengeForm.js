@@ -3,14 +3,45 @@
 import { useActionState, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateChallenge } from '@/lib/actions/challenge.actions';
+import ChallengeTitleField, {
+  useChallengeTitleValidation,
+} from '@/components/dashboard/ChallengeTitleField';
 import ImageUpload from '@/components/ui/ImageUpload';
 
-export default function EditChallengeForm({ challenge }) {
+// Format dates for input datetime-local: YYYY-MM-DDTHH:MM
+function formatDatetimeLocal(isoStr) {
+  if (!isoStr) return '';
+  const d = new Date(isoStr);
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 16);
+}
+
+export default function EditChallengeForm({ challenge, existingChallenges = [] }) {
   const router = useRouter();
   const [bannerUrl, setBannerUrl] = useState(challenge.banner_url || '');
+  const [prize, setPrize] = useState(challenge.prize || '');
+  const [startDate, setStartDate] = useState(() => formatDatetimeLocal(challenge.start_date));
+  const [endDate, setEndDate] = useState(() => formatDatetimeLocal(challenge.end_date));
+  const [description, setDescription] = useState(challenge.description || '');
+  const [rules, setRules] = useState(challenge.rules || '');
+
+  const {
+    title,
+    setTitle,
+    isDuplicate,
+    titleError,
+    markServerDuplicate,
+  } = useChallengeTitleValidation({
+    initialTitle: challenge.title || '',
+    existingChallenges,
+    excludeChallengeId: challenge.id,
+  });
 
   const [state, formAction, isPending] = useActionState(async (prevState, formData) => {
     const res = await updateChallenge(prevState, formData);
+    if (res?.code === 'DUPLICATE_CHALLENGE_NAME') {
+      markServerDuplicate(formData.get('title')?.toString() || '');
+    }
     if (res?.success) {
       router.push(`/dashboard/curator/challenges/${challenge.id}`);
       router.refresh();
@@ -18,23 +49,22 @@ export default function EditChallengeForm({ challenge }) {
     return res;
   }, null);
 
-  // Format dates for input datetime-local: YYYY-MM-DDTHH:MM
-  const formatDatetimeLocal = (isoStr) => {
-    if (!isoStr) return '';
-    const d = new Date(isoStr);
-    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-    return d.toISOString().slice(0, 16);
+  const handleFormSubmit = (e) => {
+    if (isDuplicate) {
+      e.preventDefault();
+      document.getElementById('title')?.focus();
+    }
   };
 
   return (
     <div className="dashboard-form-panel curator-form-card">
-      {state?.error && (
+      {state?.error && state?.code !== 'DUPLICATE_CHALLENGE_NAME' && (
         <div className="form-alert form-alert-error" role="alert">
           {state.error}
         </div>
       )}
 
-      <form action={formAction} className="dashboard-form">
+      <form action={formAction} onSubmit={handleFormSubmit} className="dashboard-form">
         <input type="hidden" name="challenge_id" value={challenge.id} />
 
         <div className="form-group">
@@ -48,18 +78,11 @@ export default function EditChallengeForm({ challenge }) {
         </div>
 
         <div className="dashboard-form-grid-2">
-          <div className="form-group">
-            <label htmlFor="title" className="form-label">Challenge Title *</label>
-            <input
-              id="title"
-              name="title"
-              type="text"
-              className="form-input"
-              defaultValue={challenge.title}
-              required
-              minLength={3}
-            />
-          </div>
+          <ChallengeTitleField
+            value={title}
+            onChange={setTitle}
+            error={titleError}
+          />
 
           <div className="form-group">
             <label htmlFor="prize" className="form-label">Prize / Award *</label>
@@ -68,7 +91,8 @@ export default function EditChallengeForm({ challenge }) {
               name="prize"
               type="text"
               className="form-input"
-              defaultValue={challenge.prize}
+              value={prize}
+              onChange={(e) => setPrize(e.target.value)}
               required
             />
           </div>
@@ -82,7 +106,8 @@ export default function EditChallengeForm({ challenge }) {
               name="start_date"
               type="datetime-local"
               className="form-input"
-              defaultValue={formatDatetimeLocal(challenge.start_date)}
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
               required
             />
           </div>
@@ -93,7 +118,8 @@ export default function EditChallengeForm({ challenge }) {
               name="end_date"
               type="datetime-local"
               className="form-input"
-              defaultValue={formatDatetimeLocal(challenge.end_date)}
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
               required
             />
           </div>
@@ -107,7 +133,8 @@ export default function EditChallengeForm({ challenge }) {
               name="description"
               rows={6}
               className="form-textarea"
-              defaultValue={challenge.description}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               required
               minLength={20}
             />
@@ -120,7 +147,8 @@ export default function EditChallengeForm({ challenge }) {
               name="rules"
               rows={6}
               className="form-textarea"
-              defaultValue={challenge.rules}
+              value={rules}
+              onChange={(e) => setRules(e.target.value)}
               required
             />
           </div>
@@ -130,7 +158,7 @@ export default function EditChallengeForm({ challenge }) {
           <button
             type="submit"
             className="btn-primary dashboard-submit-btn"
-            disabled={isPending || !bannerUrl}
+            disabled={isPending || !bannerUrl || isDuplicate}
           >
             {isPending ? 'Saving Changes...' : 'Save Changes'}
           </button>

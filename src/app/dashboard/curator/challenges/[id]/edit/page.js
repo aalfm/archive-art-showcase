@@ -18,7 +18,10 @@ export default async function EditChallengePage(props) {
   if (!toId(params.id)) notFound();
   const user = await requireRole('curator');
 
-  const res = await query('SELECT * FROM challenges WHERE id = $1', [params.id]);
+  const [res, existingRes] = await Promise.all([
+    query('SELECT * FROM challenges WHERE id = $1', [params.id]),
+    query('SELECT id, LOWER(BTRIM(title)) AS normalized_title FROM challenges ORDER BY id ASC'),
+  ]);
 
   if (res.rows.length === 0) {
     notFound();
@@ -55,7 +58,7 @@ export default async function EditChallengePage(props) {
         </div>
       </div>
 
-      <EditChallengeForm challenge={challenge} />
+      <EditChallengeForm challenge={challenge} existingChallenges={existingRes.rows} />
     </div>
   );
 }

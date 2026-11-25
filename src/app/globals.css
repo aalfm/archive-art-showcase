@@ -17374,6 +17374,15 @@ body,
   background: #FFFFFF;
 }
 
+.dashboard-layout .curator-form-card .form-input.is-invalid,
+.dashboard-layout .form-input.is-invalid:focus {
+  border-color: #9A342D;
+}
+
+.dashboard-layout .form-input.is-invalid:focus {
+  box-shadow: 0 0 0 1px #9A342D;
+}
+
 /* Align Verification Status shell flush with full-width topnav dashboard pages */
 .dashboard-layout .curator-status-shell {
   width: 100%;

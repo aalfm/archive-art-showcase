@@ -208,6 +208,7 @@ CREATE INDEX IF NOT EXISTS idx_artwork_likes_artwork_id ON artwork_likes(artwork
 CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorites(user_id);
 CREATE INDEX IF NOT EXISTS idx_comments_artwork_id ON comments(artwork_id);
 CREATE INDEX IF NOT EXISTS idx_reports_status ON reports(status);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_challenges_unique_title ON challenges (LOWER(BTRIM(title)));
 CREATE INDEX IF NOT EXISTS idx_submissions_challenge_id ON submissions(challenge_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_challenge_winner ON submissions(challenge_id, winner_rank) WHERE winner_rank IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);

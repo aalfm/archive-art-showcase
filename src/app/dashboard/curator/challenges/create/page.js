@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
+import { query } from '@/lib/db';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import CreateChallengeForm from './CreateChallengeForm';
 
@@ -11,6 +12,10 @@ export const metadata = {
 
 export default async function CreateChallengePage() {
   await requireRole('curator');
+
+  const existingRes = await query(
+    'SELECT id, LOWER(BTRIM(title)) AS normalized_title FROM challenges ORDER BY id ASC'
+  );
 
   return (
     <div className="admin-detail-page">
@@ -36,7 +41,7 @@ export default async function CreateChallengePage() {
         </div>
       </div>
 
-      <CreateChallengeForm />
+      <CreateChallengeForm existingChallenges={existingRes.rows} />
     </div>
   );
 }

@@ -605,7 +605,7 @@ JOIN users u ON u.email = v.curator_email AND u.role = 'curator' AND u.curator_s
 WHERE NOT EXISTS (
     SELECT 1
     FROM challenges existing
-    WHERE existing.title = v.title
+    WHERE LOWER(BTRIM(existing.title)) = LOWER(BTRIM(v.title))
 );
 
 
