@@ -32,8 +32,9 @@ export default async function CuratorPendingPage() {
   }
 
   const appsRes = await query(
-    `SELECT ca.id, ca.attempt_number, ca.portfolio_url, ca.background,
-            ca.supporting_notes, ca.status, ca.rejection_reason,
+    `SELECT ca.id, ca.attempt_number, ca.portfolio_url,
+            ca.cv_file_path, ca.cv_file_name, ca.cv_url,
+            ca.background, ca.supporting_notes, ca.status, ca.rejection_reason,
             ca.submitted_at, ca.reviewed_at,
             adm.name AS reviewed_by_name
      FROM curator_applications ca
@@ -56,10 +57,15 @@ export default async function CuratorPendingPage() {
 
   return (
     <div>
-      <Breadcrumb items={[{ label: 'Verification Status' }]} />
+      <Breadcrumb
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Verification Status' },
+        ]}
+      />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Verification status</h1>
+          <h1 className="dashboard-title">Verification Status</h1>
           <p className="dashboard-subtitle">
             {isRejected
               ? 'Review administrative feedback on your Curator application and submit an updated reapplication.'
@@ -81,7 +87,7 @@ export default async function CuratorPendingPage() {
             </span>
 
             <h2 className="curator-pending-title" id="curator-status-heading">
-              {isRejected ? 'Curator Application Rejected' : 'Awaiting curator verification'}
+              {isRejected ? 'Curator Application Rejected' : 'Awaiting Curator Verification'}
             </h2>
 
             <p className="curator-pending-desc">
@@ -96,7 +102,7 @@ export default async function CuratorPendingPage() {
             <div className="curator-rejection-box" id="curator-rejection-reason-box" role="region" aria-labelledby="rejection-reason-heading">
               <div className="curator-rejection-head">
                 <h2 id="rejection-reason-heading" className="curator-rejection-heading">
-                  Reason for rejection
+                  Reason for Rejection
                 </h2>
                 {latestApplication?.reviewed_at && (
                   <span className="curator-rejection-date">
@@ -137,7 +143,7 @@ export default async function CuratorPendingPage() {
                 </span>
               </div>
               <div className="curator-summary-item">
-                <span className="curator-summary-label">Portfolio link</span>
+                <span className="curator-summary-label">Portfolio Link</span>
                 {latestApplication?.portfolio_url || user.external_link ? (
                   <a
                     href={latestApplication?.portfolio_url || user.external_link}
@@ -151,11 +157,48 @@ export default async function CuratorPendingPage() {
                   <span className="curator-summary-muted">Not provided</span>
                 )}
               </div>
+              <div className="curator-summary-item">
+                <span className="curator-summary-label">Curriculum Vitae (CV)</span>
+                {latestApplication?.cv_file_path || latestApplication?.cv_url ? (
+                  <div className="curator-cv-links-stack">
+                    {latestApplication.cv_file_path && (
+                      <div className="curator-cv-file-actions">
+                        <a
+                          href={`/api/curator-applications/${latestApplication.id}/cv`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="curator-summary-link"
+                        >
+                          {latestApplication.cv_file_name || 'Open CV File'} ↗
+                        </a>
+                        <a
+                          href={`/api/curator-applications/${latestApplication.id}/cv?download=1`}
+                          className="curator-cv-download-inline"
+                        >
+                          Download
+                        </a>
+                      </div>
+                    )}
+                    {latestApplication.cv_url && (
+                      <a
+                        href={latestApplication.cv_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="curator-summary-link"
+                      >
+                        {latestApplication.cv_url} ↗
+                      </a>
+                    )}
+                  </div>
+                ) : (
+                  <span className="curator-summary-muted">Not provided</span>
+                )}
+              </div>
             </div>
 
             {(latestApplication?.background || user.bio) && (
               <div className="curator-summary-block">
-                <span className="curator-summary-label">Curatorial background</span>
+                <span className="curator-summary-label">Curatorial Background</span>
                 <p className="curator-summary-text">
                   {latestApplication?.background || user.bio}
                 </p>
@@ -164,7 +207,7 @@ export default async function CuratorPendingPage() {
 
             {latestApplication?.supporting_notes && (
               <div className="curator-summary-block">
-                <span className="curator-summary-label">Supporting information</span>
+                <span className="curator-summary-label">Supporting Information</span>
                 <p className="curator-summary-text">
                   {latestApplication.supporting_notes}
                 </p>
@@ -180,7 +223,7 @@ export default async function CuratorPendingPage() {
         <div className="curator-pending-actions">
           <form action={logoutUser}>
             <button type="submit" className="btn-secondary curator-pending-btn">
-              Sign out
+              Sign Out
             </button>
           </form>
         </div>
@@ -191,7 +234,7 @@ export default async function CuratorPendingPage() {
         <section className="curator-history-panel" id="curator-application-history" aria-labelledby="curator-history-heading">
           <div className="curator-history-head">
             <h2 id="curator-history-heading" className="curator-history-title">
-              Previous application history
+              Previous Application History
             </h2>
             <span className="curator-history-count">
               {previousApplications.length} prior {previousApplications.length === 1 ? 'submission' : 'submissions'}
@@ -216,14 +259,14 @@ export default async function CuratorPendingPage() {
 
                 {app.rejection_reason && (
                   <div className="curator-history-reason">
-                    <span className="curator-summary-label">Reason for rejection</span>
+                    <span className="curator-summary-label">Reason for Rejection</span>
                     <p>{app.rejection_reason}</p>
                   </div>
                 )}
 
                 {app.portfolio_url && (
                   <div className="curator-history-meta">
-                    <span className="curator-summary-label">Submitted portfolio: </span>
+                    <span className="curator-summary-label">Submitted Portfolio: </span>
                     <a
                       href={app.portfolio_url}
                       target="_blank"
@@ -232,6 +275,42 @@ export default async function CuratorPendingPage() {
                     >
                       {app.portfolio_url} ↗
                     </a>
+                  </div>
+                )}
+
+                {(app.cv_file_path || app.cv_url) && (
+                  <div className="curator-history-meta">
+                    <span className="curator-summary-label">Submitted CV: </span>
+                    {app.cv_file_path && (
+                      <>
+                        <a
+                          href={`/api/curator-applications/${app.id}/cv`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="curator-summary-link"
+                        >
+                          {app.cv_file_name || 'Open CV file'} ↗
+                        </a>
+                        {' · '}
+                        <a
+                          href={`/api/curator-applications/${app.id}/cv?download=1`}
+                          className="curator-summary-link"
+                        >
+                          Download
+                        </a>
+                      </>
+                    )}
+                    {app.cv_file_path && app.cv_url ? ' · ' : ''}
+                    {app.cv_url && (
+                      <a
+                        href={app.cv_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="curator-summary-link"
+                      >
+                        {app.cv_url} ↗
+                      </a>
+                    )}
                   </div>
                 )}
               </article>

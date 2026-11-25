@@ -91,6 +91,46 @@ export default function CuratorHistoryModal({
                       )}
                     </div>
 
+                    <div>
+                      <span className="curator-summary-label">Curriculum Vitae (CV)</span>
+                      {app.cv_file_path || app.cv_url ? (
+                        <div className="curator-cv-links-stack">
+                          {app.cv_file_path && (
+                            <div className="curator-cv-file-actions">
+                              <a
+                                href={`/api/curator-applications/${app.id}/cv`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="curator-summary-link"
+                              >
+                                {app.cv_file_name || 'Open CV file'} ↗
+                              </a>
+                              <a
+                                href={`/api/curator-applications/${app.id}/cv?download=1`}
+                                className="curator-cv-download-inline"
+                              >
+                                Download
+                              </a>
+                            </div>
+                          )}
+                          {app.cv_url && (
+                            <div>
+                              <a
+                                href={app.cv_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="curator-summary-link"
+                              >
+                                {app.cv_url} ↗
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="curator-summary-muted">Not provided</p>
+                      )}
+                    </div>
+
                     {app.background && (
                       <div>
                         <span className="curator-summary-label">Curatorial background</span>

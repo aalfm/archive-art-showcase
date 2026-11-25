@@ -109,6 +109,9 @@ CREATE TABLE IF NOT EXISTS curator_applications (
     user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     attempt_number INT NOT NULL DEFAULT 1 CHECK (attempt_number >= 1),
     portfolio_url TEXT,
+    cv_file_path TEXT,
+    cv_file_name VARCHAR(255),
+    cv_url TEXT,
     background TEXT,
     supporting_notes TEXT,
     status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
@@ -129,6 +132,9 @@ ALTER TABLE artworks ADD COLUMN IF NOT EXISTS like_count INT DEFAULT 0;
 ALTER TABLE reports ADD COLUMN IF NOT EXISTS admin_note TEXT;
 ALTER TABLE reports ADD COLUMN IF NOT EXISTS details TEXT;
 ALTER TABLE submissions ADD COLUMN IF NOT EXISTS winner_note TEXT;
+ALTER TABLE curator_applications ADD COLUMN IF NOT EXISTS cv_file_path TEXT;
+ALTER TABLE curator_applications ADD COLUMN IF NOT EXISTS cv_file_name VARCHAR(255);
+ALTER TABLE curator_applications ADD COLUMN IF NOT EXISTS cv_url TEXT;
 
 DO $$
 BEGIN

@@ -6,8 +6,15 @@ import { getSession } from '@/lib/auth';
 import {
   MAX_BACKGROUND_LENGTH,
   MAX_SUPPORTING_NOTES_LENGTH,
+  validateCuratorCvRequirement,
   validatePortfolioUrl,
 } from '@/lib/curator';
+import {
+  hasUploadedCvFile,
+  prepareCuratorCvUpload,
+  removeStoredCuratorCv,
+  savePreparedCuratorCv,
+} from '@/lib/curator-cv';
 
 /**
  * Allows a Curator account whose latest status is 'rejected' to update their
@@ -33,6 +40,9 @@ export async function reapplyCurator(prevState, formData) {
 
   const rawName = formData.get('name')?.toString().trim() || session.user.name;
   const rawPortfolio = formData.get('portfolio_url')?.toString() ?? formData.get('external_link')?.toString() ?? '';
+  const rawCvUrl = (formData.get('cv_url')?.toString() ?? '').trim();
+  const rawCvFile = formData.get('cv_file');
+  const keepPreviousCv = formData.get('keep_previous_cv')?.toString() === '1';
   const rawBackground = (formData.get('background')?.toString() ?? formData.get('bio')?.toString() ?? '').trim();
   const rawSupportingNotes = (formData.get('supporting_notes')?.toString() ?? '').trim();
 
@@ -40,9 +50,18 @@ export async function reapplyCurator(prevState, formData) {
     return { error: 'Full name must be between 2–100 characters.' };
   }
 
-  const portfolioCheck = validatePortfolioUrl(rawPortfolio);
+  const portfolioCheck = validatePortfolioUrl(rawPortfolio, { required: true });
   if (!portfolioCheck.valid) {
     return { error: portfolioCheck.error };
+  }
+
+  const hasNewCvFile = hasUploadedCvFile(rawCvFile);
+  let preparedCv = null;
+  if (hasNewCvFile) {
+    preparedCv = await prepareCuratorCvUpload(rawCvFile);
+    if (!preparedCv.valid) {
+      return { error: preparedCv.error };
+    }
   }
 
   if (!rawBackground || rawBackground.length < 10) {
@@ -65,6 +84,7 @@ export async function reapplyCurator(prevState, formData) {
   const supportingNotes = rawSupportingNotes || null;
 
   const client = await getClient();
+  let savedCv = null;
   try {
     await client.query('BEGIN');
 
@@ -114,6 +134,39 @@ export async function reapplyCurator(prevState, formData) {
       };
     }
 
+    // Resolve CV file (new upload or retained from previous application) and enforce CV requirement
+    let cvFilePath = null;
+    let cvFileName = null;
+    if (!preparedCv && keepPreviousCv) {
+      const prevRes = await client.query(
+        `SELECT cv_file_path, cv_file_name
+         FROM curator_applications
+         WHERE user_id = $1 AND cv_file_path IS NOT NULL
+         ORDER BY attempt_number DESC
+         LIMIT 1`,
+        [session.user.id]
+      );
+      if (prevRes.rows.length > 0) {
+        cvFilePath = prevRes.rows[0].cv_file_path;
+        cvFileName = prevRes.rows[0].cv_file_name;
+      }
+    }
+
+    const cvCheck = validateCuratorCvRequirement({
+      hasCvFile: Boolean(preparedCv || cvFilePath),
+      cvUrl: rawCvUrl,
+    });
+    if (!cvCheck.valid) {
+      await client.query('ROLLBACK');
+      return { error: cvCheck.error };
+    }
+
+    if (preparedCv) {
+      savedCv = await savePreparedCuratorCv(preparedCv);
+      cvFilePath = savedCv.cvFilePath;
+      cvFileName = savedCv.cvFileName;
+    }
+
     const attemptRes = await client.query(
       `SELECT COALESCE(MAX(attempt_number), 0)::int + 1 AS next_attempt
        FROM curator_applications
@@ -125,9 +178,18 @@ export async function reapplyCurator(prevState, formData) {
     // Insert a brand-new attempt record so previous rejected records & rejection reasons stay preserved
     await client.query(
       `INSERT INTO curator_applications (
-         user_id, attempt_number, portfolio_url, background, supporting_notes, status, submitted_at
-       ) VALUES ($1, $2, $3, $4, $5, 'pending', NOW())`,
-      [session.user.id, nextAttempt, portfolioUrl, rawBackground, supportingNotes]
+         user_id, attempt_number, portfolio_url, cv_file_path, cv_file_name, cv_url, background, supporting_notes, status, submitted_at
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', NOW())`,
+      [
+        session.user.id,
+        nextAttempt,
+        portfolioUrl,
+        cvFilePath,
+        cvFileName,
+        cvCheck.cvUrl,
+        rawBackground,
+        supportingNotes,
+      ]
     );
 
     // Update the same user account (never create duplicate accounts; never set approved)
@@ -144,11 +206,15 @@ export async function reapplyCurator(prevState, formData) {
     revalidatePath('/dashboard/curator/pending');
     revalidatePath('/dashboard/admin');
     revalidatePath('/dashboard/admin/curators');
+    revalidatePath(`/dashboard/admin/curators/${session.user.id}`);
     revalidatePath('/dashboard/admin/users');
 
     return { success: true, attemptNumber: nextAttempt };
   } catch (err) {
     await client.query('ROLLBACK');
+    if (savedCv?.cvFilePath) {
+      await removeStoredCuratorCv(savedCv.cvFilePath);
+    }
     if (err.code === '23505') {
       return {
         error: 'Your curator application is already pending review. Duplicate applications are not allowed.',

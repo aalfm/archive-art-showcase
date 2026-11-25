@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
 import UserAvatar from '@/components/ui/UserAvatar';
@@ -53,8 +54,9 @@ export default async function AdminCuratorsPage() {
       ORDER BY COALESCE(la.reviewed_at, u.created_at) DESC
     `),
     query(`
-      SELECT ca.id, ca.user_id, ca.attempt_number, ca.portfolio_url, ca.background,
-             ca.supporting_notes, ca.status, ca.rejection_reason,
+      SELECT ca.id, ca.user_id, ca.attempt_number, ca.portfolio_url,
+             ca.cv_file_path, ca.cv_file_name, ca.cv_url,
+             ca.background, ca.supporting_notes, ca.status, ca.rejection_reason,
              ca.submitted_at, ca.reviewed_at,
              adm.name AS reviewed_by_name
       FROM curator_applications ca
@@ -89,9 +91,9 @@ export default async function AdminCuratorsPage() {
       />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Curator verification</h1>
+          <h1 className="dashboard-title">Curator Verification</h1>
           <p className="dashboard-subtitle">
-            Review curator applications, portfolios, and prior decision history before granting curation authorization.
+            Review curator applications, CVs, portfolios, and prior decision history before granting curation authorization.
           </p>
         </div>
       </div>
@@ -99,7 +101,7 @@ export default async function AdminCuratorsPage() {
       {/* Pending Section */}
       <div className="dash-section">
         <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
-          Awaiting approval ({pendingCurators.length})
+          Awaiting Approval ({pendingCurators.length})
         </h2>
 
         {pendingCurators.length === 0 ? (
@@ -120,7 +122,7 @@ export default async function AdminCuratorsPage() {
                 <tr>
                   <th>Applicant</th>
                   <th>Email</th>
-                  <th>Portfolio &amp; application</th>
+                  <th>Portfolio, CV &amp; Application</th>
                   <th>Submitted</th>
                   <th>Decision</th>
                 </tr>
@@ -131,6 +133,9 @@ export default async function AdminCuratorsPage() {
                   const latestApp = history[0] || null;
                   const attemptNumber = latestApp?.attempt_number || 1;
                   const portfolioUrl = latestApp?.portfolio_url || c.external_link || null;
+                  const cvFilePath = latestApp?.cv_file_path || null;
+                  const cvFileName = latestApp?.cv_file_name || 'CV document';
+                  const cvUrl = latestApp?.cv_url || null;
                   const background = latestApp?.background || c.bio || '';
                   const isReapplication = attemptNumber > 1;
 
@@ -140,9 +145,12 @@ export default async function AdminCuratorsPage() {
                         <div className="dashboard-user-cell">
                           <UserAvatar src={null} role={c.role} name={c.name} size={28} />
                           <div className="admin-curator-name-col">
-                            <span className="dashboard-user-cell-name" style={{ fontWeight: 600 }}>
+                            <Link
+                              href={`/dashboard/admin/curators/${c.id}`}
+                              className="dashboard-table-link"
+                            >
                               {c.name}
-                            </span>
+                            </Link>
                             {isReapplication && (
                               <span className="admin-curator-attempt-note">
                                 Reapplication · Attempt #{attemptNumber}
@@ -154,35 +162,77 @@ export default async function AdminCuratorsPage() {
                       <td data-label="Email" className="table-cell-break">
                         {c.email}
                       </td>
-                      <td data-label="Portfolio & application">
+                      <td data-label="Portfolio, CV & application">
                         <div className="admin-curator-app-cell">
-                          {portfolioUrl ? (
-                            <a
-                              href={portfolioUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="admin-curator-portfolio-link"
-                            >
-                              View portfolio
-                            </a>
-                          ) : (
-                            <span className="admin-curator-no-portfolio">No portfolio provided</span>
-                          )}
+                          <div className="admin-curator-doc-links">
+                            {portfolioUrl ? (
+                              <a
+                                href={portfolioUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="admin-curator-portfolio-link"
+                              >
+                                Portfolio ↗
+                              </a>
+                            ) : (
+                              <span className="admin-curator-no-portfolio">No portfolio</span>
+                            )}
+                            {cvFilePath && latestApp && (
+                              <>
+                                <a
+                                  href={`/api/curator-applications/${latestApp.id}/cv`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="admin-curator-portfolio-link"
+                                  title={cvFileName}
+                                >
+                                  Open CV ↗
+                                </a>
+                                <a
+                                  href={`/api/curator-applications/${latestApp.id}/cv?download=1`}
+                                  className="admin-curator-portfolio-link"
+                                  title={`Download ${cvFileName}`}
+                                >
+                                  Download CV
+                                </a>
+                              </>
+                            )}
+                            {cvUrl && (
+                              <a
+                                href={cvUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="admin-curator-portfolio-link"
+                              >
+                                CV link ↗
+                              </a>
+                            )}
+                            {!cvFilePath && !cvUrl && (
+                              <span className="admin-curator-no-portfolio">No CV</span>
+                            )}
+                          </div>
                           {background && (
                             <p className="admin-curator-bio-snippet" title={background}>
                               {background}
                             </p>
                           )}
-                          <CuratorHistoryModal
-                            curatorName={c.name}
-                            curatorEmail={c.email}
-                            applications={history}
-                            buttonLabel={
-                              history.length > 1
-                                ? `View history (${history.length})`
-                                : 'View details'
-                            }
-                          />
+                          <div className="admin-curator-cell-actions">
+                            <Link
+                              href={`/dashboard/admin/curators/${c.id}`}
+                              className="btn-secondary table-action-btn"
+                              id={`btn-review-curator-${c.id}`}
+                            >
+                              Review Application
+                            </Link>
+                            {history.length > 1 && (
+                              <CuratorHistoryModal
+                                curatorName={c.name}
+                                curatorEmail={c.email}
+                                applications={history}
+                                buttonLabel={`History (${history.length})`}
+                              />
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td data-label="Submitted" className="table-cell-meta">
@@ -209,7 +259,7 @@ export default async function AdminCuratorsPage() {
         <div className="dash-section-head" style={{ marginBottom: 14 }}>
           <div>
             <h2 className="dash-section-title">
-              Verification history ({historyCurators.length})
+              Verification History ({historyCurators.length})
             </h2>
             <p className="dash-section-desc">
               Past approval and rejection decisions. Rejected applicants must reapply before they can be reviewed again.
@@ -231,7 +281,7 @@ export default async function AdminCuratorsPage() {
                 <th>Curator</th>
                 <th>Email</th>
                 <th>Status</th>
-                <th>Decision summary</th>
+                <th>Decision Summary</th>
                 <th>History</th>
               </tr>
             </thead>
@@ -254,9 +304,12 @@ export default async function AdminCuratorsPage() {
                         <div className="dashboard-user-cell">
                           <UserAvatar src={null} role={c.role} name={c.name} size={28} />
                           <div className="admin-curator-name-col">
-                            <span className="dashboard-user-cell-name" style={{ fontWeight: 600 }}>
+                            <Link
+                              href={`/dashboard/admin/curators/${c.id}`}
+                              className="dashboard-table-link"
+                            >
                               {c.name}
-                            </span>
+                            </Link>
                             {attemptCount > 1 && (
                               <span className="admin-curator-attempt-note">
                                 {attemptCount} attempts
@@ -294,12 +347,18 @@ export default async function AdminCuratorsPage() {
                       </td>
                       <td data-label="History" data-cell="actions">
                         <div className="table-actions-group">
+                          <Link
+                            href={`/dashboard/admin/curators/${c.id}`}
+                            className="btn-secondary table-action-btn"
+                          >
+                            View Details
+                          </Link>
                           <CuratorHistoryModal
                             curatorName={c.name}
                             curatorEmail={c.email}
                             applications={history}
                             buttonLabel={
-                              attemptCount > 1 ? `History (${attemptCount})` : 'View record'
+                              attemptCount > 1 ? `History (${attemptCount})` : 'Quick View'
                             }
                           />
                         </div>

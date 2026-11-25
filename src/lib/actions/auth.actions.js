@@ -5,7 +5,17 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getClient, query } from '@/lib/db';
 import { createSession, deleteSession, revokeUserSessions } from '@/lib/auth';
-import { MAX_BACKGROUND_LENGTH, validatePortfolioUrl } from '@/lib/curator';
+import {
+  MAX_BACKGROUND_LENGTH,
+  validateCuratorCvRequirement,
+  validatePortfolioUrl,
+} from '@/lib/curator';
+import {
+  hasUploadedCvFile,
+  prepareCuratorCvUpload,
+  removeStoredCuratorCv,
+  savePreparedCuratorCv,
+} from '@/lib/curator-cv';
 
 export async function registerUser(prevState, formData) {
   const name = formData.get('name')?.toString().trim();
@@ -14,6 +24,8 @@ export async function registerUser(prevState, formData) {
   const role = formData.get('role')?.toString();
   const bio = formData.get('bio')?.toString().trim() || null;
   const rawExternalLink = formData.get('external_link')?.toString().trim() || '';
+  const rawCvUrl = formData.get('cv_url')?.toString().trim() || '';
+  const rawCvFile = formData.get('cv_file');
 
   // Validation
   if (!name || !email || !password || !role) {
@@ -35,22 +47,53 @@ export async function registerUser(prevState, formData) {
     return { error: `Background must be at most ${MAX_BACKGROUND_LENGTH} characters.` };
   }
 
-  const portfolioCheck = validatePortfolioUrl(rawExternalLink);
-  if (!portfolioCheck.valid) {
-    return { error: portfolioCheck.error };
+  let externalLink = null;
+  let cvUrl = null;
+  let preparedCv = null;
+
+  if (role === 'curator') {
+    const portfolioCheck = validatePortfolioUrl(rawExternalLink, { required: true });
+    if (!portfolioCheck.valid) {
+      return { error: portfolioCheck.error };
+    }
+    externalLink = portfolioCheck.value;
+
+    const hasCvFile = hasUploadedCvFile(rawCvFile);
+    if (hasCvFile) {
+      preparedCv = await prepareCuratorCvUpload(rawCvFile);
+      if (!preparedCv.valid) {
+        return { error: preparedCv.error };
+      }
+    }
+
+    const cvCheck = validateCuratorCvRequirement({ hasCvFile, cvUrl: rawCvUrl });
+    if (!cvCheck.valid) {
+      return { error: cvCheck.error };
+    }
+    cvUrl = cvCheck.cvUrl;
+  } else if (rawExternalLink) {
+    const portfolioCheck = validatePortfolioUrl(rawExternalLink, { required: false });
+    if (!portfolioCheck.valid) {
+      return { error: portfolioCheck.error };
+    }
+    externalLink = portfolioCheck.value;
   }
-  const externalLink = portfolioCheck.value;
 
   const client = await getClient();
   let newUserId;
+  let savedCv = null;
   try {
     await client.query('BEGIN');
 
-    // Check if email already exists
+    // Check if email already exists before persisting any file
     const existing = await client.query('SELECT id FROM users WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
       await client.query('ROLLBACK');
       return { error: 'Email is already registered.' };
+    }
+
+    if (role === 'curator' && preparedCv) {
+      savedCv = await savePreparedCuratorCv(preparedCv);
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -66,15 +109,25 @@ export async function registerUser(prevState, formData) {
     if (role === 'curator') {
       await client.query(
         `INSERT INTO curator_applications (
-           user_id, attempt_number, portfolio_url, background, status, submitted_at
-         ) VALUES ($1, 1, $2, $3, 'pending', NOW())`,
-        [newUserId, externalLink, bio]
+           user_id, attempt_number, portfolio_url, cv_file_path, cv_file_name, cv_url, background, status, submitted_at
+         ) VALUES ($1, 1, $2, $3, $4, $5, $6, 'pending', NOW())`,
+        [
+          newUserId,
+          externalLink,
+          savedCv?.cvFilePath || null,
+          savedCv?.cvFileName || null,
+          cvUrl,
+          bio,
+        ]
       );
     }
 
     await client.query('COMMIT');
   } catch (err) {
     await client.query('ROLLBACK');
+    if (savedCv?.cvFilePath) {
+      await removeStoredCuratorCv(savedCv.cvFilePath);
+    }
     if (err.code === '23505') {
       return { error: 'Email is already registered.' };
     }
@@ -151,13 +204,17 @@ export async function loginUser(prevState, formData) {
       user.curator_status === 'approved'
         ? '/dashboard/curator'
         : '/dashboard/curator/pending';
-    if (
-      user.curator_status === 'approved' &&
-      (redirectTo === '/dashboard/curator' ||
-        redirectTo.startsWith('/dashboard/curator/') ||
-        redirectTo.startsWith('/dashboard/curator?')) &&
-      !redirectTo.startsWith('/dashboard/curator/pending')
-    ) {
+    const isSafeCuratorRedirect =
+      redirectTo.startsWith('/') &&
+      !redirectTo.startsWith('//') &&
+      !redirectTo.startsWith('/login') &&
+      !redirectTo.startsWith('/register') &&
+      !redirectTo.startsWith('/dashboard/admin') &&
+      !redirectTo.startsWith('/dashboard/member') &&
+      (user.curator_status === 'approved'
+        ? !redirectTo.startsWith('/dashboard/curator/pending')
+        : !redirectTo.startsWith('/dashboard/curator') || redirectTo === '/dashboard/curator/pending');
+    if (isSafeCuratorRedirect) {
       redirect(redirectTo);
     }
     redirect(curatorHome);

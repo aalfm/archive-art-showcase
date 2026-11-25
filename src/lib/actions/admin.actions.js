@@ -156,6 +156,7 @@ export async function updateCuratorStatus(rawCuratorId, status, rejectionReason 
     revalidatePath('/dashboard', 'layout');
     revalidatePath('/dashboard/admin');
     revalidatePath('/dashboard/admin/curators');
+    revalidatePath(`/dashboard/admin/curators/${curatorId}`);
     revalidatePath('/dashboard/admin/users');
     revalidatePath('/dashboard/curator/pending');
     revalidatePath('/dashboard/curator');
