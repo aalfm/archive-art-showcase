@@ -84,6 +84,25 @@ export function Heart({ size = 16, filled = false, className = '' }) {
   );
 }
 
+export function Bookmark({ size = 16, filled = false, className = '' }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
 export function Menu({ size = 16, className = '' }) {
   return (
     <svg

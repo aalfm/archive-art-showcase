@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { toggleFavorite } from '@/lib/actions/artwork.actions';
+import { Bookmark } from '@/components/ui/Icons';
 
-export default function RemoveFavoriteButton({ artworkId }) {
+export default function RemoveFavoriteButton({ artworkId, artworkTitle = '' }) {
   const [loading, setLoading] = useState(false);
 
   const handleRemove = async () => {
@@ -14,12 +15,15 @@ export default function RemoveFavoriteButton({ artworkId }) {
 
   return (
     <button
+      type="button"
       onClick={handleRemove}
       disabled={loading}
-      className="btn-danger"
-      style={{ padding: '6px 12px', fontSize: '0.78rem' }}
+      className="btn-secondary favorite-remove-btn"
+      aria-label={artworkTitle ? `Remove "${artworkTitle}" from favorites` : 'Remove from favorites'}
+      title="Remove from favorites"
     >
-      {loading ? '...' : 'Remove favorite'}
+      <Bookmark size={13} className="favorite-remove-icon" />
+      <span>{loading ? 'Removing...' : 'Remove'}</span>
     </button>
   );
 }

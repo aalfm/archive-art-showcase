@@ -4,10 +4,15 @@ import { useActionState, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createArtwork } from '@/lib/actions/artwork.actions';
 import ImageUpload from '@/components/ui/ImageUpload';
+import FilterDropdown from '@/components/ui/FilterDropdown';
 
 export default function CreateArtworkForm({ categories }) {
   const router = useRouter();
   const [imageUrl, setImageUrl] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [categoryError, setCategoryError] = useState('');
+
+  const categoryOptions = categories.map((cat) => ({ value: cat.id, label: cat.name }));
 
   const [state, formAction, isPending] = useActionState(async (prevState, formData) => {
     const res = await createArtwork(prevState, formData);
@@ -17,6 +22,15 @@ export default function CreateArtworkForm({ categories }) {
     return res;
   }, null);
 
+  const handleSubmit = (formData) => {
+    if (!categoryId) {
+      setCategoryError('Please select a category.');
+      document.getElementById('category_id')?.focus();
+      return;
+    }
+    formAction(formData);
+  };
+
   return (
     <div className="member-form-panel">
       {state?.error && (
@@ -25,9 +39,9 @@ export default function CreateArtworkForm({ categories }) {
         </div>
       )}
 
-      <form action={formAction} className="dashboard-form member-profile-form">
+      <form action={handleSubmit} className="dashboard-form member-profile-form">
         <div className="form-group">
-          <label className="form-label">Artwork image *</label>
+          <label className="form-label">Artwork Image *</label>
           <ImageUpload
             currentImage={imageUrl}
             onUpload={(url) => setImageUrl(url)}
@@ -38,7 +52,7 @@ export default function CreateArtworkForm({ categories }) {
 
         <div className="dashboard-form-grid-2">
           <div className="form-group">
-            <label htmlFor="title" className="form-label">Artwork title *</label>
+            <label htmlFor="title" className="form-label">Artwork Title *</label>
             <input
               id="title"
               name="title"
@@ -53,19 +67,25 @@ export default function CreateArtworkForm({ categories }) {
 
           <div className="form-group">
             <label htmlFor="category_id" className="form-label">Category *</label>
-            <select id="category_id" name="category_id" className="form-select" required>
-              <option value="">Select a category...</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+            <input type="hidden" name="category_id" value={categoryId} />
+            <FilterDropdown
+              id="category_id"
+              className={`member-category-dropdown${categoryError ? ' has-error' : ''}`}
+              ariaLabel="Category"
+              value={categoryId}
+              options={categoryOptions}
+              placeholder="Select a category..."
+              onSelect={(val) => {
+                setCategoryId(String(val));
+                setCategoryError('');
+              }}
+            />
+            {categoryError && <p className="form-error">{categoryError}</p>}
           </div>
         </div>
 
         <div className="form-group">
-          <label htmlFor="description" className="form-label">Artwork description *</label>
+          <label htmlFor="description" className="form-label">Artwork Description *</label>
           <textarea
             id="description"
             name="description"
@@ -78,7 +98,7 @@ export default function CreateArtworkForm({ categories }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="tags" className="form-label">Tags (comma-separated) *</label>
+          <label htmlFor="tags" className="form-label">Tags (Comma-Separated) *</label>
           <input
             id="tags"
             name="tags"
@@ -98,7 +118,7 @@ export default function CreateArtworkForm({ categories }) {
             className="btn-primary dashboard-submit-btn"
             disabled={isPending || !imageUrl}
           >
-            {isPending ? 'Publishing artwork...' : 'Publish artwork'}
+            {isPending ? 'Publishing Artwork...' : 'Publish Artwork'}
           </button>
         </div>
       </form>
