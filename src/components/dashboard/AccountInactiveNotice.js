@@ -10,7 +10,7 @@ export default function AccountInactiveNotice({ user }) {
     >
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Account Status</h1>
+          <h1 className="dashboard-title">Account status</h1>
           <p className="dashboard-subtitle">
             Informasi status keaktifan akun ARTHIVE Anda.
           </p>
@@ -71,12 +71,14 @@ export default function AccountInactiveNotice({ user }) {
         </p>
 
         <div className="account-inactive-actions">
-          <Link href="/" className="btn-secondary">
-            Back to Home
-          </Link>
+          {user.role !== 'admin' && user.role !== 'curator' && (
+            <Link href="/" className="btn-secondary">
+              Back to home
+            </Link>
+          )}
           <form action={logoutUser}>
             <button type="submit" className="btn-primary">
-              Sign Out
+              Sign out
             </button>
           </form>
         </div>
