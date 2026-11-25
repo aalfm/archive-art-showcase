@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
+import { formatEditorialTitle } from '@/lib/utils';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import DeleteChallengeButton from './DeleteChallengeButton';
 
 export const dynamic = 'force-dynamic';
@@ -38,59 +40,119 @@ function formatSchedule(startDate, endDate) {
   return `${startStr} – ${endStr}`;
 }
 
-export default async function CuratorChallengesPage() {
+export default async function CuratorChallengesPage(props) {
   const user = await requireRole('curator');
+  const searchParams = await props.searchParams;
+  const rawStatus = (searchParams?.status || 'all').toString().toLowerCase();
+  const statusFilter = ['all', 'active', 'upcoming', 'completed'].includes(rawStatus)
+    ? rawStatus
+    : 'all';
 
-  const res = await query(`
+  const res = await query(
+    `
     SELECT c.id, c.title, c.prize, c.start_date, c.end_date, c.created_at,
-           COUNT(DISTINCT s.id) as submission_count,
-           COUNT(DISTINCT CASE WHEN s.winner_rank IS NOT NULL THEN s.id END) as winner_count,
+           COUNT(DISTINCT s.id)::int AS submission_count,
+           COUNT(DISTINCT CASE WHEN s.winner_rank IS NOT NULL THEN s.id END)::int AS winner_count,
            CASE
              WHEN NOW() < c.start_date THEN 'upcoming'
              WHEN NOW() BETWEEN c.start_date AND c.end_date THEN 'active'
-             ELSE 'ended'
-           END as status
+             ELSE 'completed'
+           END AS status
     FROM challenges c
     LEFT JOIN submissions s ON s.challenge_id = c.id
     WHERE c.curator_id = $1
     GROUP BY c.id
     ORDER BY c.created_at DESC
-  `, [user.id]);
+    `,
+    [user.id]
+  );
 
-  const challenges = res.rows;
+  const allChallenges = res.rows;
+  const counts = {
+    all: allChallenges.length,
+    active: allChallenges.filter((c) => c.status === 'active').length,
+    upcoming: allChallenges.filter((c) => c.status === 'upcoming').length,
+    completed: allChallenges.filter((c) => c.status === 'completed').length,
+  };
+
+  const challenges =
+    statusFilter === 'all'
+      ? allChallenges
+      : allChallenges.filter((c) => c.status === statusFilter);
+
+  const filterTabs = [
+    { key: 'all', label: 'All', href: '/dashboard/curator/challenges' },
+    { key: 'active', label: 'Active', href: '/dashboard/curator/challenges?status=active' },
+    { key: 'upcoming', label: 'Upcoming', href: '/dashboard/curator/challenges?status=upcoming' },
+    { key: 'completed', label: 'Completed', href: '/dashboard/curator/challenges?status=completed' },
+  ];
+
+  const statusLabelMap = {
+    active: 'Active',
+    upcoming: 'Upcoming',
+    completed: 'Completed',
+  };
+  const breadcrumbItems =
+    statusFilter !== 'all' && statusLabelMap[statusFilter]
+      ? [
+          { label: 'Dashboard', href: '/dashboard/curator' },
+          { label: 'Challenges', href: '/dashboard/curator/challenges' },
+          { label: statusLabelMap[statusFilter] },
+        ]
+      : [
+          { label: 'Dashboard', href: '/dashboard/curator' },
+          { label: 'Challenges' },
+        ];
 
   return (
-    <div className="curator-overview-page">
-      <div className="dashboard-header curator-page-header">
+    <div>
+      <Breadcrumb items={breadcrumbItems} />
+      <div className="dashboard-header">
         <div>
-          <h1 className="curator-page-title">My Challenges</h1>
-          <p className="curator-page-subtitle">Manage curatorial programs, review submissions, and select winners.</p>
+          <h1 className="dashboard-title">My challenges</h1>
+          <p className="dashboard-subtitle">
+            Manage curatorial programs, review submissions, and select winners ({allChallenges.length} total).
+          </p>
         </div>
-        <Link href="/dashboard/curator/challenges/create" className="btn-primary curator-cta-btn">
-          + Create New Challenge
+        <Link href="/dashboard/curator/challenges/create" className="btn-primary">
+          + Create challenge
         </Link>
       </div>
 
-      {challenges.length === 0 ? (
-        <div className="curator-empty-state">
-          <p className="curator-empty-text">
-            You haven&apos;t created any challenges yet.
-          </p>
-          <Link href="/dashboard/curator/challenges/create" className="btn-primary curator-cta-btn">
-            Create First Challenge
+      {allChallenges.length === 0 ? (
+        <div className="dash-empty dash-empty--with-cta">
+          <p>You haven&apos;t created any challenges yet.</p>
+          <Link href="/dashboard/curator/challenges/create" className="btn-primary">
+            Create your first challenge
           </Link>
         </div>
       ) : (
         <>
-          {/* Desktop & Tablet 5-Column Table */}
-          <div className="data-table-wrap curator-table-wrap curator-table-desktop-wrap">
-            <table className="data-table curator-challenges-5col-table">
+          {/* Status Filter Bar (reused from Admin Challenges) */}
+          <div className="admin-challenges-filter-tabs" role="tablist" aria-label="Filter challenges by status">
+            {filterTabs.map((tab) => (
+              <Link
+                key={tab.key}
+                href={tab.href}
+                role="tab"
+                aria-selected={statusFilter === tab.key}
+                className={`admin-challenges-filter-tab ${statusFilter === tab.key ? 'active' : ''}`}
+                id={`curator-filter-challenges-${tab.key}`}
+              >
+                <span>{tab.label}</span>
+                <span className="admin-challenges-filter-count">{counts[tab.key]}</span>
+              </Link>
+            ))}
+          </div>
+
+          <div className="data-table-wrap">
+            <table className="data-table dashboard-responsive-table curator-challenges-list-table">
               <colgroup>
-                <col className="curator-5col-challenge" />
-                <col className="curator-5col-prize" />
-                <col className="curator-5col-participation" />
-                <col className="curator-5col-schedule" />
-                <col className="curator-5col-actions" />
+                <col className="curator-chal-col-title" />
+                <col className="curator-chal-col-prize" />
+                <col className="curator-chal-col-participation" />
+                <col className="curator-chal-col-schedule" />
+                <col className="curator-chal-col-actions" />
               </colgroup>
               <thead>
                 <tr>
@@ -102,135 +164,101 @@ export default async function CuratorChallengesPage() {
                 </tr>
               </thead>
               <tbody>
-                {challenges.map((ch) => {
-                  const subCount = parseInt(ch.submission_count, 10) || 0;
-                  const winnerCount = parseInt(ch.winner_count, 10) || 0;
-                  const prizeInfo = parsePrize(ch.prize);
-                  const scheduleText = formatSchedule(ch.start_date, ch.end_date);
-                  const statusLabel = ch.status === 'active' ? 'Active' : ch.status === 'upcoming' ? 'Upcoming' : 'Ended';
+                {challenges.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="data-table-empty-cell">
+                      No challenges found in this category.
+                    </td>
+                  </tr>
+                ) : (
+                  challenges.map((ch) => {
+                    const subCount = Number(ch.submission_count) || 0;
+                    const winnerCount = Number(ch.winner_count) || 0;
+                    const prizeInfo = parsePrize(ch.prize);
+                    const scheduleText = formatSchedule(ch.start_date, ch.end_date);
+                    const statusLabel =
+                      ch.status === 'active'
+                        ? 'Active'
+                        : ch.status === 'upcoming'
+                          ? 'Upcoming'
+                          : 'Completed';
+                    const badgeClass =
+                      ch.status === 'active'
+                        ? 'badge-active'
+                        : ch.status === 'upcoming'
+                          ? 'badge-upcoming'
+                          : 'badge-ended';
 
-                  return (
-                    <tr key={ch.id}>
-                      <td>
-                        <div className="curator-cell-challenge">
-                          <Link href={`/challenges/${ch.id}`} className="curator-challenge-title-link">
-                            {ch.title}
-                          </Link>
-                          <span className={`badge curator-status-badge badge-${ch.status}`}>
-                            {statusLabel}
-                          </span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="curator-cell-prize">
-                          <span className="curator-prize-main">{prizeInfo.primary}</span>
-                          {prizeInfo.secondary && (
-                            <span className="curator-prize-sub">{prizeInfo.secondary}</span>
-                          )}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="curator-cell-participation">
-                          <span className="curator-participation-count">
-                            {subCount} {subCount === 1 ? 'Submission' : 'Submissions'}
-                          </span>
-                          <span className={winnerCount > 0 ? 'curator-participation-winners is-selected' : 'curator-participation-winners'}>
-                            {winnerCount > 0 ? `Winners: ${winnerCount} selected` : 'Winners: Not selected'}
-                          </span>
-                        </div>
-                      </td>
-                      <td>
-                        <span className="curator-schedule-text">{scheduleText}</span>
-                      </td>
-                      <td>
-                        <div className="curator-5col-actions-wrap">
-                          <Link
-                            href={`/dashboard/curator/challenges/${ch.id}/submissions`}
-                            className="btn-primary curator-table-btn curator-submissions-btn"
-                          >
-                            Submissions ({subCount})
-                          </Link>
-                          <div className="curator-secondary-actions-row">
+                    return (
+                      <tr key={ch.id}>
+                        <td data-label="Challenge" data-cell="primary">
+                          <div className="admin-challenge-title-cell">
+                            <Link
+                              href={`/dashboard/curator/challenges/${ch.id}`}
+                              className="dashboard-table-link"
+                            >
+                              {formatEditorialTitle(ch.title)}
+                            </Link>
+                            <div>
+                              <span className={`badge ${badgeClass}`}>{statusLabel}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td data-label="Prize">
+                          <div className="curator-prize-stack">
+                            <span className="table-cell-num">{prizeInfo.primary}</span>
+                            {prizeInfo.secondary && (
+                              <span className="table-cell-submeta">{prizeInfo.secondary}</span>
+                            )}
+                          </div>
+                        </td>
+                        <td data-label="Participation">
+                          <div className="admin-challenge-winners-cell">
+                            <span className="table-cell-num">
+                              {subCount} {subCount === 1 ? 'submission' : 'submissions'}
+                            </span>
+                            {winnerCount > 0 ? (
+                              <span className="admin-challenge-winners-count">
+                                {winnerCount} {winnerCount === 1 ? 'winner selected' : 'winners selected'}
+                              </span>
+                            ) : (
+                              <span className="table-cell-submeta">No winners selected</span>
+                            )}
+                          </div>
+                        </td>
+                        <td data-label="Schedule" className="table-cell-meta">
+                          {scheduleText}
+                        </td>
+                        <td data-label="Actions" data-cell="actions">
+                          <div className="table-actions-group">
+                            <Link
+                              href={`/dashboard/curator/challenges/${ch.id}/submissions`}
+                              className="btn-primary table-action-btn"
+                            >
+                              Submissions ({subCount})
+                            </Link>
+                            <Link
+                              href={`/dashboard/curator/challenges/${ch.id}`}
+                              className="btn-secondary table-action-btn"
+                              id={`btn-curator-view-challenge-${ch.id}`}
+                            >
+                              View details
+                            </Link>
                             <Link
                               href={`/dashboard/curator/challenges/${ch.id}/edit`}
-                              className="btn-secondary curator-table-btn"
+                              className="btn-secondary table-action-btn"
                             >
                               Edit
                             </Link>
                             <DeleteChallengeButton challengeId={ch.id} challengeTitle={ch.title} />
                           </div>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
-          </div>
-
-          {/* Mobile Vertical Card Layout */}
-          <div className="curator-cards-mobile-list">
-            {challenges.map((ch) => {
-              const subCount = parseInt(ch.submission_count, 10) || 0;
-              const winnerCount = parseInt(ch.winner_count, 10) || 0;
-              const prizeInfo = parsePrize(ch.prize);
-              const scheduleText = formatSchedule(ch.start_date, ch.end_date);
-              const statusLabel = ch.status === 'active' ? 'Active' : ch.status === 'upcoming' ? 'Upcoming' : 'Ended';
-
-              return (
-                <article key={ch.id} className="curator-mobile-card">
-                  <div className="curator-mobile-card-head">
-                    <Link href={`/challenges/${ch.id}`} className="curator-challenge-title-link">
-                      {ch.title}
-                    </Link>
-                    <span className={`badge curator-status-badge badge-${ch.status}`}>
-                      {statusLabel}
-                    </span>
-                  </div>
-
-                  <div className="curator-mobile-card-meta">
-                    <div className="curator-mobile-meta-item">
-                      <span className="curator-mobile-meta-label">Prize</span>
-                      <span className="curator-prize-main">{prizeInfo.primary}</span>
-                      {prizeInfo.secondary && (
-                        <span className="curator-prize-sub">{prizeInfo.secondary}</span>
-                      )}
-                    </div>
-                    <div className="curator-mobile-meta-item">
-                      <span className="curator-mobile-meta-label">Participation</span>
-                      <span className="curator-participation-count">
-                        {subCount} {subCount === 1 ? 'Submission' : 'Submissions'}
-                      </span>
-                      <span className={winnerCount > 0 ? 'curator-participation-winners is-selected' : 'curator-participation-winners'}>
-                        {winnerCount > 0 ? `Winners: ${winnerCount} selected` : 'Winners: Not selected'}
-                      </span>
-                    </div>
-                    <div className="curator-mobile-meta-item">
-                      <span className="curator-mobile-meta-label">Schedule</span>
-                      <span className="curator-schedule-text">{scheduleText}</span>
-                    </div>
-                  </div>
-
-                  <div className="curator-mobile-card-actions">
-                    <Link
-                      href={`/dashboard/curator/challenges/${ch.id}/submissions`}
-                      className="btn-primary curator-table-btn curator-submissions-btn"
-                    >
-                      Submissions ({subCount})
-                    </Link>
-                    <div className="curator-secondary-actions-row">
-                      <Link
-                        href={`/dashboard/curator/challenges/${ch.id}/edit`}
-                        className="btn-secondary curator-table-btn"
-                      >
-                        Edit
-                      </Link>
-                      <DeleteChallengeButton challengeId={ch.id} challengeTitle={ch.title} />
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
           </div>
         </>
       )}

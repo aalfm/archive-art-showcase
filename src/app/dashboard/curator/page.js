@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
+import { formatEditorialTitle } from '@/lib/utils';
 import DashboardStatCard from '@/components/ui/DashboardStatCard';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,38 +64,39 @@ export default async function CuratorOverviewPage() {
   const challenges = challengesRes.rows;
 
   return (
-    <div className="dash-overview curator-overview-page">
-      <div className="dashboard-header curator-page-header">
+    <div className="dash-overview">
+      <Breadcrumb items={[{ label: 'Dashboard' }]} />
+      <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Curator Overview</h1>
+          <h1 className="dashboard-title">Curator overview</h1>
           <p className="dashboard-subtitle">
             Summary of your challenges and submissions awaiting review.
           </p>
         </div>
         <Link href="/dashboard/curator/challenges/create" className="btn-primary">
-          + Create Challenge
+          + Create challenge
         </Link>
       </div>
 
       {/* Primary Metrics (3 Focused Cards) */}
       <div className="dash-kpi-grid">
         <DashboardStatCard
-          label="Managed Challenges"
+          label="Managed challenges"
           value={stats.total_challenges}
           href="/dashboard/curator/challenges"
-          linkLabel="Manage Challenges →"
+          linkLabel="Manage challenges →"
         />
         <DashboardStatCard
-          label="Active Challenges"
+          label="Active challenges"
           value={stats.active_challenges}
           href="/dashboard/curator/challenges"
-          linkLabel="View Active →"
+          linkLabel="View active →"
         />
         <DashboardStatCard
-          label="Submissions to Review"
+          label="Submissions to review"
           value={stats.pending_review_submissions}
           href="/dashboard/curator/challenges"
-          linkLabel="Review Entries →"
+          linkLabel="Review entries →"
         />
       </div>
 
@@ -101,13 +104,13 @@ export default async function CuratorOverviewPage() {
       <section className="dash-section">
         <div className="dash-section-head">
           <div>
-            <h2 className="dash-section-title">Recent Challenge Activity</h2>
+            <h2 className="dash-section-title">Recent challenge activity</h2>
             <p className="dash-section-desc">
               Latest programs under your curation. Open full management to edit or judge entries.
             </p>
           </div>
           <Link href="/dashboard/curator/challenges" className="dash-inline-link">
-            Manage All →
+            Manage all →
           </Link>
         </div>
 
@@ -115,7 +118,7 @@ export default async function CuratorOverviewPage() {
           <div className="dash-empty dash-empty--with-cta">
             <p>You haven&apos;t created any challenges yet.</p>
             <Link href="/dashboard/curator/challenges/create" className="btn-primary">
-              Create Your First Challenge
+              Create your first challenge
             </Link>
           </div>
         ) : (
@@ -127,7 +130,7 @@ export default async function CuratorOverviewPage() {
                     ? 'Active'
                     : ch.status === 'upcoming'
                       ? 'Upcoming'
-                      : 'Ended';
+                      : 'Completed';
                 const subText =
                   ch.submission_count === 1
                     ? '1 submission'
@@ -140,10 +143,10 @@ export default async function CuratorOverviewPage() {
                     <div className="dash-list-main">
                       <span className={`dash-item-kicker is-${ch.status}`}>{statusLabel}</span>
                       <Link
-                        href={`/dashboard/curator/challenges/${ch.id}/submissions`}
+                        href={`/dashboard/curator/challenges/${ch.id}`}
                         className="dash-item-title dash-item-title-link"
                       >
-                        {ch.title}
+                        {formatEditorialTitle(ch.title)}
                       </Link>
                       <span className="dash-item-meta">
                         {subText}
@@ -162,23 +165,6 @@ export default async function CuratorOverviewPage() {
             </ul>
           </div>
         )}
-      </section>
-
-      {/* Quick Management Links */}
-      <section className="dash-section">
-        <div className="dash-section-head">
-          <h2 className="dash-section-title">Quick Access</h2>
-        </div>
-        <div className="dash-quick-links">
-          <Link href="/dashboard/curator/challenges" className="dash-quick-link">
-            <span>Manage Challenges</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-          <Link href="/dashboard/curator/challenges/create" className="dash-quick-link">
-            <span>Create New Challenge</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-        </div>
       </section>
     </div>
   );

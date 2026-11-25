@@ -1,9 +1,9 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { requireAuth } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { logoutUser } from '@/lib/actions/auth.actions';
 import { Hourglass, X } from '@/components/ui/Icons';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import CuratorReapplyPanel from './CuratorReapplyPanel';
 
 export const dynamic = 'force-dynamic';
@@ -55,35 +55,48 @@ export default async function CuratorPendingPage() {
   const nextAttemptNumber = (latestApplication?.attempt_number || 0) + 1;
 
   return (
-    <div className="curator-status-shell">
-      <div className={`curator-pending-wrap curator-status-panel ${isRejected ? 'is-rejected' : 'is-pending'}`}>
-        <div className="curator-status-header">
-          <div className={`curator-pending-icon ${isRejected ? 'is-rejected' : 'is-pending'}`}>
-            {isRejected ? <X size={28} /> : <Hourglass size={28} />}
-          </div>
-
-          <span className={`curator-status-kicker ${isRejected ? 'is-rejected' : 'is-pending'}`}>
-            {isRejected ? 'APPLICATION REJECTED' : 'PENDING REVIEW'}
-            {latestApplication ? ` · APPLICATION #${latestApplication.attempt_number}` : ''}
-          </span>
-
-          <h1 className="curator-pending-title" id="curator-status-heading">
-            {isRejected ? 'Curator Application Rejected' : 'Awaiting Curator Verification'}
-          </h1>
-
-          <p className="curator-pending-desc">
+    <div>
+      <Breadcrumb items={[{ label: 'Verification Status' }]} />
+      <div className="dashboard-header">
+        <div>
+          <h1 className="dashboard-title">Verification status</h1>
+          <p className="dashboard-subtitle">
             {isRejected
-              ? 'Unfortunately, your application to become an ARTHIVE Curator was not approved.'
-              : 'Your Curator application is currently under review by the ARTHIVE Admin team. You will receive full curation access once approved.'}
+              ? 'Review administrative feedback on your Curator application and submit an updated reapplication.'
+              : 'Track your Curator account verification progress and submitted credentials.'}
           </p>
         </div>
+      </div>
+
+      <div className="curator-status-shell">
+        <div className={`curator-pending-wrap curator-status-panel ${isRejected ? 'is-rejected' : 'is-pending'}`}>
+          <div className="curator-status-header">
+            <div className={`curator-pending-icon ${isRejected ? 'is-rejected' : 'is-pending'}`}>
+              {isRejected ? <X size={28} /> : <Hourglass size={28} />}
+            </div>
+
+            <span className={`curator-status-kicker ${isRejected ? 'is-rejected' : 'is-pending'}`}>
+              {isRejected ? 'APPLICATION REJECTED' : 'PENDING REVIEW'}
+              {latestApplication ? ` · APPLICATION #${latestApplication.attempt_number}` : ''}
+            </span>
+
+            <h2 className="curator-pending-title" id="curator-status-heading">
+              {isRejected ? 'Curator Application Rejected' : 'Awaiting curator verification'}
+            </h2>
+
+            <p className="curator-pending-desc">
+              {isRejected
+                ? 'Unfortunately, your application to become an ARTHIVE Curator was not approved.'
+                : 'Your Curator application is currently under review by the ARTHIVE Admin team. You will receive full curation access once approved.'}
+            </p>
+          </div>
 
         {isRejected ? (
           <>
             <div className="curator-rejection-box" id="curator-rejection-reason-box" role="region" aria-labelledby="rejection-reason-heading">
               <div className="curator-rejection-head">
                 <h2 id="rejection-reason-heading" className="curator-rejection-heading">
-                  Reason for Rejection
+                  Reason for rejection
                 </h2>
                 {latestApplication?.reviewed_at && (
                   <span className="curator-rejection-date">
@@ -124,7 +137,7 @@ export default async function CuratorPendingPage() {
                 </span>
               </div>
               <div className="curator-summary-item">
-                <span className="curator-summary-label">Portfolio Link</span>
+                <span className="curator-summary-label">Portfolio link</span>
                 {latestApplication?.portfolio_url || user.external_link ? (
                   <a
                     href={latestApplication?.portfolio_url || user.external_link}
@@ -142,7 +155,7 @@ export default async function CuratorPendingPage() {
 
             {(latestApplication?.background || user.bio) && (
               <div className="curator-summary-block">
-                <span className="curator-summary-label">Curatorial Background</span>
+                <span className="curator-summary-label">Curatorial background</span>
                 <p className="curator-summary-text">
                   {latestApplication?.background || user.bio}
                 </p>
@@ -151,7 +164,7 @@ export default async function CuratorPendingPage() {
 
             {latestApplication?.supporting_notes && (
               <div className="curator-summary-block">
-                <span className="curator-summary-label">Supporting Information</span>
+                <span className="curator-summary-label">Supporting information</span>
                 <p className="curator-summary-text">
                   {latestApplication.supporting_notes}
                 </p>
@@ -165,12 +178,9 @@ export default async function CuratorPendingPage() {
         )}
 
         <div className="curator-pending-actions">
-          <Link href="/" className="btn-secondary curator-pending-btn">
-            Back to Home
-          </Link>
           <form action={logoutUser}>
             <button type="submit" className="btn-secondary curator-pending-btn">
-              Sign Out
+              Sign out
             </button>
           </form>
         </div>
@@ -181,7 +191,7 @@ export default async function CuratorPendingPage() {
         <section className="curator-history-panel" id="curator-application-history" aria-labelledby="curator-history-heading">
           <div className="curator-history-head">
             <h2 id="curator-history-heading" className="curator-history-title">
-              Previous Application History
+              Previous application history
             </h2>
             <span className="curator-history-count">
               {previousApplications.length} prior {previousApplications.length === 1 ? 'submission' : 'submissions'}
@@ -206,14 +216,14 @@ export default async function CuratorPendingPage() {
 
                 {app.rejection_reason && (
                   <div className="curator-history-reason">
-                    <span className="curator-summary-label">Reason for Rejection</span>
+                    <span className="curator-summary-label">Reason for rejection</span>
                     <p>{app.rejection_reason}</p>
                   </div>
                 )}
 
                 {app.portfolio_url && (
                   <div className="curator-history-meta">
-                    <span className="curator-summary-label">Submitted Portfolio: </span>
+                    <span className="curator-summary-label">Submitted portfolio: </span>
                     <a
                       href={app.portfolio_url}
                       target="_blank"
@@ -229,6 +239,7 @@ export default async function CuratorPendingPage() {
           </div>
         </section>
       )}
+      </div>
     </div>
   );
 }

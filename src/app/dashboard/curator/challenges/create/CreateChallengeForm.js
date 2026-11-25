@@ -18,7 +18,7 @@ export default function CreateChallengeForm() {
   }, null);
 
   return (
-    <div className="dashboard-form-panel">
+    <div className="dashboard-form-panel curator-form-card">
       {state?.error && (
         <div className="form-alert form-alert-error" role="alert">
           {state.error}
@@ -27,7 +27,7 @@ export default function CreateChallengeForm() {
 
       <form action={formAction} className="dashboard-form">
         <div className="form-group">
-          <label className="form-label">Challenge Banner *</label>
+          <label className="form-label">Challenge banner *</label>
           <ImageUpload
             currentImage={bannerUrl}
             onUpload={(url) => setBannerUrl(url)}
@@ -38,20 +38,20 @@ export default function CreateChallengeForm() {
 
         <div className="dashboard-form-grid-2">
           <div className="form-group">
-            <label htmlFor="title" className="form-label">Challenge Title *</label>
+            <label htmlFor="title" className="form-label">Challenge title *</label>
             <input
               id="title"
               name="title"
               type="text"
               className="form-input"
-              placeholder="e.g., ARCHITECTURAL SPECULATIONS 2026"
+              placeholder="e.g., Architectural Speculations 2026"
               required
               minLength={3}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="prize" className="form-label">Prize / Award *</label>
+            <label htmlFor="prize" className="form-label">Prize / award *</label>
             <input
               id="prize"
               name="prize"
@@ -65,7 +65,7 @@ export default function CreateChallengeForm() {
 
         <div className="dashboard-form-grid-2">
           <div className="form-group">
-            <label htmlFor="start_date" className="form-label">Start Date *</label>
+            <label htmlFor="start_date" className="form-label">Start date *</label>
             <input
               id="start_date"
               name="start_date"
@@ -75,7 +75,7 @@ export default function CreateChallengeForm() {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="end_date" className="form-label">End Date *</label>
+            <label htmlFor="end_date" className="form-label">End date *</label>
             <input
               id="end_date"
               name="end_date"
@@ -88,7 +88,7 @@ export default function CreateChallengeForm() {
 
         <div className="dashboard-form-grid-2">
           <div className="form-group">
-            <label htmlFor="description" className="form-label">Challenge Description *</label>
+            <label htmlFor="description" className="form-label">Challenge description *</label>
             <textarea
               id="description"
               name="description"
@@ -101,7 +101,7 @@ export default function CreateChallengeForm() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="rules" className="form-label">Rules (One rule per line) *</label>
+            <label htmlFor="rules" className="form-label">Rules (one rule per line) *</label>
             <textarea
               id="rules"
               name="rules"
@@ -119,7 +119,7 @@ export default function CreateChallengeForm() {
             className="btn-primary dashboard-submit-btn"
             disabled={isPending || !bannerUrl}
           >
-            {isPending ? 'Publishing Challenge...' : 'Publish Challenge'}
+            {isPending ? 'Publishing challenge...' : 'Publish challenge'}
           </button>
         </div>
       </form>

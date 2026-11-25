@@ -50,7 +50,7 @@ export default function CuratorReapplyPanel({
         className="btn-primary curator-pending-btn"
         onClick={() => setShowForm(true)}
       >
-        Reapply as Curator
+        Reapply as curator
       </button>
     );
   }
@@ -65,7 +65,7 @@ export default function CuratorReapplyPanel({
         <div>
           <span className="curator-status-kicker">APPLICATION #{nextAttemptNumber}</span>
           <h2 id="curator-reapply-heading" className="curator-reapply-title">
-            Reapply as Curator
+            Reapply as curator
           </h2>
           <p className="curator-reapply-subtitle">
             Update your curatorial profile, portfolio link, and supporting information using your existing account. Your previous review history remains preserved for reference.
@@ -89,7 +89,7 @@ export default function CuratorReapplyPanel({
 
       <form action={formAction} onSubmit={handleSubmit} className="dashboard-form">
         <div className="form-group">
-          <label htmlFor="reapply-name" className="form-label">Full Name *</label>
+          <label htmlFor="reapply-name" className="form-label">Full name *</label>
           <input
             type="text"
             id="reapply-name"
@@ -116,7 +116,7 @@ export default function CuratorReapplyPanel({
           </div>
 
           <label htmlFor="reapply-portfolio" className="form-label">
-            Portfolio Link (Optional)
+            Portfolio link (optional)
           </label>
           <input
             type="text"
@@ -145,7 +145,7 @@ export default function CuratorReapplyPanel({
 
         <div className="form-group">
           <label htmlFor="reapply-background" className="form-label">
-            Curatorial Background &amp; Experience *
+            Curatorial background &amp; experience *
           </label>
           <textarea
             id="reapply-background"
@@ -162,7 +162,7 @@ export default function CuratorReapplyPanel({
 
         <div className="form-group">
           <label htmlFor="reapply-supporting-notes" className="form-label">
-            Supporting Information / Improvements Made (Optional)
+            Supporting information / improvements made (optional)
           </label>
           <textarea
             id="reapply-supporting-notes"
@@ -190,7 +190,7 @@ export default function CuratorReapplyPanel({
             className="btn-primary"
             disabled={isPending}
           >
-            {isPending ? 'Submitting...' : 'Submit Reapplication'}
+            {isPending ? 'Submitting...' : 'Submit reapplication'}
           </button>
         </div>
       </form>

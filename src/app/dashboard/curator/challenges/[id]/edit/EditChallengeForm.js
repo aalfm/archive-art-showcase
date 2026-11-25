@@ -12,7 +12,8 @@ export default function EditChallengeForm({ challenge }) {
   const [state, formAction, isPending] = useActionState(async (prevState, formData) => {
     const res = await updateChallenge(prevState, formData);
     if (res?.success) {
-      router.push('/dashboard/curator/challenges');
+      router.push(`/dashboard/curator/challenges/${challenge.id}`);
+      router.refresh();
     }
     return res;
   }, null);
@@ -26,7 +27,7 @@ export default function EditChallengeForm({ challenge }) {
   };
 
   return (
-    <div className="dashboard-form-panel">
+    <div className="dashboard-form-panel curator-form-card">
       {state?.error && (
         <div className="form-alert form-alert-error" role="alert">
           {state.error}
@@ -37,7 +38,7 @@ export default function EditChallengeForm({ challenge }) {
         <input type="hidden" name="challenge_id" value={challenge.id} />
 
         <div className="form-group">
-          <label className="form-label">Challenge Banner *</label>
+          <label className="form-label">Challenge banner *</label>
           <ImageUpload
             currentImage={bannerUrl}
             onUpload={(url) => setBannerUrl(url)}
@@ -48,7 +49,7 @@ export default function EditChallengeForm({ challenge }) {
 
         <div className="dashboard-form-grid-2">
           <div className="form-group">
-            <label htmlFor="title" className="form-label">Challenge Title *</label>
+            <label htmlFor="title" className="form-label">Challenge title *</label>
             <input
               id="title"
               name="title"
@@ -61,7 +62,7 @@ export default function EditChallengeForm({ challenge }) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="prize" className="form-label">Prize / Award *</label>
+            <label htmlFor="prize" className="form-label">Prize / award *</label>
             <input
               id="prize"
               name="prize"
@@ -75,7 +76,7 @@ export default function EditChallengeForm({ challenge }) {
 
         <div className="dashboard-form-grid-2">
           <div className="form-group">
-            <label htmlFor="start_date" className="form-label">Start Date *</label>
+            <label htmlFor="start_date" className="form-label">Start date *</label>
             <input
               id="start_date"
               name="start_date"
@@ -86,7 +87,7 @@ export default function EditChallengeForm({ challenge }) {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="end_date" className="form-label">End Date *</label>
+            <label htmlFor="end_date" className="form-label">End date *</label>
             <input
               id="end_date"
               name="end_date"
@@ -100,7 +101,7 @@ export default function EditChallengeForm({ challenge }) {
 
         <div className="dashboard-form-grid-2">
           <div className="form-group">
-            <label htmlFor="description" className="form-label">Challenge Description *</label>
+            <label htmlFor="description" className="form-label">Challenge description *</label>
             <textarea
               id="description"
               name="description"
@@ -113,7 +114,7 @@ export default function EditChallengeForm({ challenge }) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="rules" className="form-label">Rules (One rule per line) *</label>
+            <label htmlFor="rules" className="form-label">Rules (one rule per line) *</label>
             <textarea
               id="rules"
               name="rules"
@@ -131,7 +132,7 @@ export default function EditChallengeForm({ challenge }) {
             className="btn-primary dashboard-submit-btn"
             disabled={isPending || !bannerUrl}
           >
-            {isPending ? 'Saving Changes...' : 'Save Changes'}
+            {isPending ? 'Saving changes...' : 'Save changes'}
           </button>
           <button
             type="button"
