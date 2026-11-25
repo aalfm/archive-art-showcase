@@ -156,7 +156,6 @@ export default async function AdminArtworkDetailPage(props) {
     <div className="admin-detail-page">
       <Breadcrumb items={breadcrumbItems} />
 
-      {/* Header */}
       <div className="dashboard-header admin-detail-header">
         <div>
           <div className="admin-detail-title-row">
@@ -181,7 +180,6 @@ export default async function AdminArtworkDetailPage(props) {
         </div>
       </div>
 
-      {/* Main 2-Column Layout */}
       <div className="admin-detail-layout">
         <div className="admin-detail-main">
           <section className="admin-detail-card" aria-labelledby="artwork-preview-heading">
@@ -240,7 +238,6 @@ export default async function AdminArtworkDetailPage(props) {
             </div>
           </section>
 
-          {/* Recent Comments for Moderation Context */}
           <section className="admin-detail-card" aria-labelledby="artwork-comments-heading">
             <h2 id="artwork-comments-heading" className="admin-detail-card-title">
               Recent comments ({artwork.comment_count || 0})
@@ -263,7 +260,6 @@ export default async function AdminArtworkDetailPage(props) {
           </section>
         </div>
 
-        {/* Side Column: Owner, Reports, Submissions */}
         <aside className="admin-detail-side">
           <section className="admin-detail-card" aria-labelledby="artwork-owner-heading">
             <h2 id="artwork-owner-heading" className="admin-detail-card-title">

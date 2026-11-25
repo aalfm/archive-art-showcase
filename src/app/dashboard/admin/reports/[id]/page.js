@@ -163,9 +163,7 @@ export default async function AdminReportDetailPage(props) {
         </div>
       </div>
 
-      {/* Main 2-Column Editorial Grid */}
       <div className="admin-detail-layout">
-        {/* Primary Column: Reported Artwork Preview & Metadata */}
         <div className="admin-detail-main">
           <section className="admin-detail-card" aria-labelledby="reported-artwork-heading">
             <div className="admin-detail-card-head">
@@ -252,7 +250,6 @@ export default async function AdminReportDetailPage(props) {
             )}
           </section>
 
-          {/* Moderation Actions Panel */}
           <section className="admin-detail-card" aria-labelledby="moderation-actions-heading">
             <div className="admin-detail-card-head">
               <div>
@@ -283,9 +280,7 @@ export default async function AdminReportDetailPage(props) {
           </section>
         </div>
 
-        {/* Side Column: Report Info, Reporter, Owner, Related Reports */}
         <aside className="admin-detail-side">
-          {/* A. Report Information */}
           <section className="admin-detail-card" aria-labelledby="report-info-heading">
             <h2 id="report-info-heading" className="admin-detail-card-title">
               Report information
@@ -333,7 +328,6 @@ export default async function AdminReportDetailPage(props) {
             </div>
           </section>
 
-          {/* Reporter Information */}
           <section className="admin-detail-card" aria-labelledby="reporter-info-heading">
             <h2 id="reporter-info-heading" className="admin-detail-card-title">
               Submitted by
@@ -380,7 +374,6 @@ export default async function AdminReportDetailPage(props) {
             )}
           </section>
 
-          {/* C. Artwork Owner Information */}
           <section className="admin-detail-card" aria-labelledby="owner-info-heading">
             <h2 id="owner-info-heading" className="admin-detail-card-title">
               Artwork owner
@@ -431,7 +424,6 @@ export default async function AdminReportDetailPage(props) {
             )}
           </section>
 
-          {/* Related Reports on Same Artwork */}
           {otherReportsRes.rows.length > 0 && (
             <section className="admin-detail-card" aria-labelledby="related-reports-heading">
               <h2 id="related-reports-heading" className="admin-detail-card-title">

@@ -56,7 +56,6 @@ export default function CategoryManager({ categories }) {
 
   return (
     <div>
-      {/* Create Category Form */}
       <div style={{ maxWidth: 540, background: 'var(--bg-elevated)', border: '1px solid var(--bg-secondary)', borderRadius: 'var(--radius-xs)', padding: 24, marginBottom: 32 }}>
         <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
           Add Category
@@ -93,14 +92,12 @@ export default function CategoryManager({ categories }) {
         </form>
       </div>
 
-      {/* Edit Form Feedback if editing */}
       {updateState?.error && (
         <div className="form-alert form-alert-error" role="alert" style={{ marginBottom: 16 }}>
           {updateState.error}
         </div>
       )}
 
-      {/* Category List */}
       <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
         Categories ({categories.length})
       </h2>

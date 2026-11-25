@@ -165,7 +165,6 @@ export default async function CreatorProfilePage(props) {
         backLabel={memberContext?.backLabel}
       />
 
-      {/* Profile Header */}
       <div className="creator-profile-header">
         <div className="creator-profile-avatar-wrap">
           <UserAvatar
@@ -207,7 +206,6 @@ export default async function CreatorProfilePage(props) {
         </div>
       </div>
 
-      {/* Artwork Gallery */}
       <div className="showcase-container creator-profile-gallery">
         <h2 className="showcase-heading creator-profile-gallery-heading">
           Artwork Gallery

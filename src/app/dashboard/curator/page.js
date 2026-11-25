@@ -83,7 +83,6 @@ export default async function CuratorOverviewPage() {
         </Link>
       </div>
 
-      {/* Primary Metrics (3 Focused Cards) */}
       <div className="dash-kpi-grid">
         <DashboardStatCard
           label="Managed Challenges"
@@ -105,7 +104,6 @@ export default async function CuratorOverviewPage() {
         />
       </div>
 
-      {/* Recent Challenge Activity List */}
       <section className="dash-section">
         <div className="dash-section-head">
           <div>

@@ -29,7 +29,6 @@ function RegisterForm() {
   const [email, setEmail] = useState('');
   const [bio, setBio] = useState('');
 
-  // Mandatory Curator fields
   const [portfolioUrl, setPortfolioUrl] = useState('');
   const [portfolioError, setPortfolioError] = useState('');
   const [portfolioTouched, setPortfolioTouched] = useState(false);
@@ -157,7 +156,6 @@ function RegisterForm() {
         <div className="auth-card">
           <h2 className="auth-heading">Create Account</h2>
 
-          {/* Role Selector */}
           <div className="role-selector" role="group" aria-label="Choose account type">
             <button
               type="button"
@@ -283,7 +281,6 @@ function RegisterForm() {
                   </p>
                 </div>
 
-                {/* Mandatory Portfolio Link */}
                 <div className="form-group">
                   <label htmlFor="register-portfolio" className="form-label">
                     Portfolio Link <span className="form-required-mark" aria-hidden="true">*</span>
@@ -322,7 +319,6 @@ function RegisterForm() {
                   ) : null}
                 </div>
 
-                {/* Mandatory CV (Upload File OR Link) */}
                 <div className="form-group curator-cv-group" id="curator-cv-section">
                   <label htmlFor="register-cv-file" className="form-label">
                     Curriculum Vitae (CV) <span className="form-required-mark" aria-hidden="true">*</span>

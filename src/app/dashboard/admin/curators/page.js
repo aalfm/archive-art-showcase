@@ -98,7 +98,6 @@ export default async function AdminCuratorsPage() {
         </div>
       </div>
 
-      {/* Pending Section */}
       <div className="dash-section">
         <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
           Awaiting Approval ({pendingCurators.length})
@@ -254,7 +253,6 @@ export default async function AdminCuratorsPage() {
         )}
       </div>
 
-      {/* Verified / Rejected History Section */}
       <div className="dash-section">
         <div className="dash-section-head" style={{ marginBottom: 14 }}>
           <div>

@@ -95,7 +95,6 @@ function ExploreFiltersInner({ categories }) {
       />
 
       <div className="explore-filter-row explore-filter-row--pair">
-        {/* Category filter */}
         <FilterDropdown
           id="explore-material-filter"
           className="explore-dropdown-category"
@@ -109,7 +108,6 @@ function ExploreFiltersInner({ categories }) {
           }}
         />
 
-        {/* Sort */}
         <FilterDropdown
           id="explore-era-filter"
           className="explore-dropdown-sort"

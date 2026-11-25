@@ -16,7 +16,6 @@ function normalizeImageSrc(src) {
       return parsed.toString();
     }
   } catch {
-    // Relative path like /uploads/...
   }
 
   return trimmed;

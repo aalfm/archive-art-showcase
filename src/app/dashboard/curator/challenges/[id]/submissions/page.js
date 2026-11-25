@@ -154,7 +154,6 @@ export default async function ChallengeSubmissionsPage(props) {
         </div>
       )}
 
-      {/* Published Winner Placements Summary */}
       {hasEnded && (
         <section className="dash-section" aria-labelledby="curator-winners-summary-heading">
           <div className="dash-section-head">
@@ -205,7 +204,6 @@ export default async function ChallengeSubmissionsPage(props) {
         </section>
       )}
 
-      {/* Submissions & Winner Selection Table */}
       <section className="dash-section">
         <div className="dash-section-head">
           <div>

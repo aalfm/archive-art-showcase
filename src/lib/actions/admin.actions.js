@@ -331,7 +331,6 @@ export async function takeDownArtwork(rawReportId, rawArtworkId, rawAdminNote = 
   try {
     await client.query('BEGIN');
 
-    // Mark artwork as taken down
     const artRes = await client.query(
       `UPDATE artworks
        SET status = 'taken_down'

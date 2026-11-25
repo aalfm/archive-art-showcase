@@ -157,7 +157,6 @@ export default async function ChallengeDetailPage(props) {
         backLabel={memberContext?.backLabel}
       />
 
-      {/* Banner */}
       <div className="challenge-detail-banner">
         {challenge.banner_url && (
           <Image
@@ -186,7 +185,6 @@ export default async function ChallengeDetailPage(props) {
         </div>
       </div>
 
-      {/* Challenge Winners Showcase (for Completed Challenges or any announced winners) */}
       {(isCompleted || winners.length > 0) && (
         <section className="challenge-winners-section" aria-labelledby="challenge-winners-heading">
           <div className="challenge-winners-head">
@@ -221,7 +219,6 @@ export default async function ChallengeDetailPage(props) {
             </div>
           ) : (
             <div className="challenge-winners-showcase">
-              {/* Featured 1st Place Winner */}
               {firstPlaceWinner && (
                 <article className="winner-editorial-card is-lead" data-rank={firstPlaceWinner.winner_rank}>
                   <Link
@@ -295,7 +292,6 @@ export default async function ChallengeDetailPage(props) {
                 </article>
               )}
 
-              {/* Additional Ranked Winners (2nd / 3rd Place) */}
               {otherWinners.length > 0 && (
                 <div className="winners-secondary-grid">
                   {otherWinners.map((w) => {
@@ -382,15 +378,12 @@ export default async function ChallengeDetailPage(props) {
       )}
 
       <div className="challenge-detail-layout">
-        {/* Main Content */}
         <div className="challenge-detail-main">
-          {/* Description */}
           <div className="challenge-detail-section">
             <h2 className="challenge-section-title">About This Challenge</h2>
             <p className="challenge-section-text">{challenge.description}</p>
           </div>
 
-          {/* Rules */}
           <div className="challenge-detail-section">
             <h2 className="challenge-section-title">Guidelines &amp; Rules</h2>
             <div className="challenge-rules">
@@ -406,15 +399,12 @@ export default async function ChallengeDetailPage(props) {
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className="challenge-detail-sidebar">
-          {/* Prize */}
           <div className="challenge-sidebar-card">
             <h3 className="challenge-sidebar-title">Prize</h3>
             <p className="challenge-prize-text">{challenge.prize}</p>
           </div>
 
-          {/* Schedule & Status */}
           <div className="challenge-sidebar-card">
             <h3 className="challenge-sidebar-title">Schedule</h3>
             <div className="challenge-dates">
@@ -440,7 +430,6 @@ export default async function ChallengeDetailPage(props) {
             </div>
           </div>
 
-          {/* Curator Organizer */}
           {challenge.curator_name && (
             <div className="challenge-sidebar-card">
               <h3 className="challenge-sidebar-title">Organized By</h3>
@@ -462,7 +451,6 @@ export default async function ChallengeDetailPage(props) {
             </div>
           )}
 
-          {/* Submit Form (Active only) */}
           {user?.role === 'member' && isActive && (
             <ChallengeSubmitForm
               challengeId={challenge.id}

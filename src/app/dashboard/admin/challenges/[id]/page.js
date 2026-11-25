@@ -129,7 +129,6 @@ export default async function AdminChallengeDetailPage(props) {
         </div>
       )}
 
-      {/* Current Winner Announcement Overview (Read-Only) */}
       {hasEnded && (
         <section className="dash-section" aria-labelledby="admin-winners-summary-heading">
           <div className="dash-section-head">
@@ -187,7 +186,6 @@ export default async function AdminChallengeDetailPage(props) {
         </section>
       )}
 
-      {/* Submissions Read-Only Overview Table */}
       <section className="dash-section">
         <div className="dash-section-head">
           <div>

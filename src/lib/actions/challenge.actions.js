@@ -213,7 +213,6 @@ export async function submitToChallenge(prevState, formData) {
   if (!challengeId || !artworkId) return { error: 'Invalid submission data.' };
 
   try {
-    // Verify challenge is active
     const challenge = await query(
       'SELECT * FROM challenges WHERE id=$1 AND start_date <= NOW() AND end_date >= NOW()',
       [challengeId]
@@ -222,7 +221,6 @@ export async function submitToChallenge(prevState, formData) {
       return { error: 'Challenge is inactive or has already ended.' };
     }
 
-    // Verify artwork belongs to member
     const artwork = await query(
       'SELECT user_id FROM artworks WHERE id=$1 AND status=\'active\'',
       [artworkId]
@@ -232,7 +230,6 @@ export async function submitToChallenge(prevState, formData) {
       return { error: 'This artwork does not belong to you.', status: 403, code: 'FORBIDDEN' };
     }
 
-    // Check duplicate submission (member already submitted to this challenge)
     const existing = await query(
       'SELECT id FROM submissions WHERE challenge_id=$1 AND member_id=$2',
       [challengeId, session.user.id]
@@ -310,7 +307,6 @@ export async function selectWinner(prevState, formData) {
   try {
     await client.query('BEGIN');
 
-    // Verify challenge exists, actor owns it as an approved curator, and competition has ended
     const challengeRes = await client.query(
       'SELECT id, curator_id, end_date FROM challenges WHERE id = $1',
       [challengeId]
@@ -330,7 +326,6 @@ export async function selectWinner(prevState, formData) {
       return { error: 'Winners can only be selected after the challenge has ended.' };
     }
 
-    // Verify submission belongs to this challenge and artwork is valid & active
     const submissionRes = await client.query(
       `SELECT s.id, s.challenge_id, a.status AS artwork_status
        FROM submissions s
@@ -356,7 +351,6 @@ export async function selectWinner(prevState, formData) {
       [challengeId, rank, submissionId]
     );
 
-    // Assign rank and optional selection note to target submission
     await client.query(
       'UPDATE submissions SET winner_rank = $1, winner_note = $2 WHERE id = $3',
       [rank, winnerNote, submissionId]

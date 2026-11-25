@@ -27,7 +27,6 @@ export default async function EditArtworkPage(props) {
 
   const artwork = artworkRes.rows[0];
 
-  // Verify ownership
   if (artwork.user_id !== user.id && user.role !== 'admin') {
     redirect('/dashboard/member/artworks');
   }

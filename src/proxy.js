@@ -27,7 +27,6 @@ export async function proxy(request) {
     }
   }
 
-  // Protected dashboard area
   if (pathname.startsWith('/dashboard')) {
     if (!valid) {
       const loginUrl = new URL('/login', request.url);

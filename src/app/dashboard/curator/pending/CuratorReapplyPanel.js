@@ -204,7 +204,6 @@ export default function CuratorReapplyPanel({
           </p>
         </div>
 
-        {/* Mandatory Portfolio Link */}
         <div className="form-group">
           <label htmlFor="reapply-portfolio" className="form-label">
             Portfolio Link <span className="form-required-mark" aria-hidden="true">*</span>
@@ -246,7 +245,6 @@ export default function CuratorReapplyPanel({
           ) : null}
         </div>
 
-        {/* Mandatory CV (Upload File OR Link) */}
         <div className="form-group curator-cv-group">
           <label htmlFor="reapply-cv-file" className="form-label">
             Curriculum Vitae (CV) <span className="form-required-mark" aria-hidden="true">*</span>

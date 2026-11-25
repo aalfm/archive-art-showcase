@@ -29,7 +29,6 @@ export default function EditArtworkForm({ artwork, categories }) {
         </div>
       )}
 
-      {/* Non-editable image display as per PRD */}
       <div className="form-group">
         <label className="form-label">Artwork Image (Cannot Be Changed)</label>
         <div className="member-readonly-artwork-preview">

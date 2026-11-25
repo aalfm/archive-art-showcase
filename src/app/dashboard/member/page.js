@@ -155,7 +155,6 @@ export default async function MemberOverviewPage(props) {
         </Link>
       </div>
 
-      {/* Primary Metrics (3 Focused Cards) */}
       <div className="dash-kpi-grid">
         <DashboardStatCard
           label="Published Artworks"
@@ -177,7 +176,6 @@ export default async function MemberOverviewPage(props) {
         />
       </div>
 
-      {/* Conditional Important Artwork Review / Moderation Notice */}
       {hasModerationNotice && (
         <div className="dash-notice" role="status">
           <div className="dash-notice-body">
@@ -198,7 +196,6 @@ export default async function MemberOverviewPage(props) {
         </div>
       )}
 
-      {/* Concise Recent Activity */}
       <section className="dash-section">
         <div className="dash-section-head">
           <div>

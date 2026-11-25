@@ -91,7 +91,6 @@ export default async function AdminOverviewPage() {
         </div>
       </div>
 
-      {/* Primary Metrics (3 Focused Cards) */}
       <div className="dash-kpi-grid">
         <DashboardStatCard
           label="Total Users"
@@ -113,7 +112,6 @@ export default async function AdminOverviewPage() {
         />
       </div>
 
-      {/* Priority Attention List */}
       <section className="dash-section">
         <div className="dash-section-head">
           <div>

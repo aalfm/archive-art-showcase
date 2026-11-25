@@ -128,7 +128,6 @@ export default async function CuratorChallengesPage(props) {
         </div>
       ) : (
         <>
-          {/* Status Filter Bar (reused from Admin Challenges) */}
           <div className="admin-challenges-filter-tabs" role="tablist" aria-label="Filter challenges by status">
             {filterTabs.map((tab) => (
               <Link

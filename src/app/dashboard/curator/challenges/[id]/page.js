@@ -156,10 +156,8 @@ export default async function CuratorChallengeDetailPage(props) {
         </div>
       </div>
 
-      {/* Read-only Form-Like Panel Mirroring EditChallengeForm */}
       <div className="dashboard-form-panel curator-readonly-panel">
         <div className="dashboard-form curator-readonly-form">
-          {/* Cover Image */}
           <div className="form-group">
             <span className="form-label">Challenge Cover Image</span>
             {challenge.banner_url ? (
@@ -180,7 +178,6 @@ export default async function CuratorChallengeDetailPage(props) {
             )}
           </div>
 
-          {/* Title & Prize */}
           <div className="dashboard-form-grid-2">
             <div className="form-group">
               <span className="form-label">Challenge Title</span>
@@ -197,7 +194,6 @@ export default async function CuratorChallengeDetailPage(props) {
             </div>
           </div>
 
-          {/* Status & Participation Summary */}
           <div className="dashboard-form-grid-2">
             <div className="form-group">
               <span className="form-label">Challenge Status</span>
@@ -218,7 +214,6 @@ export default async function CuratorChallengeDetailPage(props) {
             </div>
           </div>
 
-          {/* Start Date & End Date / Submission Deadline */}
           <div className="dashboard-form-grid-2">
             <div className="form-group">
               <span className="form-label">Start Date</span>
@@ -235,7 +230,6 @@ export default async function CuratorChallengeDetailPage(props) {
             </div>
           </div>
 
-          {/* Description & Rules / Judging Criteria */}
           <div className="dashboard-form-grid-2">
             <div className="form-group">
               <span className="form-label">Challenge Description</span>
@@ -260,7 +254,6 @@ export default async function CuratorChallengeDetailPage(props) {
             </div>
           </div>
 
-          {/* Curatorial Record Footer Info */}
           <div className="curator-readonly-meta-strip">
             <span>Curated by <strong>{challenge.curator_name || user.name}</strong></span>
             <span>·</span>
@@ -269,7 +262,6 @@ export default async function CuratorChallengeDetailPage(props) {
             <span>Challenge ID #{challenge.id}</span>
           </div>
 
-          {/* Actions */}
           <div className="dashboard-form-actions">
             {canEdit && (
               <Link

@@ -14,20 +14,17 @@ export async function createSession(userId) {
   const sessionId = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + SESSION_DURATION_DAYS * 24 * 60 * 60 * 1000);
 
-  // Store session in DB
   await query(
     'INSERT INTO sessions (id, user_id, expires_at) VALUES ($1, $2, $3)',
     [sessionId, userId, expiresAt]
   );
 
-  // Create JWT
   const token = await new SignJWT({ sessionId, userId })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime(`${SESSION_DURATION_DAYS}d`)
     .setIssuedAt()
     .sign(SECRET);
 
-  // Set cookie
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
@@ -185,7 +182,6 @@ export async function requireRole(...roles) {
     }
     redirect('/');
   }
-  // Additional check for curator status
   if (user.role === 'curator' && roles.includes('curator')) {
     if (user.curator_status !== 'approved') {
       const { redirect } = await import('next/navigation');

@@ -280,14 +280,12 @@ export async function reportArtwork(prevState, formData) {
   const details = reason === 'Other' ? trimmedDetails : null;
 
   try {
-    // Check if artwork exists
     const artwork = await query('SELECT id, user_id FROM artworks WHERE id=$1', [artworkId]);
     if (artwork.rows.length === 0) return { error: 'Artwork not found.' };
     if (artwork.rows[0].user_id === session.user.id) {
       return { error: 'You cannot report your own artwork.' };
     }
 
-    // Check duplicate report
     const existing = await query(
       'SELECT id FROM reports WHERE user_id=$1 AND artwork_id=$2',
       [session.user.id, artworkId]

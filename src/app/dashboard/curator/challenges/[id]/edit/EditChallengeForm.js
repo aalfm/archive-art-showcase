@@ -8,7 +8,6 @@ import ChallengeTitleField, {
 } from '@/components/dashboard/ChallengeTitleField';
 import ImageUpload from '@/components/ui/ImageUpload';
 
-// Format dates for input datetime-local: YYYY-MM-DDTHH:MM
 function formatDatetimeLocal(isoStr) {
   if (!isoStr) return '';
   const d = new Date(isoStr);

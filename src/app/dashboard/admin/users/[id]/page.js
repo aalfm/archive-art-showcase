@@ -194,7 +194,6 @@ export default async function AdminMemberDetailPage(props) {
         ]}
       />
 
-      {/* Header + Member Actions */}
       <div className="dashboard-header admin-detail-header">
         <div>
           <h1 className="dashboard-title">Member details</h1>
@@ -216,7 +215,6 @@ export default async function AdminMemberDetailPage(props) {
         </div>
       </div>
 
-      {/* A. Member Profile Card */}
       <section className="admin-detail-card admin-member-profile-card" aria-labelledby="member-profile-heading">
         <div className="admin-member-identity-top">
           <UserAvatar
@@ -276,7 +274,6 @@ export default async function AdminMemberDetailPage(props) {
         </div>
       </section>
 
-      {/* B. Member Statistics */}
       <section className="admin-stats-grid" aria-label="Member statistics">
         <div className="admin-stat-box">
           <span className="admin-stat-label">Uploaded artworks</span>
@@ -306,7 +303,6 @@ export default async function AdminMemberDetailPage(props) {
         </div>
       </section>
 
-      {/* C. Member Artworks */}
       <section className="dash-section" aria-labelledby="member-artworks-heading">
         <div className="dash-section-head">
           <div>
@@ -372,7 +368,6 @@ export default async function AdminMemberDetailPage(props) {
         )}
       </section>
 
-      {/* D. Challenge Submissions */}
       <section className="dash-section" aria-labelledby="member-submissions-heading">
         <div className="dash-section-head">
           <div>
@@ -439,7 +434,6 @@ export default async function AdminMemberDetailPage(props) {
         )}
       </section>
 
-      {/* Moderation History for this Member's Artworks */}
       <section className="dash-section" aria-labelledby="member-reports-heading">
         <div className="dash-section-head">
           <div>

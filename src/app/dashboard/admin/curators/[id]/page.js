@@ -127,7 +127,6 @@ export default async function AdminCuratorApplicationDetailPage(props) {
         </div>
       </div>
 
-      {/* Applicant Identity Card */}
       <section className="admin-detail-card admin-member-profile-card" aria-labelledby="curator-applicant-heading">
         <div className="admin-member-identity-top">
           <UserAvatar src={null} role="curator" name={applicant.name} size={64} />
@@ -150,7 +149,6 @@ export default async function AdminCuratorApplicationDetailPage(props) {
         </div>
       </section>
 
-      {/* Submitted CV & Portfolio Documents */}
       <section className="admin-detail-card" aria-labelledby="curator-documents-heading">
         <div className="dash-section-head" style={{ marginBottom: 16 }}>
           <div>
@@ -164,7 +162,6 @@ export default async function AdminCuratorApplicationDetailPage(props) {
         </div>
 
         <div className="admin-curator-doc-grid">
-          {/* Portfolio Card */}
           <div className="admin-curator-doc-card" id="admin-curator-portfolio-card">
             <div className="admin-curator-doc-head">
               <span className="admin-meta-label">Portfolio link</span>
@@ -202,7 +199,6 @@ export default async function AdminCuratorApplicationDetailPage(props) {
             )}
           </div>
 
-          {/* CV Card */}
           <div className="admin-curator-doc-card" id="admin-curator-cv-card">
             <div className="admin-curator-doc-head">
               <span className="admin-meta-label">Curriculum Vitae (CV)</span>
@@ -273,7 +269,6 @@ export default async function AdminCuratorApplicationDetailPage(props) {
         </div>
       </section>
 
-      {/* Curatorial Background & Supporting Information */}
       <section className="admin-detail-card" aria-labelledby="curator-background-heading">
         <h2 id="curator-background-heading" className="dash-section-title" style={{ marginBottom: 14 }}>
           Application details
@@ -307,7 +302,6 @@ export default async function AdminCuratorApplicationDetailPage(props) {
         </div>
       </section>
 
-      {/* Previous Application History (when reapplications exist) */}
       {previousApplications.length > 0 && (
         <section className="dash-section" aria-labelledby="curator-prev-history-heading">
           <div className="dash-section-head">

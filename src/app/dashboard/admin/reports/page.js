@@ -67,7 +67,6 @@ export default async function AdminReportsPage() {
         </div>
       </div>
 
-      {/* Pending Reports */}
       <section className="moderation-section">
         <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
           Pending Reports ({pendingReports.length})
@@ -155,7 +154,6 @@ export default async function AdminReportsPage() {
         )}
       </section>
 
-      {/* Moderation History */}
       <section className="moderation-section">
         <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
           Moderation History ({historyReports.length})

@@ -126,7 +126,6 @@ export default async function AdminChallengesPage(props) {
         </div>
       </div>
 
-      {/* Status Filter Bar */}
       <div className="admin-challenges-filter-tabs" role="tablist" aria-label="Filter challenges by status">
         {filterTabs.map((tab) => (
           <Link

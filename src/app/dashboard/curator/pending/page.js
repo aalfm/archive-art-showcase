@@ -229,7 +229,6 @@ export default async function CuratorPendingPage() {
         </div>
       </div>
 
-      {/* Preserved Application History (visible for multi-attempt applicants) */}
       {previousApplications.length > 0 && (
         <section className="curator-history-panel" id="curator-application-history" aria-labelledby="curator-history-heading">
           <div className="curator-history-head">

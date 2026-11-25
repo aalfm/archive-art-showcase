@@ -159,10 +159,8 @@ export default function ImageUpload({
 
   return (
     <div className="image-upload-wrapper">
-      {/* Hidden field carrying the server-uploaded image path */}
       <input type="hidden" name={name} value={imageValue} />
 
-      {/* File-only input */}
       <input
         ref={fileRef}
         type="file"

@@ -71,10 +71,8 @@ export default async function AdminUsersPage({ searchParams }) {
         </div>
       </div>
 
-      {/* Filter / Search Bar */}
       <UserFilters initialSearch={search} initialRole={roleFilter} />
 
-      {/* Users Table */}
       <div className="data-table-wrap">
         <table className="data-table dashboard-responsive-table admin-users-table">
           <colgroup>

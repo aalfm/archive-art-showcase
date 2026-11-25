@@ -200,13 +200,11 @@ export default function ArtworkInteractions({
     );
   }
 
-  // Interaction buttons (like, favorite, report)
   return (
     <div className="artwork-interactions">
       {toast && <div className="interaction-toast">{toast}</div>}
 
       <div className="interaction-buttons">
-        {/* Like */}
         <button
           type="button"
           className={`interaction-btn like-btn ${liked ? 'active' : ''}`}
@@ -222,7 +220,6 @@ export default function ArtworkInteractions({
           <span>{likeCountState}</span>
         </button>
 
-        {/* Favorite */}
         <button
           type="button"
           className={`interaction-btn fav-btn ${favorited ? 'active' : ''}`}
@@ -261,7 +258,6 @@ export default function ArtworkInteractions({
         )}
       </div>
 
-      {/* Report Form */}
       {showReportForm && !reported && (
         <form
           action={async (formData) => {

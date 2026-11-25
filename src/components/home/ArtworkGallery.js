@@ -33,14 +33,12 @@ export default function ArtworkGallery({
   const lastPointerTypeRef = useRef('mouse');
   const touchSwipeRef = useRef({ x: 0, y: 0, active: false });
 
-  // Cleanup navigation lock timer on unmount
   useEffect(() => {
     return () => {
       if (navTimerRef.current) clearTimeout(navTimerRef.current);
     };
   }, []);
 
-  // Viewport entrance & visibility observer (for entrance reveal + keyboard arrow scoping)
   useEffect(() => {
     const node = sectionRef.current;
     if (!node) return;
@@ -67,7 +65,6 @@ export default function ArtworkGallery({
     return () => observer.disconnect();
   }, []);
 
-  // Dropdown outside-click & Escape handling
   useEffect(() => {
     const handleOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -198,7 +195,6 @@ export default function ArtworkGallery({
     [filtered.length, safeIndex, resetCardTilt]
   );
 
-  // Desktop keyboard arrow navigation when gallery is visible
   useEffect(() => {
     if (!isGalleryVisible) return;
     const handleWindowKeyDown = (e) => {
@@ -227,7 +223,6 @@ export default function ArtworkGallery({
     setCatOpen(false);
   };
 
-  // Pointer & 3D tilt interactions (hover on desktop, tap on touch)
   const handleCardPointerEnter = (e) => {
     lastPointerTypeRef.current = e.pointerType || 'mouse';
     if (e.pointerType === 'mouse') {
@@ -293,7 +288,6 @@ export default function ArtworkGallery({
       aria-label="Curated Architectural Exhibition"
     >
       <div className="editorial-container">
-        {/* Minimalist Gallery Header with Single All Categories Filter */}
         <header className="editorial-gallery-header">
           <div className="editorial-section-title-group">
             <span className="editorial-eyebrow">CURATED EXHIBITION</span>
@@ -359,7 +353,6 @@ export default function ArtworkGallery({
           </div>
         </header>
 
-        {/* Immersive Single-Artwork Tilted Exhibition Showcase */}
         {!activeArtwork ? (
           <div className="editorial-empty-state">
             <p className="editorial-empty-title">
@@ -382,7 +375,6 @@ export default function ArtworkGallery({
           </div>
         ) : (
           <div className="tilted-showcase-shell">
-            {/* 3D Tilted Artwork Monolith */}
             <div
               key={`plate-${activeArtwork.id}-${transitionTick}`}
               className={`tilted-slide-stage tilted-slide-${slideDir}`}
@@ -399,7 +391,6 @@ export default function ArtworkGallery({
                 aria-label={`${activeArtwork.title} — hover or tap to view curatorial details`}
               >
                 <div className="tilted-card-inner">
-                  {/* Front Layer: Dominant Full-Color Architectural Artwork */}
                   <div className="tilted-face tilted-face-front" aria-hidden={isRevealed}>
                     <ArtworkImage
                       src={activeArtwork.image_url}
@@ -411,7 +402,6 @@ export default function ArtworkGallery({
                     />
                   </div>
 
-                  {/* Back Layer: Minimal Essential Artwork Information */}
                   <div className="tilted-face tilted-face-back" aria-hidden={!isRevealed}>
                     <div className="tilted-back-content">
                       <div className="tilted-back-header">
@@ -457,7 +447,6 @@ export default function ArtworkGallery({
                 </div>
               </div>
 
-              {/* Hierarchy 2: Clickable Artwork Title Beneath the Artwork */}
               <div className="tilted-caption-bar">
                 <div className="tilted-title-wrap">
                   <h3 className="tilted-artwork-title">
@@ -470,7 +459,6 @@ export default function ArtworkGallery({
                   </h3>
                 </div>
 
-                {/* Accessible / Mobile Details Toggle */}
                 <button
                   type="button"
                   className={`tilted-flip-toggle ${isRevealed ? 'active' : ''}`}
@@ -485,7 +473,6 @@ export default function ArtworkGallery({
               </div>
             </div>
 
-            {/* Hierarchy 3: Reused Featured Artists Minimal Navigation + Complete Archive Link */}
             <div className="exhibition-nav-bar">
               <div
                 className="artist-dossier-nav exhibition-dossier-nav"

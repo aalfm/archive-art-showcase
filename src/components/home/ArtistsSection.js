@@ -255,7 +255,6 @@ export default function ArtistsSection({ artists = [] }) {
         </header>
 
         <div className={`artist-dossier-stage${folderOpen ? ' is-open' : ''}`}>
-          {/* Primary Single Visual Focus: Warm Cream Landscape React Bits Folder */}
           <div className="artist-dossier-folder-area">
             <Folder
               mode="flap"
@@ -284,7 +283,6 @@ export default function ArtistsSection({ artists = [] }) {
             />
           </div>
 
-          {/* Smoothly Revealed Artist Works Preview Gallery */}
           <div
             className="artist-dossier-drawer"
             data-open={folderOpen ? 'true' : 'false'}
@@ -370,7 +368,6 @@ export default function ArtistsSection({ artists = [] }) {
             </div>
           </div>
 
-          {/* Minimal Inter-Artist Navigation */}
           <div className="artist-dossier-nav" role="navigation" aria-label="Featured artist dossier navigation">
             <button
               type="button"

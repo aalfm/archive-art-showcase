@@ -110,7 +110,6 @@ export default function DashboardSidebar({ user, isInactive = false }) {
 
   return (
     <>
-      {/* Mobile & Tablet Topbar */}
       <header className="dashboard-mobile-topbar">
         <Link href={brandHref} className="dashboard-topbar-brand" aria-label={brandAriaLabel}>
           <Image
@@ -166,7 +165,6 @@ export default function DashboardSidebar({ user, isInactive = false }) {
           </button>
         </div>
 
-        {/* User info */}
         <div className="sidebar-user">
           <UserAvatar
             src={user.profile_image}
@@ -189,7 +187,6 @@ export default function DashboardSidebar({ user, isInactive = false }) {
 
         <div className="sidebar-divider"></div>
 
-        {/* Navigation */}
         <nav className="sidebar-nav" aria-label="Dashboard Navigation">
           {links.map((link) => (
             <Link
@@ -208,7 +205,6 @@ export default function DashboardSidebar({ user, isInactive = false }) {
 
         <div className="sidebar-divider" style={{ marginTop: 'auto' }}></div>
 
-        {/* Explore / Back to site (non-admin) + logout */}
         <div className="sidebar-footer">
           {!isDashboardOnly && (
             <Link href="/" className="sidebar-nav-item" onClick={() => setDrawerOpen(false)}>

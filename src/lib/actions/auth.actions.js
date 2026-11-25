@@ -27,7 +27,6 @@ export async function registerUser(prevState, formData) {
   const rawCvUrl = formData.get('cv_url')?.toString().trim() || '';
   const rawCvFile = formData.get('cv_file');
 
-  // Validation
   if (!name || !email || !password || !role) {
     return { error: 'All fields are required.' };
   }
