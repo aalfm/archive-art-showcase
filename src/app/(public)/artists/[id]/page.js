@@ -3,11 +3,13 @@ import { unstable_noStore as noStore } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
 import { query } from '@/lib/db';
+import { getSession } from '@/lib/auth';
 import { applyAvatarPolicy } from '@/lib/avatar';
+import { resolveRoleReturnContext } from '@/lib/member-navigation';
 import { toId } from '@/lib/utils';
 import { Heart } from '@/components/ui/Icons';
 import UserAvatar from '@/components/ui/UserAvatar';
-import Breadcrumb from '@/components/ui/Breadcrumb';
+import DetailContextBar from '@/components/ui/DetailContextBar';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -58,27 +60,41 @@ export async function generateMetadata(props) {
 }
 
 export default async function CreatorProfilePage(props) {
-  const params = await props.params;
+  const [params, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
   if (!toId(params.id)) notFound();
-  const data = await getCreatorProfile(params.id);
+  const [data, session] = await Promise.all([
+    getCreatorProfile(params.id),
+    getSession(),
+  ]);
   if (!data) notFound();
 
   const { user, artworks } = data;
+  const memberContext = resolveRoleReturnContext(searchParams, session?.user || null);
+  const withContext = (href) => (memberContext ? memberContext.appendContext(href) : href);
   const joinDate = new Date(user.created_at).toLocaleDateString('en-US', {
     month: 'long',
     year: 'numeric',
   });
 
-  const breadcrumbItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Artists', href: '/artists' },
-    { label: user.name },
-  ];
+  const breadcrumbItems = memberContext
+    ? memberContext.buildBreadcrumbs(user.name)
+    : [
+        { label: 'Home', href: '/' },
+        { label: 'Artists', href: '/artists' },
+        { label: user.name },
+      ];
 
   if (user.is_active === false) {
     return (
       <div className="creator-profile-page artist-inactive-page">
-        <Breadcrumb items={breadcrumbItems} className="arthive-breadcrumb--detail" />
+        <DetailContextBar
+          breadcrumbItems={breadcrumbItems}
+          returnHref={memberContext?.returnHref}
+          backLabel={memberContext?.backLabel}
+        />
 
         <section
           className="artist-inactive-card"
@@ -128,10 +144,10 @@ export default async function CreatorProfilePage(props) {
 
           <div className="artist-inactive-actions">
             <Link href="/explore" className="btn-primary">
-              Explore artworks
+              Explore Artworks
             </Link>
-            <Link href="/artists" className="btn-secondary">
-              Back to artists
+            <Link href={memberContext ? memberContext.returnHref : '/artists'} className="btn-secondary">
+              {memberContext ? memberContext.backLabel : 'Back to Artists'}
             </Link>
           </div>
         </section>
@@ -143,7 +159,11 @@ export default async function CreatorProfilePage(props) {
 
   return (
     <div className="creator-profile-page">
-      <Breadcrumb items={breadcrumbItems} className="arthive-breadcrumb--detail" />
+      <DetailContextBar
+        breadcrumbItems={breadcrumbItems}
+        returnHref={memberContext?.returnHref}
+        backLabel={memberContext?.backLabel}
+      />
 
       {/* Profile Header */}
       <div className="creator-profile-header">
@@ -177,7 +197,7 @@ export default async function CreatorProfilePage(props) {
             </div>
             <div className="creator-stat">
               <span className="creator-stat-value">{totalLikes}</span>
-              <span className="creator-stat-label">Total likes</span>
+              <span className="creator-stat-label">Total Likes</span>
             </div>
             <div className="creator-stat">
               <span className="creator-stat-value">{joinDate}</span>
@@ -190,7 +210,7 @@ export default async function CreatorProfilePage(props) {
       {/* Artwork Gallery */}
       <div className="showcase-container creator-profile-gallery">
         <h2 className="showcase-heading creator-profile-gallery-heading">
-          Artwork gallery
+          Artwork Gallery
         </h2>
         {artworks.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px' }}>
@@ -198,33 +218,36 @@ export default async function CreatorProfilePage(props) {
           </div>
         ) : (
           <div className="masonry-grid">
-            {artworks.map((artwork) => (
-              <article key={artwork.id} className="project-card creator-artwork-card">
-                <Link href={`/artworks/${artwork.id}`} className="project-image-wrap">
-                  <Image
-                    src={artwork.image_url}
-                    alt={artwork.title}
-                    fill
-                    className="project-image"
-                    sizes="(max-width: 639px) 100vw, (max-width: 1079px) 50vw, 33vw"
-                  />
-                </Link>
-                <div className="card-editorial-body">
-                  <div className="card-top-bar">
-                    <span className="card-tag-typology">{artwork.category_name}</span>
-                    <span className="card-like-count">
-                      <Heart size={15} className="card-like-icon" />
-                      <span className="card-like-num">{artwork.like_count}</span>
-                    </span>
+            {artworks.map((artwork) => {
+              const artworkHref = withContext(`/artworks/${artwork.id}`);
+              return (
+                <article key={artwork.id} className="project-card creator-artwork-card">
+                  <Link href={artworkHref} className="project-image-wrap">
+                    <Image
+                      src={artwork.image_url}
+                      alt={artwork.title}
+                      fill
+                      className="project-image"
+                      sizes="(max-width: 639px) 100vw, (max-width: 1079px) 50vw, 33vw"
+                    />
+                  </Link>
+                  <div className="card-editorial-body">
+                    <div className="card-top-bar">
+                      <span className="card-tag-typology">{artwork.category_name}</span>
+                      <span className="card-like-count">
+                        <Heart size={15} className="card-like-icon" />
+                        <span className="card-like-num">{artwork.like_count}</span>
+                      </span>
+                    </div>
+                    <div className="card-bottom-info">
+                      <Link href={artworkHref}>
+                        <h3 className="card-title">{artwork.title}</h3>
+                      </Link>
+                    </div>
                   </div>
-                  <div className="card-bottom-info">
-                    <Link href={`/artworks/${artwork.id}`}>
-                      <h3 className="card-title">{artwork.title}</h3>
-                    </Link>
-                  </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         )}
       </div>

@@ -4,8 +4,9 @@ import Link from 'next/link';
 import { query } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { resolveUserAvatarSrc } from '@/lib/avatar';
+import { resolveRoleReturnContext } from '@/lib/member-navigation';
 import UserAvatar from '@/components/ui/UserAvatar';
-import Breadcrumb from '@/components/ui/Breadcrumb';
+import DetailContextBar from '@/components/ui/DetailContextBar';
 import ArtworkInteractions from './ArtworkInteractions';
 import { toId } from '@/lib/utils';
 
@@ -101,15 +102,17 @@ export default async function ArtworkDetailPage(props) {
 
   const { artwork, comments, otherWorks } = data;
   const user = session?.user || null;
-  const rawFrom = Array.isArray(searchParams?.from) ? searchParams.from[0] : searchParams?.from;
-  const isFromMemberSubmissions = user?.role === 'member' && rawFrom === 'submissions';
+  const memberContext = resolveRoleReturnContext(searchParams, user);
+  const withContext = (href) => (memberContext ? memberContext.appendContext(href) : href);
 
   const isAdmin = user?.role === 'admin';
+  const isCurator = user?.role === 'curator';
+  const isMember = user?.role === 'member';
   let userLiked = false;
   let userFavorited = false;
   let userReported = false;
 
-  if (user && !isAdmin) {
+  if (isMember) {
     const [likeRes, favRes, repRes] = await Promise.all([
       query('SELECT id FROM artwork_likes WHERE user_id=$1 AND artwork_id=$2', [user.id, artwork.id]),
       query('SELECT id FROM favorites WHERE user_id=$1 AND artwork_id=$2', [user.id, artwork.id]),
@@ -125,12 +128,8 @@ export default async function ArtworkDetailPage(props) {
     day: 'numeric', month: 'long', year: 'numeric'
   });
 
-  const breadcrumbItems = isFromMemberSubmissions
-    ? [
-        { label: 'Dashboard', href: '/dashboard/member' },
-        { label: 'Submissions', href: '/dashboard/member/submissions' },
-        { label: artwork.title },
-      ]
+  const breadcrumbItems = memberContext
+    ? memberContext.buildBreadcrumbs(artwork.title)
     : [
         { label: 'Home', href: '/' },
         { label: 'Explore', href: '/explore' },
@@ -147,20 +146,11 @@ export default async function ArtworkDetailPage(props) {
 
   return (
     <div className="artwork-detail-page">
-      {isFromMemberSubmissions ? (
-        <div className="detail-context-bar">
-          <Breadcrumb items={breadcrumbItems} className="arthive-breadcrumb--detail" />
-          <Link href="/dashboard/member/submissions" className="detail-back-link">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <line x1="19" y1="12" x2="5" y2="12" />
-              <polyline points="12 19 5 12 12 5" />
-            </svg>
-            <span>Back to submissions</span>
-          </Link>
-        </div>
-      ) : (
-        <Breadcrumb items={breadcrumbItems} className="arthive-breadcrumb--detail" />
-      )}
+      <DetailContextBar
+        breadcrumbItems={breadcrumbItems}
+        returnHref={memberContext?.returnHref}
+        backLabel={memberContext?.backLabel}
+      />
 
       <div className="artwork-detail-layout">
         <div className="artwork-detail-image-col">
@@ -185,7 +175,7 @@ export default async function ArtworkDetailPage(props) {
             <h1 className="artwork-detail-title">{artwork.title}</h1>
           </div>
 
-          <Link href={`/artists/${artwork.creator_id}`} className="artwork-creator-link">
+          <Link href={withContext(`/artists/${artwork.creator_id}`)} className="artwork-creator-link">
             <UserAvatar
               src={artwork.creator_image}
               role={artwork.creator_role}
@@ -207,6 +197,7 @@ export default async function ArtworkDetailPage(props) {
             userReported={userReported}
             isLoggedIn={!!user}
             isAdmin={isAdmin}
+            isCurator={isCurator}
             isOwner={user?.id === artwork.creator_id}
           />
 
@@ -219,7 +210,7 @@ export default async function ArtworkDetailPage(props) {
           )}
 
           <div className="artwork-description">
-            <h3>About this artwork</h3>
+            <h3>About This Artwork</h3>
             <p>{artwork.description}</p>
           </div>
 
@@ -229,9 +220,9 @@ export default async function ArtworkDetailPage(props) {
         </div>
       </div>
 
-      <div className="artwork-comments-section">
-        <div className="showcase-container" style={{ maxWidth: '900px' }}>
-          <h2 className="showcase-heading" style={{ fontSize: '1.25rem' }}>
+      <section className="artwork-comments-section" aria-labelledby="artwork-comments-heading">
+        <div className="artwork-comments-container">
+          <h2 id="artwork-comments-heading" className="showcase-heading artwork-comments-heading">
             Comments ({comments.length})
           </h2>
 
@@ -239,12 +230,13 @@ export default async function ArtworkDetailPage(props) {
             artworkId={artwork.id}
             comments={comments}
             isLoggedIn={!!user}
-            isAdmin={user?.role === 'admin'}
+            isAdmin={isAdmin}
+            isCurator={isCurator}
             userId={user?.id}
             showComments
           />
         </div>
-      </div>
+      </section>
 
       {otherWorks.length > 0 && (
         <div className="artwork-other-works">
@@ -253,20 +245,23 @@ export default async function ArtworkDetailPage(props) {
               More from {artwork.creator_name}
             </h2>
             <div className="masonry-grid" style={{ marginTop: '1.5rem' }}>
-              {otherWorks.map((w) => (
-                <article key={w.id} className="project-card aspect-wide">
-                  <Link href={`/artworks/${w.id}`} className="project-image-wrap">
-                    <Image src={w.image_url} alt={w.title} fill className="project-image" sizes="300px" />
-                  </Link>
-                  <div className="card-editorial-body">
-                    <div className="card-bottom-info">
-                      <Link href={`/artworks/${w.id}`}>
-                        <h3 className="card-title">{w.title}</h3>
-                      </Link>
+              {otherWorks.map((w) => {
+                const otherWorkHref = withContext(`/artworks/${w.id}`);
+                return (
+                  <article key={w.id} className="project-card aspect-wide">
+                    <Link href={otherWorkHref} className="project-image-wrap">
+                      <Image src={w.image_url} alt={w.title} fill className="project-image" sizes="300px" />
+                    </Link>
+                    <div className="card-editorial-body">
+                      <div className="card-bottom-info">
+                        <Link href={otherWorkHref}>
+                          <h3 className="card-title">{w.title}</h3>
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           </div>
         </div>

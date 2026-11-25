@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { formatEditorialTitle } from '@/lib/utils';
+import { buildMemberDetailHref } from '@/lib/member-navigation';
 import DashboardStatCard from '@/components/ui/DashboardStatCard';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 
@@ -19,8 +20,11 @@ function formatShortDate(value) {
   });
 }
 
-export default async function MemberOverviewPage() {
-  const user = await requireRole('member');
+export default async function MemberOverviewPage(props) {
+  const [user, searchParams] = await Promise.all([
+    requireRole('member'),
+    props?.searchParams,
+  ]);
 
   const [statsRes, recentArtworksRes, recentSubmissionsRes] = await Promise.all([
     query(
@@ -60,7 +64,7 @@ export default async function MemberOverviewPage() {
       SELECT s.id, s.winner_rank, s.created_at,
              c.id AS challenge_id, c.title AS challenge_title,
              (c.end_date < NOW()) AS challenge_ended,
-             a.title AS artwork_title
+             a.id AS artwork_id, a.title AS artwork_title, a.status AS artwork_status
       FROM submissions s
       JOIN challenges c ON s.challenge_id = c.id
       JOIN artworks a ON s.artwork_id = a.id
@@ -89,28 +93,42 @@ export default async function MemberOverviewPage() {
       const statusText = sub.winner_rank
         ? `Ranked #${sub.winner_rank}`
         : sub.challenge_ended
-          ? 'Judging closed'
-          : 'Under review';
+          ? 'Judging Closed'
+          : 'Under Review';
+      const challengeHref = buildMemberDetailHref(`/challenges/${sub.challenge_id}`, 'overview', searchParams);
+      const artworkHref =
+        sub.artwork_status === 'active'
+          ? buildMemberDetailHref(`/artworks/${sub.artwork_id}`, 'overview', searchParams)
+          : null;
 
       return {
         key: `sub-${sub.id}`,
-        kicker: 'Challenge entry',
+        kicker: 'Challenge Entry',
         title: formatEditorialTitle(sub.challenge_title),
-        meta: `${sub.artwork_title} · ${statusText} · ${formatShortDate(sub.created_at)}`,
-        href: '/dashboard/member/submissions',
-        actionLabel: 'Status',
+        metaLeadLabel: sub.artwork_title,
+        metaLeadHref: artworkHref,
+        metaSuffix: ` · ${statusText} · ${formatShortDate(sub.created_at)}`,
+        href: challengeHref,
+        actionLabel: 'View Challenge',
         createdAt: new Date(sub.created_at).getTime(),
       };
     }),
-    ...recentArtworksRes.rows.map((art) => ({
-      key: `art-${art.id}`,
-      kicker: art.status === 'active' ? 'Published work' : 'Taken down',
-      title: formatEditorialTitle(art.title),
-      meta: `${art.category_name} · ${art.like_count} ${art.like_count === 1 ? 'like' : 'likes'} · ${formatShortDate(art.created_at)}`,
-      href: `/dashboard/member/artworks/${art.id}/edit`,
-      actionLabel: 'Manage',
-      createdAt: new Date(art.created_at).getTime(),
-    })),
+    ...recentArtworksRes.rows.map((art) => {
+      const isPublished = art.status === 'active';
+      const artworkHref = isPublished
+        ? buildMemberDetailHref(`/artworks/${art.id}`, 'overview', searchParams)
+        : `/dashboard/member/artworks/${art.id}/edit`;
+
+      return {
+        key: `art-${art.id}`,
+        kicker: isPublished ? 'Published Work' : 'Taken Down',
+        title: formatEditorialTitle(art.title),
+        meta: `${art.category_name} · ${art.like_count} ${art.like_count === 1 ? 'like' : 'likes'} · ${formatShortDate(art.created_at)}`,
+        href: artworkHref,
+        actionLabel: isPublished ? 'View Artwork' : 'Manage',
+        createdAt: new Date(art.created_at).getTime(),
+      };
+    }),
   ]
     .sort((a, b) => b.createdAt - a.createdAt)
     .slice(0, 4);
@@ -127,35 +145,35 @@ export default async function MemberOverviewPage() {
       />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Member overview</h1>
+          <h1 className="dashboard-title">Member Overview</h1>
           <p className="dashboard-subtitle">
             Welcome back, {user.name}. Here is a brief summary of your works and challenges.
           </p>
         </div>
         <Link href="/dashboard/member/artworks/create" className="btn-primary">
-          + Upload artwork
+          + Upload Artwork
         </Link>
       </div>
 
       {/* Primary Metrics (3 Focused Cards) */}
       <div className="dash-kpi-grid">
         <DashboardStatCard
-          label="Published artworks"
+          label="Published Artworks"
           value={stats.published_artworks}
           href="/dashboard/member/artworks"
-          linkLabel="My artworks →"
+          linkLabel="My Artworks →"
         />
         <DashboardStatCard
-          label="Active challenges"
+          label="Active Challenges"
           value={stats.active_challenges}
           href="/dashboard/member/submissions"
-          linkLabel="My submissions →"
+          linkLabel="My Submissions →"
         />
         <DashboardStatCard
-          label="Under review"
+          label="Under Review"
           value={underReviewTotal}
           href={underReviewHref}
-          linkLabel="View status →"
+          linkLabel="View Status →"
         />
       </div>
 
@@ -163,7 +181,7 @@ export default async function MemberOverviewPage() {
       {hasModerationNotice && (
         <div className="dash-notice" role="status">
           <div className="dash-notice-body">
-            <span className="dash-notice-label">Artwork status notice</span>
+            <span className="dash-notice-label">Artwork Status Notice</span>
             <p className="dash-notice-text">
               {stats.artworks_in_review > 0
                 ? `${stats.artworks_in_review} ${stats.artworks_in_review === 1 ? 'artwork is' : 'artworks are'} currently under moderation review.`
@@ -175,7 +193,7 @@ export default async function MemberOverviewPage() {
             </p>
           </div>
           <Link href="/dashboard/member/artworks" className="dash-row-link">
-            Review artworks →
+            Review Artworks →
           </Link>
         </div>
       )}
@@ -184,13 +202,13 @@ export default async function MemberOverviewPage() {
       <section className="dash-section">
         <div className="dash-section-head">
           <div>
-            <h2 className="dash-section-title">Recent activity</h2>
+            <h2 className="dash-section-title">Recent Activity</h2>
             <p className="dash-section-desc">
               Your latest published works and active challenge entries.
             </p>
           </div>
           <Link href="/dashboard/member/artworks" className="dash-inline-link">
-            All artworks →
+            All Artworks →
           </Link>
         </div>
 
@@ -198,7 +216,7 @@ export default async function MemberOverviewPage() {
           <div className="dash-empty dash-empty--with-cta">
             <p>You haven&apos;t published an artwork or joined a challenge yet.</p>
             <Link href="/dashboard/member/artworks/create" className="btn-primary">
-              Upload your first artwork
+              Upload Your First Artwork
             </Link>
           </div>
         ) : (
@@ -211,7 +229,22 @@ export default async function MemberOverviewPage() {
                     <Link href={item.href} className="dash-item-title dash-item-title-link">
                       {item.title}
                     </Link>
-                    <span className="dash-item-meta">{item.meta}</span>
+                    <span className="dash-item-meta">
+                      {item.metaLeadLabel ? (
+                        <>
+                          {item.metaLeadHref ? (
+                            <Link href={item.metaLeadHref} className="dash-item-meta-link">
+                              {item.metaLeadLabel}
+                            </Link>
+                          ) : (
+                            item.metaLeadLabel
+                          )}
+                          {item.metaSuffix}
+                        </>
+                      ) : (
+                        item.meta
+                      )}
+                    </span>
                   </div>
                   <Link href={item.href} className="dash-row-link">
                     {item.actionLabel} →

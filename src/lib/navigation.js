@@ -8,41 +8,42 @@ const EXACT_ROUTE_LABELS = {
   '/explore': 'Explore',
   '/challenges': 'Challenges',
   '/artists': 'Artists',
-  '/login': 'Sign in',
+  '/login': 'Sign In',
   '/register': 'Register',
   '/dashboard': 'Dashboard',
   '/dashboard/member': 'Dashboard',
   '/dashboard/member/profile': 'Profile',
-  '/dashboard/member/artworks': 'My artworks',
+  '/dashboard/member/artworks': 'My Artworks',
   '/dashboard/member/artworks/create': 'Upload',
   '/dashboard/member/favorites': 'Favorites',
   '/dashboard/member/submissions': 'Submissions',
   '/dashboard/member/settings': 'Settings',
-  '/dashboard/member/inactive': 'Account status',
+  '/dashboard/member/inactive': 'Account Status',
   '/dashboard/curator': 'Dashboard',
   '/dashboard/curator/challenges': 'Challenges',
-  '/dashboard/curator/challenges/create': 'Create challenge',
-  '/dashboard/curator/pending': 'Verification status',
+  '/dashboard/curator/challenges/create': 'Create Challenge',
+  '/dashboard/curator/pending': 'Verification Status',
   '/dashboard/admin': 'Dashboard',
-  '/dashboard/admin/users': 'User management',
-  '/dashboard/admin/curators': 'Curator verification',
+  '/dashboard/admin/users': 'User Management',
+  '/dashboard/admin/curators': 'Curator Verification',
   '/dashboard/admin/challenges': 'Challenges',
   '/dashboard/admin/categories': 'Categories',
-  '/dashboard/admin/reports': 'Content moderation',
+  '/dashboard/admin/reports': 'Content Moderation',
 };
 
 const PATTERN_ROUTE_LABELS = [
-  { pattern: /^\/artworks\/[^/]+$/, label: 'Artwork detail' },
-  { pattern: /^\/challenges\/[^/]+$/, label: 'Challenge detail' },
-  { pattern: /^\/artists\/[^/]+$/, label: 'Artist profile' },
-  { pattern: /^\/dashboard\/member\/artworks\/[^/]+\/edit$/, label: 'Edit artwork' },
-  { pattern: /^\/dashboard\/curator\/challenges\/[^/]+\/edit$/, label: 'Edit challenge' },
+  { pattern: /^\/artworks\/[^/]+$/, label: 'Artwork Details' },
+  { pattern: /^\/challenges\/[^/]+$/, label: 'Challenge Details' },
+  { pattern: /^\/artists\/[^/]+$/, label: 'Artist Profile' },
+  { pattern: /^\/dashboard\/member\/artworks\/[^/]+\/edit$/, label: 'Edit Artwork' },
+  { pattern: /^\/dashboard\/curator\/challenges\/[^/]+\/edit$/, label: 'Edit Challenge' },
   { pattern: /^\/dashboard\/curator\/challenges\/[^/]+\/submissions$/, label: 'Submissions' },
-  { pattern: /^\/dashboard\/curator\/challenges\/[^/]+$/, label: 'Challenge detail' },
-  { pattern: /^\/dashboard\/admin\/challenges\/[^/]+$/, label: 'Challenge detail' },
-  { pattern: /^\/dashboard\/admin\/reports\/[^/]+$/, label: 'Report detail' },
-  { pattern: /^\/dashboard\/admin\/users\/[^/]+$/, label: 'Member detail' },
-  { pattern: /^\/dashboard\/admin\/artworks\/[^/]+$/, label: 'Artwork detail' },
+  { pattern: /^\/dashboard\/curator\/challenges\/[^/]+$/, label: 'Challenge Details' },
+  { pattern: /^\/dashboard\/admin\/curators\/[^/]+$/, label: 'Curator Application' },
+  { pattern: /^\/dashboard\/admin\/challenges\/[^/]+$/, label: 'Challenge Details' },
+  { pattern: /^\/dashboard\/admin\/reports\/[^/]+$/, label: 'Report Details' },
+  { pattern: /^\/dashboard\/admin\/users\/[^/]+$/, label: 'Member Details' },
+  { pattern: /^\/dashboard\/admin\/artworks\/[^/]+$/, label: 'Artwork Details' },
 ];
 
 const MEMBER_DROPDOWN_PAGE_LABELS = {
@@ -56,6 +57,17 @@ const MEMBER_DROPDOWN_PAGE_LABELS = {
 
 const MEMBER_DROPDOWN_PATTERN_LABELS = [
   { pattern: /^\/dashboard\/member\/artworks\/[^/]+\/edit$/, label: 'My Artworks' },
+];
+
+const CURATOR_DROPDOWN_PAGE_LABELS = {
+  '/dashboard/curator': 'Overview',
+  '/dashboard/curator/challenges': 'My Challenges',
+  '/dashboard/curator/challenges/create': 'My Challenges',
+  '/dashboard/curator/pending': 'Verification Status',
+};
+
+const CURATOR_DROPDOWN_PATTERN_LABELS = [
+  { pattern: /^\/dashboard\/curator\/challenges\/[^/]+(?:\/(?:edit|submissions))?$/, label: 'My Challenges' },
 ];
 
 function normalizePathname(pathname) {
@@ -122,6 +134,30 @@ export function getMemberActivePageLabel(pathname) {
   }
 
   for (const entry of MEMBER_DROPDOWN_PATTERN_LABELS) {
+    if (entry.pattern.test(normalized)) {
+      return entry.label;
+    }
+  }
+
+  return '';
+}
+
+/**
+ * Resolve the active page indicator shown beside the Curator role in the navbar.
+ * Mirrors Member behavior: returns an empty string on public browsing routes
+ * (Home, Explore, Challenges, Artists, and detail pages) and displays the
+ * active Curator Dashboard section (`Overview`, `My Challenges`, or
+ * `Verification status`) when inside the Curator Dashboard.
+ */
+export function getCuratorActivePageLabel(pathname) {
+  const normalized = normalizePathname(pathname);
+  if (!normalized) return '';
+
+  if (Object.prototype.hasOwnProperty.call(CURATOR_DROPDOWN_PAGE_LABELS, normalized)) {
+    return CURATOR_DROPDOWN_PAGE_LABELS[normalized];
+  }
+
+  for (const entry of CURATOR_DROPDOWN_PATTERN_LABELS) {
     if (entry.pattern.test(normalized)) {
       return entry.label;
     }

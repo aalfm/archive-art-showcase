@@ -1,11 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { logoutUser } from '@/lib/actions/auth.actions';
-import { getActivePageLabel, getMemberActivePageLabel } from '@/lib/navigation';
+import {
+  getActivePageLabel,
+  getCuratorActivePageLabel,
+  getMemberActivePageLabel,
+} from '@/lib/navigation';
+import { resolveNavbarDashboardOrigin } from '@/lib/member-navigation';
 import { formatCuratorStatusLabel, formatRoleLabel } from '@/lib/utils';
 import UserAvatar from '@/components/ui/UserAvatar';
 
@@ -76,6 +81,11 @@ const MEMBER_FLAT_MENU_ITEMS = [
   { href: '/dashboard/member/submissions', label: 'Submissions', icon: 'send' },
 ];
 
+const CURATOR_FLAT_MENU_ITEMS = [
+  { href: '/dashboard/curator', label: 'Overview', icon: 'grid', exact: true },
+  { href: '/dashboard/curator/challenges', label: 'My Challenges', icon: 'award' },
+];
+
 function getRoleDropdownConfig(user, isInactive) {
   if (!user) return { primary: [], account: [], sectionLabel: '' };
 
@@ -83,7 +93,7 @@ function getRoleDropdownConfig(user, isInactive) {
     return {
       sectionLabel: 'Account',
       primary: [
-        { href: '/dashboard/member/inactive', label: 'Account status', icon: 'shield' },
+        { href: '/dashboard/member/inactive', label: 'Account Status', icon: 'shield' },
       ],
       account: [],
     };
@@ -100,20 +110,16 @@ function getRoleDropdownConfig(user, isInactive) {
   if (user.role === 'curator') {
     if (user.curator_status === 'approved') {
       return {
-        sectionLabel: 'Curator dashboard',
-        primary: [
-          { href: '/dashboard/curator', label: 'Dashboard', icon: 'grid' },
-          { href: '/dashboard/curator/challenges', label: 'My challenges', icon: 'award' },
-          { href: '/dashboard/curator/challenges/create', label: 'Create challenge', icon: 'plus-square' },
-        ],
+        sectionLabel: '',
+        primary: CURATOR_FLAT_MENU_ITEMS,
         account: [],
       };
     }
 
     return {
-      sectionLabel: 'Curator status',
+      sectionLabel: 'Curator Status',
       primary: [
-        { href: '/dashboard/curator/pending', label: 'Verification status', icon: 'shield' },
+        { href: '/dashboard/curator/pending', label: 'Verification Status', icon: 'shield' },
       ],
       account: [],
     };
@@ -129,7 +135,7 @@ function getRoleDropdownConfig(user, isInactive) {
   };
 }
 
-export default function Navbar({ user, isInactive = false }) {
+function NavbarContent({ user, isInactive = false, fromParam = '' }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -195,8 +201,16 @@ export default function Navbar({ user, isInactive = false }) {
     [dropdownConfig]
   );
 
+  const activeDashboardOrigin = useMemo(
+    () => (isInactive ? null : resolveNavbarDashboardOrigin(pathname, fromParam, user)),
+    [isInactive, pathname, fromParam, user]
+  );
+
   // Highlight only the most specific matching dashboard route inside the dropdown
   const activeDropdownHref = useMemo(() => {
+    if (activeDashboardOrigin?.dropdownHref) {
+      return activeDashboardOrigin.dropdownHref;
+    }
     if (!pathname) return null;
     const match = allDropdownLinks
       .filter((item) =>
@@ -206,22 +220,33 @@ export default function Navbar({ user, isInactive = false }) {
       )
       .sort((a, b) => b.href.length - a.href.length)[0];
     return match?.href || null;
-  }, [allDropdownLinks, pathname]);
+  }, [activeDashboardOrigin, allDropdownLinks, pathname]);
 
   const roleLabel = useMemo(() => (user ? formatRoleLabel(user.role) : ''), [user]);
 
   const isAdminUser = Boolean(user && user.role === 'admin');
   const isCuratorUser = Boolean(user && user.role === 'curator');
-  const isDashboardOnlyUser = isAdminUser || isCuratorUser;
+  const isDashboardOnlyUser = isAdminUser;
   const isMemberUser = Boolean(user && user.role === 'member');
   const isActiveMember = Boolean(isMemberUser && !isInactive);
+  const isApprovedCurator = Boolean(
+    isCuratorUser && !isInactive && user.curator_status === 'approved'
+  );
+  const isFlatRoleDropdown = isActiveMember || isApprovedCurator;
+  const flatDropdownItems = isApprovedCurator ? CURATOR_FLAT_MENU_ITEMS : MEMBER_FLAT_MENU_ITEMS;
 
   const activePageLabel = useMemo(() => {
+    if (activeDashboardOrigin?.label) {
+      return activeDashboardOrigin.label;
+    }
     if (isMemberUser) {
       return isInactive ? '' : getMemberActivePageLabel(pathname);
     }
+    if (isCuratorUser) {
+      return isInactive ? '' : getCuratorActivePageLabel(pathname);
+    }
     return getActivePageLabel(pathname);
-  }, [isMemberUser, isInactive, pathname]);
+  }, [activeDashboardOrigin, isMemberUser, isCuratorUser, isInactive, pathname]);
 
   const showPageContext = Boolean(
     user && (user.role === 'member' || user.role === 'curator')
@@ -238,8 +263,11 @@ export default function Navbar({ user, isInactive = false }) {
     return roleLabel;
   }, [user, isInactive, roleLabel]);
 
-  const isNavActive = (href) =>
-    href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/');
+  // Do not activate Explore / Challenges / Artists when viewing a detail page opened from a role dashboard menu
+  const isNavActive = (href) => {
+    if (activeDashboardOrigin) return false;
+    return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/');
+  };
 
   const handleDropdownKeyDown = (e) => {
     if (!dropdownRef.current) return;
@@ -286,13 +314,7 @@ export default function Navbar({ user, isInactive = false }) {
           <Link
             href={isDashboardOnlyUser ? getDashboardLink() : '/'}
             className="brand-wordmark brand-logo-only"
-            aria-label={
-              isAdminUser
-                ? 'ARCHIVE Admin Dashboard'
-                : isCuratorUser
-                  ? 'ARCHIVE Curator Dashboard'
-                  : 'ARCHIVE Home'
-            }
+            aria-label={isAdminUser ? 'ARCHIVE Admin Dashboard' : 'ARCHIVE Home'}
           >
             <Image
               src="/logo/Logo_archive_white.svg"
@@ -331,7 +353,7 @@ export default function Navbar({ user, isInactive = false }) {
                 <button
                   ref={userTriggerRef}
                   type="button"
-                  className={`btn-login-pill navbar-profile-trigger${showPageContext ? ' navbar-profile-trigger--with-context' : ''}${isMemberUser ? ' navbar-profile-trigger--member' : ''}${userMenuOpen ? ' is-open' : ''}`}
+                  className={`btn-login-pill navbar-profile-trigger${showPageContext ? ' navbar-profile-trigger--with-context' : ''}${isMemberUser || isCuratorUser ? ' navbar-profile-trigger--member' : ''}${userMenuOpen ? ' is-open' : ''}`}
                   onClick={() => setUserMenuOpen((prev) => !prev)}
                   onKeyDown={handleTriggerKeyDown}
                   aria-haspopup="menu"
@@ -390,14 +412,14 @@ export default function Navbar({ user, isInactive = false }) {
                   <div
                     ref={dropdownRef}
                     id="navbar-user-dropdown"
-                    className={`user-dropdown user-dropdown--panel${isActiveMember ? ' user-dropdown--member-flat' : ''}`}
+                    className={`user-dropdown user-dropdown--panel${isFlatRoleDropdown ? ' user-dropdown--member-flat' : ''}`}
                     role="menu"
                     aria-label="Account and dashboard navigation"
                     onKeyDown={handleDropdownKeyDown}
                   >
-                    {isActiveMember ? (
+                    {isFlatRoleDropdown ? (
                       <>
-                        {MEMBER_FLAT_MENU_ITEMS.map((item) => {
+                        {flatDropdownItems.map((item) => {
                           const isActive = item.href === activeDropdownHref;
                           return (
                             <Link
@@ -517,7 +539,7 @@ export default function Navbar({ user, isInactive = false }) {
                                   <line x1="21" y1="12" x2="9" y2="12" />
                                 </svg>
                               </span>
-                              <span>Sign out</span>
+                              <span>Sign Out</span>
                             </button>
                           </form>
                         </div>
@@ -527,13 +549,13 @@ export default function Navbar({ user, isInactive = false }) {
                 )}
               </div>
             ) : (
-              <Link href="/login" className="btn-login-pill" id="btn-login">
+              <Link href="/login" className="btn-login-pill navbar-signin-btn" id="btn-login">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
                   <polyline points="10 17 15 12 10 7" />
                   <line x1="15" y1="12" x2="3" y2="12" />
                 </svg>
-                Sign in
+                Sign In
               </Link>
             )}
 
@@ -585,17 +607,17 @@ export default function Navbar({ user, isInactive = false }) {
             <div className="drawer-footer">
               {user ? (
                 <>
-                  <Link href={getDashboardLink()} className="btn-primary" style={{ display: 'block', textAlign: 'center' }} onClick={() => setDrawerOpen(false)}>
+                  <Link href={getDashboardLink()} className="btn-primary drawer-cta" onClick={() => setDrawerOpen(false)}>
                     Dashboard
                   </Link>
                   <form action={logoutUser} style={{ marginTop: 8 }}>
-                    <button type="submit" className="btn-secondary" style={{ width: '100%' }}>Sign out</button>
+                    <button type="submit" className="btn-secondary drawer-cta">Sign Out</button>
                   </form>
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="btn-primary" style={{ display: 'block', textAlign: 'center' }} onClick={() => setDrawerOpen(false)} id="drawer-login-btn">Sign in</Link>
-                  <Link href="/register" className="btn-secondary" style={{ display: 'block', textAlign: 'center', marginTop: 8 }} onClick={() => setDrawerOpen(false)}>Register</Link>
+                  <Link href="/login" className="btn-primary drawer-cta" onClick={() => setDrawerOpen(false)} id="drawer-login-btn">Sign In</Link>
+                  <Link href="/register" className="btn-secondary drawer-cta" style={{ marginTop: 8 }} onClick={() => setDrawerOpen(false)}>Register</Link>
                 </>
               )}
             </div>
@@ -604,5 +626,19 @@ export default function Navbar({ user, isInactive = false }) {
         </>
       )}
     </>
+  );
+}
+
+function NavbarWithSearchParams({ user, isInactive }) {
+  const searchParams = useSearchParams();
+  const fromParam = searchParams?.get('from') || '';
+  return <NavbarContent user={user} isInactive={isInactive} fromParam={fromParam} />;
+}
+
+export default function Navbar({ user, isInactive = false }) {
+  return (
+    <Suspense fallback={<NavbarContent user={user} isInactive={isInactive} fromParam="" />}>
+      <NavbarWithSearchParams user={user} isInactive={isInactive} />
+    </Suspense>
   );
 }

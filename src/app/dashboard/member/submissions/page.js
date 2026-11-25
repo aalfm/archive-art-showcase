@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { formatEditorialTitle } from '@/lib/utils';
+import { buildMemberDetailHref } from '@/lib/member-navigation';
 import ArtworkImage from '@/components/ui/ArtworkImage';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import WithdrawButton from './WithdrawButton';
@@ -12,8 +13,11 @@ export const metadata = {
   title: 'My Submissions — ARCHIVE',
 };
 
-export default async function MemberSubmissionsPage() {
-  const user = await requireRole('member');
+export default async function MemberSubmissionsPage(props) {
+  const [user, searchParams] = await Promise.all([
+    requireRole('member'),
+    props?.searchParams,
+  ]);
 
   const res = await query(`
     SELECT s.id as submission_id, s.winner_rank, s.created_at as submitted_at,
@@ -44,11 +48,11 @@ export default async function MemberSubmissionsPage() {
       />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Challenge submissions</h1>
+          <h1 className="dashboard-title">Challenge Submissions</h1>
           <p className="dashboard-subtitle">Track the status of your entries across curated challenges.</p>
         </div>
         <Link href="/challenges" className="btn-primary">
-          Explore challenges
+          Explore Challenges
         </Link>
       </div>
 
@@ -58,7 +62,7 @@ export default async function MemberSubmissionsPage() {
             You haven&apos;t submitted to any challenges yet.
           </p>
           <Link href="/challenges" className="btn-primary">
-            View open challenges
+            View Open Challenges
           </Link>
         </div>
       ) : (
@@ -76,10 +80,10 @@ export default async function MemberSubmissionsPage() {
             <thead>
               <tr>
                 <th>Artwork</th>
-                <th>Artwork title</th>
+                <th>Artwork Title</th>
                 <th>Challenge</th>
                 <th>Prize</th>
-                <th>Judging status</th>
+                <th>Judging Status</th>
                 <th>Deadline</th>
                 <th>Actions</th>
               </tr>
@@ -87,8 +91,8 @@ export default async function MemberSubmissionsPage() {
             <tbody>
               {submissions.map((sub) => {
                 const canWithdraw = sub.challenge_status === 'active';
-                const artworkHref = `/artworks/${sub.artwork_id}?from=submissions`;
-                const challengeHref = `/challenges/${sub.challenge_id}?from=submissions`;
+                const artworkHref = buildMemberDetailHref(`/artworks/${sub.artwork_id}`, 'submissions', searchParams);
+                const challengeHref = buildMemberDetailHref(`/challenges/${sub.challenge_id}`, 'submissions', searchParams);
                 const challengeLabel = formatEditorialTitle(sub.challenge_title);
 
                 return (
@@ -131,9 +135,9 @@ export default async function MemberSubmissionsPage() {
                           {rankLabels[sub.winner_rank]}
                         </span>
                       ) : sub.challenge_status === 'ended' ? (
-                        <span className="badge badge-rejected">Not selected</span>
+                        <span className="badge badge-rejected">Not Selected</span>
                       ) : (
-                        <span className="badge badge-pending">Under review</span>
+                        <span className="badge badge-pending">Under Review</span>
                       )}
                     </td>
                     <td data-label="Deadline" className="table-cell-meta">
