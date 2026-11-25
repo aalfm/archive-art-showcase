@@ -1,130 +1,104 @@
 <div align="center">
 
-<img src="public/logo/Favicon_archive.svg" alt="ARTHIVE Official Architectural Emblem" width="84" height="84" />
+<img src="docs/assets/archive-hero-banner.svg" alt="ARCHIVE — Where Architecture Meets Digital Expression." width="100%" />
 
-# ARTHIVE
+<br /><br />
 
-### *Where Architecture Meets Digital Expression.*
+<img src="public/logo/Favicon_archive.svg" alt="ARCHIVE Official Logo" width="46" height="46" />
 
-A digital space for architectural exploration, creative showcases, and curated design challenges.
+### Welcome to ARCHIVE
 
-<br />
-
-[![Next.js](https://img.shields.io/badge/Next.js-16.4.6-1A1917?style=for-the-badge&logo=nextdotjs&logoColor=F7F5F0)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.3.0-303438?style=for-the-badge&logo=react&logoColor=F7F5F0)](https://react.dev/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-1A1917?style=for-the-badge&logo=postgresql&logoColor=B5A284)](https://www.postgresql.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.3-303438?style=for-the-badge&logo=tailwindcss&logoColor=F7F5F0)](https://tailwindcss.com/)
-[![GSAP](https://img.shields.io/badge/GSAP-3.13.0-8C7963?style=for-the-badge&logo=greensock&logoColor=F7F5F0)](https://gsap.com/)
-
-[![Status](https://img.shields.io/badge/Status-Active_Development-8C7963?style=flat-square)](https://github.com/aalfm/arthive-art-showcase)
-[![Version](https://img.shields.io/badge/Version-0.1.0-B5A284?style=flat-square)](package.json)
-[![License](https://img.shields.io/badge/License-Unspecified-626A6D?style=flat-square)](#license)
+A digital showcase platform dedicated to architectural creativity and digital expression.<br />
+<sub>Built to elevate spatial visualization, architectural photography, and curated design competitions beyond ordinary social feeds.</sub>
 
 <br />
 
-[About The Project](#about-the-project) · [Features](#features) · [Preview](#preview) · [Tech Stack](#tech-stack) · [System Architecture](#system-architecture) · [Getting Started](#getting-started) · [Project Structure](#project-structure) · [Usage](#usage)
+[![Next.js](https://img.shields.io/badge/Next.js-16.4.6-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.3.0-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.3-0F172A?style=for-the-badge&logo=tailwindcss&logoColor=38BDF8)](https://tailwindcss.com/)
+[![GSAP](https://img.shields.io/badge/GSAP-3.13.0-0A0A0A?style=for-the-badge&logo=greensock&logoColor=88CE02)](https://gsap.com/)
 
-[Explore Repository](https://github.com/aalfm/arthive-art-showcase) · [Report an Issue](https://github.com/aalfm/arthive-art-showcase/issues) · [Request a Feature](https://github.com/aalfm/arthive-art-showcase/issues)
+<br />
+
+[About The Project](#about-the-project) · [Features](#features) · [Preview](#preview) · [Tech Stack](#tech-stack) · [Getting Started](#getting-started) · [Project Structure](#project-structure) · [Usage](#usage) · [Contributing](#contributing) · [License](#license) · [Author](#author)
 
 </div>
 
----
+<a id="about-the-project"></a>
 
-## About The Project
+## 🏛️ About The Project
 
-**ARTHIVE** is an architectural digital showcase platform built to connect architects, digital artists, curators, and spatial design enthusiasts within a dedicated exhibition environment.
+**ARCHIVE** is a digital architecture showcase platform created for architects, digital artists, curators, and spatial design enthusiasts.
 
-### Background & Problem Solved
+General-purpose visual feeds rarely provide the structure required to appreciate architectural form, tectonic studies, and spatial storytelling. **ARCHIVE** addresses that gap by indexing artworks around architectural movements—including *Modern*, *Brutalist*, *Organic*, *Parametric*, and *Sustainable Architecture*—while separating publishing, curatorial challenges, and moderation into dedicated role workspaces.
 
-General-purpose social platforms flatten architectural visualization and spatial concepts into transient feeds with little structural context. **ARTHIVE** solves this by indexing works around architectural movements—such as *Modern*, *Brutalist*, *Organic*, *Parametric*, and *Sustainable Architecture*—while separating creative publishing, curatorial competitions, and platform governance into purposeful workspaces.
-
-### Platform Goals & Experience
-
-- **Visitors & Enthusiasts**: Experience an editorial gallery powered by a 3D depth carousel, category exploration, artist portfolios, and open design competitions.
-- **Members & Creators**: Publish architectural works, curate personal collections, participate in community critique, and compete in themed challenges.
-- **Curators**: Undergo verified credential review (portfolio and CV), organize time-bound challenges, evaluate entries, and select ranked winners.
-- **Administrators**: Govern platform integrity through multi-attempt curator verification, user account status management, category curation, and content report moderation.
+- **For Visitors & Enthusiasts**: Discover curated exhibitions through a 3D depth carousel, category-filtered galleries, artist portfolios, and public competition archives.
+- **For Creators (Members)**: Showcase architectural works, collect favorites, engage in critique threads, and enter themed challenges.
+- **For Curators**: Undergo portfolio and CV verification, launch time-bound design challenges, review entries, and recognize ranked winners.
+- **For Administrators**: Maintain platform quality through multi-attempt curator verification, account status governance, category management, and report moderation.
 
 ```mermaid
 flowchart LR
-    V["🏛️ Public Visitor\nExplore Works & Artists"] -->|"Sign Up"| M["🎨 Member / Creator\nPublish Works & Compete"]
-    V -->|"Apply with Portfolio & CV"| CP["⏳ Curator Applicant\nPending Admin Review"]
-    CP -->|"Approved"| CA["🏆 Approved Curator\nHost Challenges & Judge"]
-    CP -->|"Rejected with Reason"| CR["🔄 Reapplication Flow\nUpdate Credentials & Retry"]
+    V["🏛️ Public Visitor\nExplore Exhibition"] -->|"Sign Up"| M["🎨 Member / Creator\nPublish & Compete"]
+    V -->|"Apply with Portfolio & CV"| CP["⏳ Curator Applicant\nPending Review"]
+    CP -->|"Approved"| CA["🏆 Verified Curator\nHost & Judge Challenges"]
+    CP -->|"Rejected with Reason"| CR["🔄 Reapply\nUpdate CV & Portfolio"]
     CR --> CP
-    AD["🛡️ Administrator\nVerify Curators & Moderate"] -->|"Review"| CP
-    AD -->|"Moderate Reports & Users"| M
+    AD["🛡️ Administrator\nVerify & Moderate"] -->|"Review"| CP
+    AD -->|"Moderate Content & Users"| M
 
-    classDef charcoal fill:#1A1917,stroke:#B5A284,color:#F7F5F0,stroke-width:1.5px;
-    classDef sand fill:#B5A284,stroke:#1A1917,color:#1A1917,stroke-width:1.5px;
-    classDef slate fill:#303438,stroke:#B5A284,color:#EAE7E0,stroke-width:1.5px;
-    classDef stone fill:#626A6D,stroke:#1A1917,color:#F7F5F0,stroke-width:1.5px;
-    classDef ivory fill:#F7F5F0,stroke:#8C7963,color:#1A1917,stroke-width:1.5px;
+    classDef navy fill:#0D1730,stroke:#5C7FA8,color:#F7F5F0,stroke-width:1.5px;
+    classDef slate fill:#1E293B,stroke:#B5A284,color:#EAE7E0,stroke-width:1.5px;
+    classDef sand fill:#B5A284,stroke:#0D1730,color:#0D1730,stroke-width:1.5px;
+    classDef blue fill:#3B5998,stroke:#EAE7E0,color:#F7F5F0,stroke-width:1.5px;
+    classDef charcoal fill:#1A1917,stroke:#8C7963,color:#F7F5F0,stroke-width:1.5px;
 
-    class V ivory;
+    class V navy;
     class M sand;
-    class CP,CR stone;
-    class CA charcoal;
-    class AD slate;
+    class CP,CR slate;
+    class CA blue;
+    class AD charcoal;
 ```
 
----
+<a id="features"></a>
 
-## Features
-
-<table>
-<tr>
-<td width="50%" valign="top">
+## ✨ Features
 
 ### 🏛️ Public / Guest
-- **3D Exhibition Hero (`/`)**: Interactive GSAP-animated `DepthCarousel`, curated gallery (up to 48 active works), active challenges, and featured creators.
-- **Explore Gallery (`/explore`)**: Search works by title or artist name, filter by architectural category, and sort by latest or most liked.
-- **Artwork Detail (`/artworks/[id]`)**: High-resolution presentation with tags, category attribution, like counter, community comments, and related creator works.
-- **Artist Directory (`/artists`, `/artists/[id]`)**: Discover active creators, filter by architectural specialty, and inspect portfolio links.
-- **Challenge Hub (`/challenges`, `/challenges/[id]`)**: Live search and status tabs (`active`, `upcoming`) backed by `/api/challenges/search`, rules, prizes, and ranked winners.
-
-</td>
-<td width="50%" valign="top">
+- **Interactive 3D Exhibition (`/`)**: GSAP-powered `DepthCarousel` hero, curated artwork showcase (up to 48 active works), active challenges, and featured artists.
+- **Explore Gallery (`/explore`)**: Search works by title or creator name, filter by architectural category, and sort by latest or popularity.
+- **Artwork Detail (`/artworks/[id]`)**: Full artwork view with tags, category attribution, like counter, community comments, and related works by the same creator.
+- **Artist Discovery (`/artists`, `/artists/[id]`)**: Searchable directory of active members with architectural category filters and portfolio links.
+- **Challenge Discovery (`/challenges`, `/challenges/[id]`)**: Live search and status tabs (`active`, `upcoming`) backed by `/api/challenges/search`, rules, prizes, and 1st–3rd place winners.
 
 ### 🎨 Member / Creator
-- **Member Overview (`/dashboard/member`)**: Track published works, artworks under moderation review, active challenge entries, and recent activity.
-- **Artwork Studio (`/dashboard/member/artworks`)**: Create, edit, and delete artworks using local uploads (`/api/upload` processed with `sharp`) or external image URLs.
-- **Social & Collections (`/dashboard/member/favorites`)**: Like artworks, bookmark favorites, post or delete personal comments, and submit content reports.
-- **Challenge Participation (`/dashboard/member/submissions`)**: Enter active artworks into ongoing competitions (one entry per challenge) and withdraw before the deadline.
-- **Profile & Security (`/dashboard/member/profile`, `settings`)**: Customize avatar, bio, external portfolio URL, and account password.
-
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
+- **Creator Overview (`/dashboard/member`)**: Summary metrics for published works, artworks under moderation review, challenge entries, and recent activity.
+- **Artwork Management (`/dashboard/member/artworks`)**: Create, edit, and delete artworks via `sharp`-processed file uploads (`/api/upload`) or external image URLs.
+- **Community & Favorites (`/dashboard/member/favorites`)**: Like artworks, bookmark favorites, post or delete personal comments, and submit moderation reports.
+- **Challenge Submissions (`/dashboard/member/submissions`)**: Submit active artworks to ongoing competitions (one entry per challenge) and withdraw before the deadline.
+- **Profile & Password (`/dashboard/member/profile`, `settings`)**: Manage display name, avatar, bio, portfolio link, and password.
 
 ### 🏆 Curator
 - **Credentialed Onboarding (`/dashboard/curator/pending`)**: Register with a required portfolio URL and CV (`.pdf`, `.doc`, `.docx` up to 5 MB or external link); rejected applicants can review reasons and reapply.
-- **Curator Overview (`/dashboard/curator`)**: Monitor owned challenges, active schedules, and submissions awaiting evaluation.
-- **Challenge Authoring (`/dashboard/curator/challenges`)**: Create, edit, and delete architectural competitions with banners, rules, prizes, and schedules.
-- **Judging & Winner Assignment (`/dashboard/curator/challenges/[id]/submissions`)**: Evaluate entries and assign 1st, 2nd, and 3rd place winners with optional jury notes after the challenge ends.
-
-</td>
-<td width="50%" valign="top">
+- **Curator Workspace (`/dashboard/curator`)**: Overview of owned challenges, active competitions, and entries awaiting review.
+- **Challenge Authoring (`/dashboard/curator/challenges`)**: Create, edit, and delete challenges with custom banners, rules, prizes, and schedules.
+- **Judging & Winner Podium (`/dashboard/curator/challenges/[id]/submissions`)**: Evaluate submissions and assign or clear 1st–3rd place winners with optional jury notes after the end date.
 
 ### 🛡️ Administrator
-- **Admin Overview (`/dashboard/admin`)**: Real-time platform metrics and a prioritized queue of pending reports and curator applications.
-- **Curator Verification (`/dashboard/admin/curators`, `[id]`)**: Inspect portfolio links, view or download private CV files securely, review attempt history, and approve or reject applications.
-- **User Governance (`/dashboard/admin/users`, `[id]`)**: Search accounts, filter by role, and activate or deactivate non-admin users (revoking active sessions immediately).
-- **Content & Challenge Oversight (`/dashboard/admin/reports`, `artworks`, `challenges`, `categories`)**: Manage categories, monitor platform challenges, assign/clear winners if needed, dismiss reports, or take down offending artworks.
-
-</td>
-</tr>
-</table>
+- **Admin Overview (`/dashboard/admin`)**: Real-time platform statistics and a prioritized queue of pending moderation reports and curator applications.
+- **Curator Verification (`/dashboard/admin/curators`, `[id]`)**: Inspect portfolio links, view or download private CV files securely, review attempt history, and approve or reject applications with mandatory rejection notes.
+- **User Management (`/dashboard/admin/users`, `[id]`)**: Search accounts, filter by role, and activate or deactivate non-admin users (immediately revoking active sessions).
+- **Content & Challenge Governance (`/dashboard/admin/reports`, `artworks`, `challenges`, `categories`)**: Manage architectural categories, inspect and judge platform challenges, and dismiss reports or take down offending artworks.
 
 <details>
-<summary><strong>Interactive Matrix: Role Permissions & Access Rules</strong></summary>
+<summary><strong>View Detailed Role Permissions Matrix</strong></summary>
 
 <br />
 
 | Capability | Public / Guest | Member | Curator (Pending / Rejected) | Curator (Approved) | Administrator |
 |---|---|---|---|---|---|
-| Browse public gallery, artists, and challenges | Yes | Yes | Yes | Yes | Yes |
+| Browse gallery, artists, and challenges | Yes | Yes | Yes | Yes | Yes |
 | Like, favorite, comment on, or report artworks | No | Yes | Yes | Yes | Restricted* |
 | Create, edit, and delete own artworks | No | Yes | No | No | Edit / Delete any |
 | Submit and withdraw challenge entries | No | Yes | No | No | No |
@@ -132,124 +106,105 @@ flowchart LR
 | Submit curator reapplication with CV & portfolio | No | No | Rejected only | No | No |
 | Create, edit, and delete own challenges | No | No | No | Yes | Edit / Delete any |
 | Assign or clear challenge winners (1st–3rd) | No | No | No | Own challenges | Any challenge |
-| Verify curator applications & inspect private CVs | No | No | No | No | Yes |
+| Verify curator applications & access private CVs | No | No | No | No | Yes |
 | Activate or deactivate non-admin accounts | No | No | No | No | Yes |
-| Manage categories & moderate reported artworks | No | No | No | No | Yes |
+| Manage categories & moderate reports | No | No | No | No | Yes |
 
-*\*Administrators are blocked from liking, favoriting, commenting on, or reporting artworks to preserve moderation neutrality.*
-
-</details>
-
-<details>
-<summary><strong>Implementation Notes: Endpoints & Current Status</strong></summary>
-
-<br />
-
-- `POST /api/upload`: Authenticated endpoint validating MIME type (`JPEG`, `PNG`, `WebP`, `GIF`) and file size (max `10 MB`), sanitizing and resizing non-GIF images with `sharp` up to `2400x2400`, and saving UUID files to `public/uploads/`.
-- `GET /api/challenges/search`: Live search endpoint returning active/upcoming challenges and status counts.
-- `GET /api/curator-applications/[id]/cv`: Protected CV retrieval endpoint strictly restricted to authenticated Admins and the application owner (`401`/`403` enforced, `Cache-Control: private, no-store`).
-- `src/app/api/artworks/search/route.js`: Exists as an empty placeholder file; artwork search and filtering currently run server-side in `src/app/(public)/explore/page.js`.
+*\*Administrators are blocked from liking, favoriting, commenting on, or reporting artworks to keep moderation neutral.*
 
 </details>
 
----
+<a id="preview"></a>
 
-## Preview
+## 🖼️ Preview
 
-> **Repository Screenshot Status:** No genuine application UI screenshots are currently stored in the repository (only brand logos in `public/logo/` and uploaded artwork media in `public/uploads/` exist).
->
-> To preserve accuracy, no stock images or fabricated captures are displayed. Once real screenshots are captured and placed in `docs/screenshots/` or `public/`, populate the gallery below.
+> **Application Screenshots Pending:** No genuine UI screenshots exist in the repository yet (only brand SVGs in `public/logo/` and uploaded artwork media in `public/uploads/` are present). Add real captures to `docs/screenshots/` and update the gallery below when ready.
 
 <table>
 <tr>
 <td align="center" width="50%">
-<strong>🏛️ Landing Page & 3D Hero</strong><br />
-<sub><code>docs/screenshots/home.png</code> (Pending)</sub><br />
-<sub>GSAP 3D <code>DepthCarousel</code> exhibition, curated gallery, featured challenges, and artist showcase.</sub>
+<strong>🏛️ Landing Page &amp; 3D Hero</strong><br />
+<sub><code>docs/screenshots/home.png</code> — Not yet added</sub><br />
+<sub>GSAP 3D <code>DepthCarousel</code>, curated artwork gallery, and featured artists.</sub>
 </td>
 <td align="center" width="50%">
-<strong>🔍 Explore & Artwork Detail</strong><br />
-<sub><code>docs/screenshots/explore.png</code> (Pending)</sub><br />
-<sub>Category filtering, sorting, high-resolution artwork view, likes, favorites, and critique comments.</sub>
+<strong>🔍 Explore &amp; Artwork Detail</strong><br />
+<sub><code>docs/screenshots/explore.png</code> — Not yet added</sub><br />
+<sub>Category filtering, sorting, artwork detail view, and critique threads.</sub>
 </td>
 </tr>
 <tr>
 <td align="center" width="50%">
-<strong>🏆 Challenges & Winner Podium</strong><br />
-<sub><code>docs/screenshots/challenges.png</code> (Pending)</sub><br />
-<sub>Live challenge discovery, competition briefs, submission flow, and 1st–3rd place winners.</sub>
+<strong>🏆 Challenges &amp; Winner Podium</strong><br />
+<sub><code>docs/screenshots/challenges.png</code> — Not yet added</sub><br />
+<sub>Live challenge discovery, competition briefs, and ranked winners.</sub>
 </td>
 <td align="center" width="50%">
 <strong>📊 Role-Based Dashboards</strong><br />
-<sub><code>docs/screenshots/dashboards.png</code> (Pending)</sub><br />
-<sub>Dedicated workspaces for Member Studios, Curator Judging, and Admin Governance.</sub>
+<sub><code>docs/screenshots/dashboards.png</code> — Not yet added</sub><br />
+<sub>Dedicated workspaces for Members, Curators, and Administrators.</sub>
 </td>
 </tr>
 </table>
 
----
+<a id="tech-stack"></a>
 
-## Tech Stack
+## ⚙️ Tech Stack
 
-### Frontend & UI / Styling
-[![Next.js](https://img.shields.io/badge/Next.js-16.4.6-1A1917?style=flat-square&logo=nextdotjs&logoColor=F7F5F0)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.3.0-303438?style=flat-square&logo=react&logoColor=F7F5F0)](https://react.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.3-303438?style=flat-square&logo=tailwindcss&logoColor=F7F5F0)](https://tailwindcss.com/)
-[![Turbopack](https://img.shields.io/badge/@tailwindcss/turbopack-4.3.3-626A6D?style=flat-square&logo=tailwindcss&logoColor=F7F5F0)](https://tailwindcss.com/)
-[![Manrope](https://img.shields.io/badge/Font-Manrope-B5A284?style=flat-square&logo=googlefonts&logoColor=1A1917)](https://fonts.google.com/specimen/Manrope)
+**Frontend**
 
-### Backend, Database & Authentication
-[![Node.js](https://img.shields.io/badge/Node.js-20+-1A1917?style=flat-square&logo=nodedotjs&logoColor=B5A284)](https://nodejs.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-303438?style=flat-square&logo=postgresql&logoColor=F7F5F0)](https://www.postgresql.org/)
-[![node-postgres](https://img.shields.io/badge/pg-8.23.1-303438?style=flat-square&logo=postgresql&logoColor=B5A284)](https://node-postgres.com/)
-[![jose](https://img.shields.io/badge/jose_(JWT)-6.2.18-8C7963?style=flat-square&logo=jsonwebtokens&logoColor=F7F5F0)](https://github.com/panva/jose)
-[![bcryptjs](https://img.shields.io/badge/bcryptjs-3.0.3-626A6D?style=flat-square)](https://github.com/dcodeIO/bcrypt.js)
+[![Next.js](https://img.shields.io/badge/Next.js_16.4.6-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React_19.3.0-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://react.dev/)
+[![GSAP](https://img.shields.io/badge/GSAP_3.13.0-88CE02?style=flat-square&logo=greensock&logoColor=111111)](https://gsap.com/)
 
-### Libraries, Components & Development Tools
-[![GSAP](https://img.shields.io/badge/GSAP-3.13.0-8C7963?style=flat-square&logo=greensock&logoColor=F7F5F0)](https://gsap.com/)
-[![sharp](https://img.shields.io/badge/sharp-0.35.5-8C7963?style=flat-square)](https://sharp.pixelplumbing.com/)
-[![uuid](https://img.shields.io/badge/uuid-14.0.3-626A6D?style=flat-square)](https://github.com/uuidjs/uuid)
-[![ESLint](https://img.shields.io/badge/ESLint-9-303438?style=flat-square&logo=eslint&logoColor=F7F5F0)](https://eslint.org/)
-[![eslint-config-next](https://img.shields.io/badge/eslint--config--next-16.4.6-1A1917?style=flat-square&logo=nextdotjs&logoColor=F7F5F0)](https://nextjs.org/)
+**Backend & Media**
+
+[![Node.js](https://img.shields.io/badge/Node.js_20+-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![sharp](https://img.shields.io/badge/sharp_0.35.5-99CC00?style=flat-square&logo=sharp&logoColor=111111)](https://sharp.pixelplumbing.com/)
+[![uuid](https://img.shields.io/badge/uuid_14.0.3-6366F1?style=flat-square)](https://github.com/uuidjs/uuid)
+
+**Database**
+
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL_14+-336791?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![node-postgres](https://img.shields.io/badge/pg_8.23.1-336791?style=flat-square&logo=postgresql&logoColor=white)](https://node-postgres.com/)
+
+**Authentication**
+
+[![jose](https://img.shields.io/badge/jose_6.2.18_(JWT)-000000?style=flat-square&logo=jsonwebtokens&logoColor=FB015B)](https://github.com/panva/jose)
+[![bcryptjs](https://img.shields.io/badge/bcryptjs_3.0.3-D97706?style=flat-square)](https://github.com/dcodeIO/bcrypt.js)
+
+**UI / Styling**
+
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_4.3.3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Manrope](https://img.shields.io/badge/Font_Manrope-4285F4?style=flat-square&logo=googlefonts&logoColor=white)](https://fonts.google.com/specimen/Manrope)
+
+**Development Tools**
+
+[![ESLint](https://img.shields.io/badge/ESLint_9-4B32C3?style=flat-square&logo=eslint&logoColor=white)](https://eslint.org/)
+[![npm](https://img.shields.io/badge/npm-CB3837?style=flat-square&logo=npm&logoColor=white)](https://www.npmjs.com/)
 
 <details>
-<summary><strong>Detailed Stack Breakdown by Layer</strong></summary>
+<summary><strong>Explore System Architecture &amp; Database Schema (Mermaid Diagrams)</strong></summary>
 
 <br />
 
-| Layer | Technologies Used | Purpose in ARTHIVE |
-|---|---|---|
-| **Frontend** | Next.js `16.4.6` (App Router), React `19.3.0`, React DOM `19.3.0` | Server Components, Client Components, dynamic routing, SSR |
-| **Backend** | Next.js Server Actions & Route Handlers (`Node.js` 20+) | Form mutations, live search API, multipart upload & CV retrieval |
-| **Database** | PostgreSQL `14+`, `pg` `^8.23.1` | Connection pooling (`src/lib/db.js`), parameterized SQL, 11 tables |
-| **Authentication** | `jose` `^6.2.18`, `bcryptjs` `^3.0.3`, `sessions` table | HS256 JWT `httpOnly` cookies, salt-12 hashing, session revocation |
-| **UI / Styling** | Tailwind CSS `4.3.3`, `@tailwindcss/turbopack`, `globals.css`, Manrope | Architectural editorial palette (`#F7F5F0`, `#1A1917`, `#B5A284`) |
-| **Libraries & Components** | `gsap` `^3.13.0`, `sharp` `^0.35.5`, `uuid` `^14.0.3`, Custom SVGs | 3D `DepthCarousel`, image sanitization/resizing, UUID filenames |
-| **Development Tools** | `eslint` `^9`, `eslint-config-next` `16.4.6`, npm | Core Web Vitals linting and dependency management |
-
-</details>
-
----
-
-## System Architecture
-
-ARTHIVE follows a unified Next.js App Router architecture where Server Components query PostgreSQL directly, Server Actions execute validated database transactions, and Route Handlers process binary file uploads and live queries.
+### Application Request & Auth Flow
 
 ```mermaid
 flowchart TD
-    Browser["🌐 Browser Client (React 19 + GSAP)"]
-    Proxy["🛡️ src/proxy.js\nOptimistic JWT Check on /dashboard/*"]
-    Public["🏛️ Public App Routes\n/, /explore, /artworks, /artists, /challenges"]
+    Client["🌐 Browser Client"]
+    Proxy["🛡️ src/proxy.js\nOptimistic JWT Check (/dashboard/*)"]
+    Public["🏛️ Public Pages\n/, /explore, /artworks, /artists, /challenges"]
     Dash["📊 Protected Dashboards\n/dashboard/member, /curator, /admin"]
-    Auth["🔐 Auth & RBAC (src/lib/auth.js)\ngetSession, requireAuth, requireRole"]
-    Actions["⚙️ Server Actions (src/lib/actions/*.js)\nauth, artwork, challenge, curator, admin"]
-    UploadAPI["🖼️ POST /api/upload\nsharp Validation -> public/uploads/"]
-    CvAPI["📄 GET /api/curator-applications/[id]/cv\nPrivate Storage -> storage/curator-cvs/"]
-    SearchAPI["🔍 GET /api/challenges/search\nLive Query & Counts"]
-    DB[("🗄️ PostgreSQL\nsrc/lib/db.js Pool (11 Tables)")]
+    Auth["🔐 src/lib/auth.js\ngetSession, requireAuth, requireRole"]
+    Actions["⚙️ Server Actions\nsrc/lib/actions/*.js"]
+    Upload["🖼️ POST /api/upload\nsharp -> public/uploads/"]
+    CV["📄 GET /api/curator-applications/[id]/cv\nPrivate -> storage/curator-cvs/"]
+    Search["🔍 GET /api/challenges/search"]
+    DB[("🗄️ PostgreSQL\nsrc/lib/db.js Pool")]
 
-    Browser --> Proxy
-    Browser --> Public
+    Client --> Proxy
+    Client --> Public
     Proxy --> Dash
     Public --> DB
     Dash --> Auth
@@ -258,34 +213,28 @@ flowchart TD
     Public --> Actions
     Actions --> Auth
     Actions --> DB
-    Browser --> UploadAPI
-    Browser --> CvAPI
-    Browser --> SearchAPI
-    UploadAPI --> Auth
-    CvAPI --> Auth
-    SearchAPI --> DB
+    Client --> Upload
+    Client --> CV
+    Client --> Search
+    Upload --> Auth
+    CV --> Auth
+    Search --> DB
     Actions --> DB
 
-    classDef charcoal fill:#1A1917,stroke:#B5A284,color:#F7F5F0,stroke-width:1.5px;
-    classDef sand fill:#B5A284,stroke:#1A1917,color:#1A1917,stroke-width:1.5px;
-    classDef slate fill:#303438,stroke:#B5A284,color:#EAE7E0,stroke-width:1.5px;
-    classDef stone fill:#626A6D,stroke:#1A1917,color:#F7F5F0,stroke-width:1.5px;
-    classDef ivory fill:#F7F5F0,stroke:#8C7963,color:#1A1917,stroke-width:1.5px;
+    classDef navy fill:#0D1730,stroke:#5C7FA8,color:#F7F5F0,stroke-width:1.5px;
+    classDef slate fill:#1E293B,stroke:#B5A284,color:#EAE7E0,stroke-width:1.5px;
+    classDef sand fill:#B5A284,stroke:#0D1730,color:#0D1730,stroke-width:1.5px;
+    classDef blue fill:#3B5998,stroke:#EAE7E0,color:#F7F5F0,stroke-width:1.5px;
+    classDef charcoal fill:#1A1917,stroke:#8C7963,color:#F7F5F0,stroke-width:1.5px;
 
-    class Browser ivory;
+    class Client navy;
     class Proxy,Auth slate;
     class Public,Dash sand;
-    class Actions,UploadAPI,CvAPI,SearchAPI stone;
+    class Actions,Upload,CV,Search blue;
     class DB charcoal;
 ```
 
-- **Two-Layer Access Control**: `src/proxy.js` runs an optimistic JWT check on `/dashboard/:path*` and redirects unauthenticated requests to `/login`. Authoritative checks run in `requireAuth()` and `requireRole()` (`src/lib/auth.js`), joining `sessions` and `users` to verify expiration, `is_active = TRUE`, `role`, and `curator_status = 'approved'`.
-- **Dual File Storage**: Public artwork images uploaded through `POST /api/upload` are verified/resized by `sharp` and written to `public/uploads/`. Sensitive curator CVs (`.pdf`, `.doc`, `.docx` verified via magic bytes in `src/lib/curator-cv.js`) are stored outside `public/` in `storage/curator-cvs/` and served only through the authorized `/api/curator-applications/[id]/cv` handler.
-
-<details>
-<summary><strong>Interactive Diagram: PostgreSQL Database Schema (11 Tables)</strong></summary>
-
-<br />
+### PostgreSQL Database Schema (11 Tables)
 
 ```mermaid
 erDiagram
@@ -293,147 +242,101 @@ erDiagram
     USERS ||--o{ ARTWORKS : publishes
     USERS ||--o{ CHALLENGES : curates
     USERS ||--o{ SUBMISSIONS : submits
-    USERS ||--o{ COMMENTS : authors
+    USERS ||--o{ COMMENTS : writes
     USERS ||--o{ FAVORITES : saves
     USERS ||--o{ ARTWORK_LIKES : likes
     USERS ||--o{ REPORTS : files
     USERS ||--o{ CURATOR_APPLICATIONS : submits
 
-    CATEGORIES ||--o{ ARTWORKS : categorizes
+    CATEGORIES ||--o{ ARTWORKS : classifies
     ARTWORKS ||--o{ ARTWORK_LIKES : receives
     ARTWORKS ||--o{ FAVORITES : saved_in
     ARTWORKS ||--o{ COMMENTS : has
-    ARTWORKS ||--o{ REPORTS : reported_in
+    ARTWORKS ||--o{ REPORTS : subject_of
     ARTWORKS ||--o{ SUBMISSIONS : entered_as
     CHALLENGES ||--o{ SUBMISSIONS : receives
-
-    USERS {
-        int id PK
-        varchar name
-        varchar email UK
-        text password
-        varchar role
-        varchar curator_status
-        boolean is_active
-    }
-    CURATOR_APPLICATIONS {
-        int id PK
-        int user_id FK
-        int attempt_number
-        text portfolio_url
-        text cv_file_path
-        varchar status
-        text rejection_reason
-    }
-    ARTWORKS {
-        int id PK
-        int user_id FK
-        int category_id FK
-        varchar title
-        text image_url
-        varchar status
-        int like_count
-    }
-    CHALLENGES {
-        int id PK
-        int curator_id FK
-        varchar title
-        timestamp start_date
-        timestamp end_date
-    }
-    SUBMISSIONS {
-        int id PK
-        int challenge_id FK
-        int artwork_id FK
-        int member_id FK
-        int winner_rank
-        text winner_note
-    }
 ```
 
 </details>
 
----
+<a id="getting-started"></a>
 
-## Getting Started
+## 🚀 Getting Started
 
-### 1. Prerequisites
+### Prerequisites
 
 - **Node.js** `20+`
-- **npm** (included with Node.js)
+- **npm** (bundled with Node.js)
 - **PostgreSQL** `14+`
 
-### 2. Clone Repository
+### Installation
 
-```bash
-git clone https://github.com/aalfm/arthive-art-showcase.git
-```
+1. **Clone Repository**
 
-### 3. Navigate to Project
+   ```bash
+   git clone https://github.com/aalfm/arthive-art-showcase.git
+   ```
 
-```bash
-cd arthive-art-showcase
-```
+2. **Navigate to Project**
 
-### 4. Install Dependencies
+   ```bash
+   cd arthive-art-showcase
+   ```
 
-```bash
-npm install
-```
+3. **Install Dependencies**
 
-### 5. Configure Environment Variables
+   ```bash
+   npm install
+   ```
 
-Copy the template file to `.env.local` and configure your PostgreSQL connection and session secret:
+4. **Configure Environment Variables**
 
-```bash
-cp .env.example .env.local
-```
+   ```bash
+   cp .env.example .env.local
+   ```
 
-```env
-DATABASE_URL=postgresql://postgres:your_password@localhost:5432/arthive_db
-SESSION_SECRET=replace-with-a-random-32-char-secret
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+   Update `.env.local` with your PostgreSQL credentials and a strong random session secret:
 
-> **Note:** `src/lib/auth.js` and `src/proxy.js` fall back to a default development string if `SESSION_SECRET` is omitted, so always set a strong 32+ character secret in `.env.local` and production environments.
+   ```env
+   DATABASE_URL=postgresql://postgres:your_password@localhost:5432/arthive_db
+   SESSION_SECRET=replace-with-a-random-32-char-secret
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
 
-### 6. Database Setup
+   > **Important:** Always keep `.env.local` out of version control. If `SESSION_SECRET` is omitted, `src/lib/auth.js` and `src/proxy.js` fall back to a built-in development key—never rely on that fallback in production.
 
-Create the database, initialize the schema, and execute the idempotent seed script in order:
+5. **Database Setup**
 
-```bash
-psql -U postgres -c "CREATE DATABASE arthive_db;"
-psql -U postgres -d arthive_db -f database/schema.sql
-psql -U postgres -d arthive_db -f database/seed.sql
-```
+   Create `arthive_db`, then execute `database/schema.sql` before `database/seed.sql`:
 
-> **Important:** Always run `database/schema.sql` before `database/seed.sql`. The seed script creates tables/relations assumptions and ends with verification counts for users, categories, artworks, likes, and challenges.
+   ```bash
+   psql -U postgres -c "CREATE DATABASE arthive_db;"
+   psql -U postgres -d arthive_db -f database/schema.sql
+   psql -U postgres -d arthive_db -f database/seed.sql
+   ```
 
-### 7. Run Development Server
+   > **Note:** `database/seed.sql` is safe to re-run and prints summary counts for users, categories, artworks, likes, and challenges upon completion.
 
-```bash
-npm run dev
-```
+6. **Run Development Server**
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 <details>
-<summary><strong>Environment Variables Reference (`.env.example`)</strong></summary>
+<summary><strong>Environment Variables &amp; Demo Accounts Reference</strong></summary>
 
 <br />
 
-| Variable | Description | Required | Example Value |
+| Variable | Description | Required | Example |
 |---|---|---|---|
-| `DATABASE_URL` | PostgreSQL connection string used by `pg` Pool in `src/lib/db.js`. | Yes | `postgresql://postgres:your_password@localhost:5432/arthive_db` |
-| `SESSION_SECRET` | Secret key (32+ characters recommended) used to sign HS256 JWT session cookies. | Yes (Production) | `replace-with-a-random-32-char-secret` |
-| `NEXT_PUBLIC_APP_URL` | Public base URL of the application configured in `.env.example`. | No | `http://localhost:3000` |
+| `DATABASE_URL` | PostgreSQL connection string used by `src/lib/db.js`. | Yes | `postgresql://postgres:your_password@localhost:5432/arthive_db` |
+| `SESSION_SECRET` | Secret key (32+ chars recommended) for HS256 JWT cookies. | Yes (Prod) | `replace-with-a-random-32-char-secret` |
+| `NEXT_PUBLIC_APP_URL` | Base application URL defined in `.env.example`. | No | `http://localhost:3000` |
 
-</details>
-
-<details>
-<summary><strong>Database Demo Accounts & Verification Queries (`database/seed.sql`)</strong></summary>
-
-<br />
+**Seeded Demo Accounts (`database/seed.sql`)**
 
 | Role | Email | Password | Status |
 |---|---|---|---|
@@ -441,102 +344,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | **Curator** | `kurator@arthive.com` | `Curator@123` | Approved |
 | **Member** | `member@arthive.com` | `Member@123` | Active |
 
-Verify database tables manually at any time:
-```sql
-\dt
-SELECT role, COUNT(*) FROM users GROUP BY role;
-```
-
 </details>
 
 <details>
-<summary><strong>Troubleshooting Common Setup Issues</strong></summary>
-
-<br />
-
-- **`[DB] Query error` or connection refused**: Confirm PostgreSQL is running and verify host, port, username, password, and `arthive_db` in `.env.local`.
-- **Redirected back to `/login` after signing in**: Verify `database/schema.sql` was executed (creating `sessions`) and `SESSION_SECRET` matches across requests.
-- **`sharp` installation or runtime failure**: Rebuild native bindings on Node.js `20+` using `npm rebuild sharp`.
-- **Port `3000` conflict**: Stop the conflicting process or start Next.js on a custom port (`npx next dev -p 3001`).
-- **Seed errors**: Drop and re-initialize `arthive_db`, then run `database/schema.sql` strictly before `database/seed.sql`.
-
-</details>
-
----
-
-## Project Structure
-
-```text
-arthive-art-showcase/
-├── database/
-│   ├── schema.sql                       # 11-table PostgreSQL schema, constraints, indexes
-│   └── seed.sql                         # Idempotent demo accounts, categories, artworks, challenges
-├── public/
-│   ├── logo/                            # Official ARCHIVE / ARTHIVE SVG logos & favicons
-│   └── uploads/                         # Local directory for sharp-processed artwork images
-├── src/
-│   ├── app/
-│   │   ├── (public)/                    # Public routes: explore, artworks/[id], artists, challenges, auth
-│   │   ├── api/
-│   │   │   ├── artworks/search/         # Placeholder search route
-│   │   │   ├── challenges/search/       # Live challenge search & status counts API
-│   │   │   ├── curator-applications/    # Authorized CV file retrieval endpoint ([id]/cv)
-│   │   │   └── upload/                  # Authenticated image upload & sharp sanitization API
-│   │   ├── dashboard/
-│   │   │   ├── admin/                   # Overview, users, curators, artworks, challenges, categories, reports
-│   │   │   ├── curator/                 # Overview, pending/reapply gate, challenges CRUD, judging
-│   │   │   ├── member/                  # Overview, artworks CRUD, favorites, submissions, profile, settings
-│   │   │   ├── layout.js                # Shared dashboard sidebar layout
-│   │   │   └── page.js                  # Role-based dashboard redirector
-│   │   ├── globals.css                  # Editorial design tokens (ivory, charcoal, sand) & styles
-│   │   ├── layout.js                    # Root layout loading Manrope font & favicon
-│   │   └── page.js                      # Public homepage exhibition
-│   ├── components/
-│   │   ├── artists/                     # Artist directory, navigation, and portfolio components
-│   │   ├── dashboard/                   # Account inactive notice & admin artwork preview
-│   │   ├── home/                        # HeroSection, ArtworkGallery, ChallengesSection, ArtistsSection
-│   │   ├── layout/                      # Navbar, Footer, DashboardSidebar, PublicPageContainer
-│   │   └── ui/                          # DepthCarousel, Folder, ImageUpload, Breadcrumb, Modal, Toast, Icons
-│   ├── lib/
-│   │   ├── actions/                     # Server Actions (admin, artwork, auth, challenge, curator)
-│   │   ├── auth.js                      # JWT + DB session management, requireAuth, requireRole
-│   │   ├── avatar.js                    # Role-aware avatar resolution helpers
-│   │   ├── curator.js                   # Curator validation rules & rejection reason guidelines
-│   │   ├── curator-cv.js                # Private CV magic-byte validation & storage/curator-cvs/ I/O
-│   │   ├── db.js                        # PostgreSQL connection pool and query helper
-│   │   ├── member-navigation.js         # Contextual member navigation helpers
-│   │   ├── navigation.js                # Active page label & dashboard navigation helpers
-│   │   └── utils.js                     # Positive integer ID & formatting helpers
-│   └── proxy.js                         # Optimistic session cookie guard for /dashboard/*
-├── .env.example                         # Environment variable template
-├── eslint.config.mjs                    # ESLint configuration
-├── jsconfig.json                        # Path aliases (@/* -> ./src/*)
-├── next.config.mjs                      # Next.js config (remote images, 10MB action body limit)
-└── package.json                         # Dependencies and npm scripts
-```
-
-<details>
-<summary><strong>Runtime Storage Note (`storage/curator-cvs/`)</strong></summary>
-
-<br />
-
-When a curator uploads a CV file (`.pdf`, `.doc`, or `.docx`), `src/lib/curator-cv.js` creates `storage/curator-cvs/` at the project root so private applicant documents remain outside `public/` and are never served statically.
-
-</details>
-
----
-
-## Usage
-
-| Role | Entry Point | Core Workflow |
-|---|---|---|
-| **Public / Guest** | `/` · `/explore` · `/artists` · `/challenges` | Browse the 3D hero exhibition, search/filter works by architectural category, inspect artist portfolios, and view challenge rules and ranked winners. |
-| **Member** | `/register` · `/dashboard/member` | Sign in to upload artworks (file upload or URL), manage favorites, comment and like works, report violations, submit active artworks to challenges, and update profile settings. |
-| **Curator** | `/register` · `/dashboard/curator` | Apply with a portfolio URL and CV; once approved by an Admin, create/edit challenges, review participant entries, and select 1st–3rd place winners with notes after the deadline. |
-| **Administrator** | `/login` · `/dashboard/admin` | Inspect platform metrics, verify curator applications and private CVs, activate/deactivate non-admin users, manage categories, monitor challenges, and resolve artwork reports. |
-
-<details>
-<summary><strong>Available npm Scripts (`package.json`)</strong></summary>
+<summary><strong>Available npm Scripts &amp; Troubleshooting</strong></summary>
 
 <br />
 
@@ -545,55 +356,99 @@ When a curator uploads a CV file (`.pdf`, `.doc`, or `.docx`), `src/lib/curator-
 | `dev` | `npm run dev` | Starts the Next.js development server at `http://localhost:3000`. |
 | `build` | `npm run build` | Builds the application for production. |
 | `start` | `npm run start` | Runs the compiled production server. |
-| `lint` | `npm run lint` | Runs ESLint with `eslint-config-next` Core Web Vitals rules. |
+| `lint` | `npm run lint` | Runs ESLint with `eslint-config-next` rules. |
+
+**Common Troubleshooting**
+- **`[DB] Query error` / connection refused**: Ensure PostgreSQL is running and verify `DATABASE_URL` in `.env.local`.
+- **Redirected back to `/login` after signing in**: Ensure `database/schema.sql` has been executed (`sessions` table exists) and `SESSION_SECRET` is configured.
+- **`sharp` install or runtime error**: Run `npm rebuild sharp` using Node.js `20+`.
+- **Port `3000` already in use**: Stop the conflicting process or run `npx next dev -p 3001`.
 
 </details>
 
+<a id="project-structure"></a>
+
+## 📂 Project Structure
+
+```text
+arthive-art-showcase/
+├── database/
+│   ├── schema.sql                  # 11-table PostgreSQL schema, constraints & indexes
+│   └── seed.sql                    # Idempotent demo users, categories, artworks & challenges
+├── docs/
+│   └── assets/
+│       └── archive-hero-banner.svg # Custom deep-navy architectural SVG banner
+├── public/
+│   ├── logo/                       # Official ARCHIVE SVGs and favicons
+│   └── uploads/                    # Local storage for sharp-processed artwork uploads
+├── src/
+│   ├── app/
+│   │   ├── (public)/               # Public pages: explore, artworks/[id], artists, challenges, auth
+│   │   ├── api/                    # upload, challenges/search, curator-applications/[id]/cv
+│   │   ├── dashboard/              # Role workspaces: admin/, curator/, member/
+│   │   ├── globals.css             # Architectural editorial palette & layout styles
+│   │   ├── layout.js               # Root layout loading Manrope font & favicon
+│   │   └── page.js                 # Homepage exhibition
+│   ├── components/
+│   │   ├── artists/                # Artist directory, navigation & portfolio components
+│   │   ├── dashboard/              # Account status notices & admin artwork preview
+│   │   ├── home/                   # HeroSection, ArtworkGallery, ChallengesSection, ArtistsSection
+│   │   ├── layout/                 # Navbar, Footer, DashboardSidebar, PublicPageContainer
+│   │   └── ui/                     # DepthCarousel, Folder, ImageUpload, Breadcrumb, Modal, Toast
+│   ├── lib/
+│   │   ├── actions/                # Server Actions (admin, artwork, auth, challenge, curator)
+│   │   ├── auth.js                 # JWT & DB session helpers, requireAuth, requireRole
+│   │   ├── curator-cv.js           # Magic-byte CV validation & private storage/curator-cvs/ I/O
+│   │   └── db.js                   # PostgreSQL connection pool and query helper
+│   └── proxy.js                    # Optimistic JWT route guard for /dashboard/*
+├── .env.example                    # Environment variable template
+├── next.config.mjs                 # Next.js configuration (remote images, 10MB action body limit)
+└── package.json                    # Project dependencies and npm scripts
+```
+
 <details>
-<summary><strong>Security & Access Control Summary</strong></summary>
+<summary><strong>Additional Project &amp; Implementation Notes</strong></summary>
 
 <br />
 
-- **Session & Cookie Protection**: DB-backed `sessions` paired with `httpOnly`, `sameSite: 'lax'` HS256 JWT cookies (`secure: true` in production); user deactivation deletes active sessions immediately.
-- **Password Security**: `bcryptjs` hashing with a salt factor of `12` (`src/lib/actions/auth.actions.js`).
-- **SQL Injection Defense**: All database queries use parameterized `$1, $2, ...` placeholders.
-- **Upload & Document Validation**: Artwork images pass through `sharp` format verification and resizing; curator CVs undergo magic-byte validation (`%PDF-`, OLE2 `.doc`, ZIP `.docx`) and role-restricted streaming.
+- **Private Curator CV Storage**: Uploaded curator CVs (`.pdf`, `.doc`, `.docx`) are saved dynamically to `storage/curator-cvs/` outside `public/` and served strictly to Admins and the applicant via `GET /api/curator-applications/[id]/cv`.
+- **Artwork Search Endpoint**: `src/app/api/artworks/search/route.js` currently exists as an empty placeholder; artwork search and category filtering run server-side inside `src/app/(public)/explore/page.js`.
 
 </details>
 
----
+<a id="usage"></a>
 
-## Contributing
+## 📖 Usage
 
-Contributions, bug reports, and architectural improvements are welcome.
+- **Public / Guest**: Visit `/` to explore the 3D hero carousel, search and filter works in `/explore`, browse creator portfolios in `/artists`, and inspect challenge briefs and ranked winners in `/challenges`.
+- **Member / Creator**: Register or sign in at `/login` to open `/dashboard/member`. Upload artworks (`JPEG`, `PNG`, `WebP`, `GIF` up to `10 MB` or via URL), bookmark favorites, post comments, submit active works to ongoing challenges, and update your profile or password.
+- **Curator**: Register as a `curator` with a portfolio link and CV. Once approved by an Administrator, use `/dashboard/curator` to create and edit challenges, inspect submissions, and assign 1st–3rd place winners with optional jury notes after the challenge end date.
+- **Administrator**: Sign in to `/dashboard/admin` to verify curator applications (including viewing/downloading private CVs and rejecting with documented reasons), activate or deactivate non-admin accounts, manage categories, oversee platform challenges, and resolve artwork reports.
 
-1. **Fork the repository** on GitHub.
-2. **Create a feature branch**:
-   ```bash
-   git checkout -b feat/your-feature-name
-   ```
-3. **Make your changes** and verify code quality before committing:
-   ```bash
-   npm run lint
-   npm run build
-   ```
-4. **Commit using Conventional Commits**:
-   - `feat: add artwork tag filtering on explore page`
-   - `fix: resolve curator reapplication CV retention edge case`
-   - `refactor: simplify challenge winner validation helper`
+<a id="contributing"></a>
+
+## 🤝 Contributing
+
+Contributions, issues, and feature improvements are welcome.
+
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feat/your-feature`).
+3. Verify your changes with `npm run lint` and `npm run build`.
+4. Commit using Conventional Commits:
+   - `feat: add challenge winner note display`
+   - `fix: resolve curator CV download header encoding`
+   - `refactor: extract shared dashboard breadcrumb helper`
    - `docs: update README architecture diagram`
-5. **Submit a Pull Request** detailing your changes and verification steps.
+5. Open a Pull Request explaining the purpose and verification of your changes.
 
----
+<a id="license"></a>
 
-## License
+## 📄 License
 
 No `LICENSE` file is currently specified in this repository. All rights remain with the repository author unless a license is added.
 
----
+<a id="author"></a>
 
-## Author
+## 👤 Author
 
-**aalfm** — [GitHub Profile](https://github.com/aalfm) · [ARTHIVE Repository](https://github.com/aalfm/arthive-art-showcase)
-
-<sub>Built with Next.js, React, PostgreSQL, Tailwind CSS, GSAP, jose, bcryptjs, and sharp.</sub>
+**aalfm** — [GitHub](https://github.com/aalfm) · [ARCHIVE Repository](https://github.com/aalfm/arthive-art-showcase)
