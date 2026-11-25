@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/Archive_Gallery_identity.6s.gif" alt="ARCHIVE — Where Architecture Meets Digital Expression." width="100%" />
+<img src="docs/assets/Archive_Gallery_identity · 6s.gif" alt="ARCHIVE — Where Architecture Meets Digital Expression." width="100%" />
 
 <br /><br />
 
