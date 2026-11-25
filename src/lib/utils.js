@@ -16,3 +16,54 @@ export function isUploadedImagePath(value) {
   if (typeof value !== 'string') return false;
   return /^\/uploads\/[a-zA-Z0-9._-]+\.(jpe?g|png|webp)$/i.test(value.trim());
 }
+
+/** Format database user roles in clean editorial case (Admin, Curator, Member). */
+export function formatRoleLabel(role) {
+  if (typeof role !== 'string') return '';
+  const normalized = role.trim().toLowerCase();
+  if (normalized === 'admin') return 'Admin';
+  if (normalized === 'curator') return 'Curator';
+  if (normalized === 'member') return 'Member';
+  return normalized ? normalized.charAt(0).toUpperCase() + normalized.slice(1) : '';
+}
+
+/** Format curator verification statuses in clean Sentence case. */
+export function formatCuratorStatusLabel(status) {
+  if (typeof status !== 'string') return '';
+  const normalized = status.trim().toLowerCase();
+  if (normalized === 'approved') return 'Approved';
+  if (normalized === 'pending') return 'Pending';
+  if (normalized === 'rejected') return 'Rejected';
+  return normalized ? normalized.charAt(0).toUpperCase() + normalized.slice(1) : '';
+}
+
+const EDITORIAL_ACRONYMS = new Set(['ARCHIVE', 'ARTHIVE', 'UNM', '3D', '2D', 'AI', 'VR', 'AR', 'BIM', 'CAD', 'UI', 'UX', 'NFT', 'ID']);
+const EDITORIAL_SMALL_WORDS = new Set(['a', 'an', 'and', 'as', 'at', 'by', 'for', 'from', 'in', 'into', 'of', 'on', 'or', 'the', 'to', 'with', 'dan', 'di', 'ke', 'dari', 'yang', 'untuk', 'pada']);
+
+/**
+ * Normalizes dynamic database titles that were stored in ALL CAPS into refined editorial Title Case
+ * while preserving mixed-case titles and recognized acronyms untouched.
+ */
+export function formatEditorialTitle(value) {
+  if (typeof value !== 'string') return '';
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+
+  // Leave titles that already have natural mixed casing untouched
+  const hasLower = /[a-z]/.test(trimmed);
+  const hasUpper = /[A-Z]/.test(trimmed);
+  if (hasLower || !hasUpper) return trimmed;
+
+  const words = trimmed.split(/\s+/);
+  return words
+    .map((word, idx) => {
+      if (EDITORIAL_ACRONYMS.has(word)) return word;
+      if (!/[A-Z]/.test(word)) return word;
+      const lower = word.toLowerCase();
+      if (idx > 0 && idx < words.length - 1 && EDITORIAL_SMALL_WORDS.has(lower)) {
+        return lower;
+      }
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+    })
+    .join(' ');
+}
