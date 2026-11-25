@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/auth';
+import { restrictAdminFromPublic } from '@/lib/auth';
 import { applyAvatarPolicy } from '@/lib/avatar';
 import { query } from '@/lib/db';
 import Navbar from '@/components/layout/Navbar';
@@ -100,10 +100,8 @@ async function getHomepageData() {
 }
 
 export default async function HomePage() {
-  const [session, data] = await Promise.all([
-    getSession(),
-    getHomepageData(),
-  ]);
+  const session = await restrictAdminFromPublic();
+  const data = await getHomepageData();
 
   const popularArtworks = [...data.artworks].sort((a, b) => Number(b.like_count || 0) - Number(a.like_count || 0));
   const latestArtworks = data.artworks;
@@ -126,7 +124,7 @@ export default async function HomePage() {
           <ArtistsSection artists={data.artists} />
         )}
       </main>
-      <Footer />
+      <Footer user={session?.user || null} />
     </>
   );
 }

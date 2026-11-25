@@ -151,12 +151,45 @@ export async function requireAuth() {
 }
 
 /**
+ * Resolve the Curator's home dashboard path based on verification status.
+ */
+export function getCuratorDashboardPath(user) {
+  return user?.curator_status === 'approved'
+    ? '/dashboard/curator'
+    : '/dashboard/curator/pending';
+}
+
+/**
+ * Enforce Dashboard-only access on public-facing routes for Admin and Curator users.
+ * Redirects authenticated Admin users to /dashboard/admin and Curator users to
+ * their Curator Dashboard while leaving Member and unauthenticated visitors unaffected.
+ */
+export async function restrictAdminFromPublic(session) {
+  const activeSession = session === undefined ? await getSession() : session;
+  if (activeSession?.user?.role === 'admin') {
+    const { redirect } = await import('next/navigation');
+    redirect('/dashboard/admin');
+  }
+  if (activeSession?.user?.role === 'curator') {
+    const { redirect } = await import('next/navigation');
+    redirect(getCuratorDashboardPath(activeSession.user));
+  }
+  return activeSession;
+}
+
+/**
  * Require a specific role
  */
 export async function requireRole(...roles) {
   const user = await requireAuth();
   if (!roles.includes(user.role)) {
     const { redirect } = await import('next/navigation');
+    if (user.role === 'admin') {
+      redirect('/dashboard/admin');
+    }
+    if (user.role === 'curator') {
+      redirect(getCuratorDashboardPath(user));
+    }
     redirect('/');
   }
   // Additional check for curator status

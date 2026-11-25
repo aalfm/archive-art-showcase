@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getInactiveSessionUser, getSession } from '@/lib/auth';
 import DashboardSidebar from '@/components/layout/DashboardSidebar';
+import Navbar from '@/components/layout/Navbar';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,24 +11,52 @@ export default async function DashboardLayout({ children }) {
   if (!session) {
     const inactiveUser = await getInactiveSessionUser();
     if (inactiveUser) {
+      if (inactiveUser.role === 'admin' || inactiveUser.role === 'curator') {
+        return (
+          <div className="dashboard-layout">
+            <DashboardSidebar user={inactiveUser} isInactive />
+            <main className="dashboard-main">
+              {children}
+            </main>
+          </div>
+        );
+      }
+
       return (
-        <div className="dashboard-layout">
-          <DashboardSidebar user={inactiveUser} isInactive />
-          <main className="dashboard-main">
-            {children}
-          </main>
-        </div>
+        <>
+          <Navbar user={inactiveUser} isInactive />
+          <div className="dashboard-layout dashboard-layout--topnav">
+            <main className="dashboard-main dashboard-main--topnav">
+              {children}
+            </main>
+          </div>
+        </>
       );
     }
     redirect('/login');
   }
 
+  // Admin and Curator share the dedicated sidebar dashboard layout
+  if (session.user.role === 'admin' || session.user.role === 'curator') {
+    return (
+      <div className="dashboard-layout">
+        <DashboardSidebar user={session.user} />
+        <main className="dashboard-main">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
+  // Member dashboard uses the top Navbar with role-based profile dropdown
   return (
-    <div className="dashboard-layout">
-      <DashboardSidebar user={session.user} />
-      <main className="dashboard-main">
-        {children}
-      </main>
-    </div>
+    <>
+      <Navbar user={session.user} />
+      <div className="dashboard-layout dashboard-layout--topnav">
+        <main className="dashboard-main dashboard-main--topnav">
+          {children}
+        </main>
+      </div>
+    </>
   );
 }

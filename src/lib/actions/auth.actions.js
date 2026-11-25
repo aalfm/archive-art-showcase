@@ -135,21 +135,39 @@ export async function loginUser(prevState, formData) {
     return { error: 'Sign in failed. Please try again.' };
   }
 
+  if (user.role === 'admin') {
+    if (
+      redirectTo === '/dashboard/admin' ||
+      redirectTo.startsWith('/dashboard/admin/') ||
+      redirectTo.startsWith('/dashboard/admin?')
+    ) {
+      redirect(redirectTo);
+    }
+    redirect('/dashboard/admin');
+  }
+
+  if (user.role === 'curator') {
+    const curatorHome =
+      user.curator_status === 'approved'
+        ? '/dashboard/curator'
+        : '/dashboard/curator/pending';
+    if (
+      user.curator_status === 'approved' &&
+      (redirectTo === '/dashboard/curator' ||
+        redirectTo.startsWith('/dashboard/curator/') ||
+        redirectTo.startsWith('/dashboard/curator?')) &&
+      !redirectTo.startsWith('/dashboard/curator/pending')
+    ) {
+      redirect(redirectTo);
+    }
+    redirect(curatorHome);
+  }
+
   if (redirectTo.startsWith('/') && !redirectTo.startsWith('//') && !redirectTo.startsWith('/login')) {
     redirect(redirectTo);
   }
 
-  if (user.role === 'admin') {
-    redirect('/dashboard/admin');
-  } else if (user.role === 'curator') {
-    if (user.curator_status === 'approved') {
-      redirect('/dashboard/curator');
-    } else {
-      redirect('/dashboard/curator/pending');
-    }
-  } else {
-    redirect('/dashboard/member');
-  }
+  redirect('/dashboard/member');
 }
 
 export async function logoutUser() {
