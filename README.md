@@ -8,7 +8,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.3-303438?style=flat-square&logo=tailwindcss&logoColor=F7F5F0)](https://tailwindcss.com/)
 [![GSAP](https://img.shields.io/badge/GSAP-3.13.0-8C7963?style=flat-square)](https://gsap.com/)
 
-[About The Project](#about-the-project) · [Features](#features) · [Preview](#preview) · [Tech Stack](#tech-stack) · [Getting Started](#getting-started) · [Project Structure](#project-structure) · [Usage](#usage)
+**Quick Jump:** [About](#about-the-project) · [Features](#features) · [Preview](#preview) · [Tech Stack](#tech-stack) · [Getting Started](#getting-started) · [Project Structure](#project-structure) · [Usage](#usage) · [Contributing](#contributing)
 
 ---
 
@@ -16,7 +16,7 @@
 
 **ARTHIVE** is a digital architecture showcase platform designed to bring together architects, digital artists, curators, and spatial design enthusiasts through creative exhibitions, curated challenges, and architectural visual exploration.
 
-General-purpose social feeds rarely give spatial design the structure it needs. ARTHIVE addresses this by organizing works around architectural movements (such as Modern, Brutalist, Organic, Parametric, and Sustainable Architecture), pairing editorial presentation with role-separated workflows for **Members**, **Curators**, and **Administrators**.
+General-purpose social feeds rarely give spatial design the structure it needs. ARTHIVE solves this by organizing works around architectural movements (such as Modern, Brutalist, Organic, Parametric, and Sustainable Architecture), pairing editorial presentation with role-separated workflows for **Members**, **Curators**, and **Administrators**.
 
 ---
 
@@ -28,7 +28,7 @@ General-purpose social feeds rarely give spatial design the structure it needs. 
 - **Admin Governance & Moderation** — Verify pending curator applications (`/dashboard/admin/curators`), manage user activation status (`/dashboard/admin/users`), maintain categories (`/dashboard/admin/categories`), and moderate reported artworks (`/dashboard/admin/reports`).
 
 <details>
-<summary><strong>Explore Detailed Role Capabilities & Permissions Matrix</strong></summary>
+<summary><strong>Interactive Matrix: User Roles & Permissions</strong> (click to expand)</summary>
 
 | Capability | Public User | Member | Curator (Pending) | Curator (Approved) | Admin |
 |---|---|---|---|---|---|
@@ -48,7 +48,26 @@ General-purpose social feeds rarely give spatial design the structure it needs. 
 </details>
 
 <details>
-<summary><strong>Explore System Architecture & Database Schema (Mermaid Diagrams)</strong></summary>
+<summary><strong>Interactive Explorer: Routes & API Endpoints</strong> (click to expand)</summary>
+
+| Area | Route / Endpoint | Access | Purpose |
+|---|---|---|---|
+| Public | `/` | Everyone | 3D `DepthCarousel` hero, gallery, challenges, featured artists |
+| Public | `/explore` | Everyone | Search, category filter, latest/popular sorting |
+| Public | `/artworks/[id]` | Everyone | Artwork detail, likes, favorites, comments, reporting |
+| Public | `/artists`, `/artists/[id]` | Everyone | Artist directory and individual portfolios |
+| Public | `/challenges`, `/challenges/[id]` | Everyone | Challenge discovery, rules, submissions, winners |
+| Auth | `/login`, `/register` | Public | Sign in and register as `member` or `curator` |
+| API | `POST /api/upload` | Authenticated | Validates & resizes image uploads (`sharp`) to `public/uploads/` |
+| API | `GET /api/challenges/search` | Public | Live challenge search and active/upcoming counts |
+| Member | `/dashboard/member/*` | Member | Overview, artworks CRUD, favorites, submissions, profile, settings |
+| Curator | `/dashboard/curator/*` | Approved Curator | Overview, challenges CRUD, submission judging, winner ranking |
+| Admin | `/dashboard/admin/*` | Admin | Overview, users, curator verification, categories, reports |
+
+</details>
+
+<details>
+<summary><strong>Interactive Diagrams: System Architecture & Database ER</strong> (click to expand)</summary>
 
 ### Application Architecture
 
@@ -137,6 +156,8 @@ erDiagram
 
 </details>
 
+[↑ Back to Top](#arthive)
+
 ---
 
 ## Preview
@@ -167,52 +188,41 @@ erDiagram
 - **npm**
 - **PostgreSQL** `14+`
 
-### Installation
+### Interactive Setup Checklist
 
-1. Clone the repository.
+Track your local setup progress step by step:
 
-   ```bash
-   git clone https://github.com/aalfm/arthive-art-showcase.git
-   ```
-
-2. Navigate to the project directory.
-
-   ```bash
-   cd arthive-art-showcase
-   ```
-
-3. Install dependencies.
-
-   ```bash
-   npm install
-   ```
-
-4. Configure environment variables.
-
-   ```bash
-   cp .env.example .env.local
-   ```
-
-   Update `DATABASE_URL` and `SESSION_SECRET` inside `.env.local` to match your local PostgreSQL setup.
-
-5. Initialize the PostgreSQL database (`schema.sql` first, then `seed.sql`).
-
-   ```bash
-   psql -U postgres -c "CREATE DATABASE arthive_db;"
-   psql -U postgres -d arthive_db -f database/schema.sql
-   psql -U postgres -d arthive_db -f database/seed.sql
-   ```
-
-6. Run the development server.
-
-   ```bash
-   npm run dev
-   ```
-
-   Open `http://localhost:3000` in your browser.
+- [ ] **1. Clone the repository**
+  ```bash
+  git clone https://github.com/aalfm/arthive-art-showcase.git
+  ```
+- [ ] **2. Navigate to the project directory**
+  ```bash
+  cd arthive-art-showcase
+  ```
+- [ ] **3. Install dependencies**
+  ```bash
+  npm install
+  ```
+- [ ] **4. Configure environment variables**
+  ```bash
+  cp .env.example .env.local
+  ```
+  Update `DATABASE_URL` and `SESSION_SECRET` inside `.env.local`.
+- [ ] **5. Initialize PostgreSQL (`schema.sql` first, then `seed.sql`)**
+  ```bash
+  psql -U postgres -c "CREATE DATABASE arthive_db;"
+  psql -U postgres -d arthive_db -f database/schema.sql
+  psql -U postgres -d arthive_db -f database/seed.sql
+  ```
+- [ ] **6. Run the development server**
+  ```bash
+  npm run dev
+  ```
+  Open `http://localhost:3000` in your browser.
 
 <details>
-<summary><strong>Environment Variables & Demo Accounts</strong></summary>
+<summary><strong>Environment Variables & Demo Credentials</strong> (click to expand)</summary>
 
 ### Environment Variables (`.env.example`)
 
@@ -231,6 +241,19 @@ erDiagram
 | Member | `member@arthive.com` | `Member@123` | Active |
 
 </details>
+
+<details>
+<summary><strong>Troubleshooting FAQ</strong> (click an issue to see the fix)</summary>
+
+- **Database connection error (`[DB] Query error`)**: Ensure PostgreSQL is running and verify `DATABASE_URL` in `.env.local` matches your database name (`arthive_db`), port, and credentials.
+- **Redirected back to `/login` after signing in**: Ensure `database/schema.sql` has been executed (so the `sessions` table exists) and `SESSION_SECRET` is set in `.env.local`.
+- **`sharp` fails during install or image upload**: Run `npm rebuild sharp` or reinstall with Node.js `20+`.
+- **Port `3000` already in use**: Stop the other process or run `npx next dev -p 3001`.
+- **Seed script fails**: Always execute `database/schema.sql` before `database/seed.sql`.
+
+</details>
+
+[↑ Back to Top](#arthive)
 
 ---
 
@@ -284,10 +307,45 @@ arthive-art-showcase/
 
 ## Usage
 
-- **Public Visitor**: Browse the homepage exhibition (`/`), search and filter works in `/explore`, inspect artist portfolios in `/artists`, and view challenge briefs and winners in `/challenges`.
-- **Member**: Register or sign in to access `/dashboard/member`. Upload artworks (JPEG, PNG, WebP, or GIF up to 10 MB, or external URL), save favorites, submit active works to challenges, and manage your profile or password.
-- **Curator**: Register as a `curator` and await administrator approval at `/dashboard/curator/pending`. Once approved, create challenges, manage schedules, review entries, and select 1st–3rd place winners after a challenge ends.
-- **Admin**: Sign in to `/dashboard/admin` to approve or reject curator applications, activate or deactivate user accounts (which revokes active sessions), manage categories, and dismiss or take down reported artworks.
+Select your role below to expand the step-by-step workflow:
+
+<details>
+<summary><strong>Public Visitor Workflow</strong></summary>
+
+1. Open `/` to explore the 3D `DepthCarousel` hero, curated artworks, active challenges, and featured artists.
+2. Visit `/explore` to search by title or artist, filter by architectural category, and sort by latest or most liked.
+3. Visit `/artists` to browse member portfolios or `/challenges` to inspect active and upcoming competitions.
+
+</details>
+
+<details>
+<summary><strong>Member Workflow</strong></summary>
+
+1. Register as a `member` at `/register` or sign in at `/login` to open `/dashboard/member`.
+2. Go to **Artworks → Create** to upload an image (`JPEG`, `PNG`, `WebP`, `GIF` up to 10 MB) or provide an image URL.
+3. Like, favorite, comment on, or report artworks on `/artworks/[id]`.
+4. Submit an active artwork to an ongoing challenge on `/challenges/[id]` and track or withdraw it in **Submissions**.
+
+</details>
+
+<details>
+<summary><strong>Curator Workflow</strong></summary>
+
+1. Register as a `curator` at `/register`; your account starts in `pending` state at `/dashboard/curator/pending`.
+2. Once approved by an Admin, open `/dashboard/curator` to create and edit challenges with rules, prizes, and start/end dates.
+3. After a challenge's end date passes, open its **Submissions** page to select 1st, 2nd, and 3rd place winners.
+
+</details>
+
+<details>
+<summary><strong>Admin Workflow</strong></summary>
+
+1. Sign in as an Admin to open `/dashboard/admin` and monitor platform totals and pending items.
+2. Approve or reject pending curator applications in `/dashboard/admin/curators`.
+3. Activate or deactivate non-admin accounts in `/dashboard/admin/users` (deactivation revokes active sessions).
+4. Manage architectural categories in `/dashboard/admin/categories` and dismiss or take down reported artworks in `/dashboard/admin/reports`.
+
+</details>
 
 <details>
 <summary><strong>Available npm Scripts</strong></summary>
@@ -300,6 +358,8 @@ arthive-art-showcase/
 | `lint` | `npm run lint` | Runs ESLint with `eslint-config-next` rules. |
 
 </details>
+
+[↑ Back to Top](#arthive)
 
 ---
 
