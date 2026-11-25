@@ -31,7 +31,7 @@ async function main() {
   );
 
   if (!fs.existsSync(SCHEMA_PATH) || !fs.existsSync(SEED_PATH)) {
-    throw new Error('Required database/schema.sql or database/seed.sql file is missing.');
+    throw new Error('Required src/database/schema.sql or src/database/seed.sql file is missing.');
   }
 
   const schemaSql = fs.readFileSync(SCHEMA_PATH, 'utf8');
@@ -45,14 +45,14 @@ async function main() {
 
     await client.query('BEGIN');
 
-    console.log('[db:reset] Ensuring schema from database/schema.sql...');
+    console.log('[db:reset] Ensuring schema from src/database/schema.sql...');
     await client.query(schemaSql);
 
     console.log('[db:reset] Truncating all tables with RESTART IDENTITY CASCADE...');
     const tableList = ARCHIVE_TABLES.map((t) => `"${t}"`).join(', ');
     await client.query(`TRUNCATE TABLE ${tableList} RESTART IDENTITY CASCADE`);
 
-    console.log('[db:reset] Restoring official seed data from database/seed.sql...');
+    console.log('[db:reset] Restoring official seed data from src/database/seed.sql...');
     await client.query(seedSql);
 
     await client.query('COMMIT');

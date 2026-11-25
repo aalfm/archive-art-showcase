@@ -17,7 +17,7 @@ async function main() {
   );
 
   if (!fs.existsSync(SCHEMA_PATH) || !fs.existsSync(SEED_PATH)) {
-    throw new Error('Required database/schema.sql or database/seed.sql file is missing.');
+    throw new Error('Required src/database/schema.sql or src/database/seed.sql file is missing.');
   }
 
   const schemaSql = fs.readFileSync(SCHEMA_PATH, 'utf8');
@@ -31,10 +31,10 @@ async function main() {
 
     await client.query('BEGIN');
     if (existingSet.size < 11) {
-      console.log('[db:seed] Applying database/schema.sql to initialize missing tables...');
+      console.log('[db:seed] Applying src/database/schema.sql to initialize missing tables...');
       await client.query(schemaSql);
     }
-    console.log('[db:seed] Executing official database/seed.sql...');
+    console.log('[db:seed] Executing official src/database/seed.sql...');
     await client.query(seedSql);
     await client.query('COMMIT');
 

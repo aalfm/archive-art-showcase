@@ -6,8 +6,8 @@ const require = createRequire(import.meta.url);
 const pg = require('pg');
 
 export const ROOT_DIR = process.cwd();
-export const SCHEMA_PATH = path.join(ROOT_DIR, 'database', 'schema.sql');
-export const SEED_PATH = path.join(ROOT_DIR, 'database', 'seed.sql');
+export const SCHEMA_PATH = path.join(ROOT_DIR, 'src', 'database', 'schema.sql');
+export const SEED_PATH = path.join(ROOT_DIR, 'src', 'database', 'seed.sql');
 
 export const ARCHIVE_TABLES = [
   'sessions',
