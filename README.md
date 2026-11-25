@@ -181,6 +181,10 @@ flowchart LR
 [![ESLint](https://img.shields.io/badge/ESLint_9-4B32C3?style=flat-square&logo=eslint&logoColor=white)](https://eslint.org/)
 [![npm](https://img.shields.io/badge/npm-CB3837?style=flat-square&logo=npm&logoColor=white)](https://www.npmjs.com/)
 
+**Design Tools**
+
+![Figma](https://img.shields.io/badge/Figma-Design%20Tool-F24E1E?style=flat-square&logo=figma&logoColor=white)
+
 <details>
 <summary><strong>Explore System Architecture &amp; Database Schema (Mermaid Diagrams)</strong></summary>
 
