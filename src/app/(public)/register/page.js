@@ -4,6 +4,7 @@ import { useActionState, useRef, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { registerUser } from '@/lib/actions/auth.actions';
+import PasswordInput from '@/components/ui/PasswordInput';
 import {
   CURATOR_REQUIREMENTS_BODY,
   CURATOR_REQUIREMENTS_NOTE,
@@ -256,8 +257,7 @@ function RegisterForm() {
 
             <div className="form-group">
               <label htmlFor="register-password" className="form-label">Password *</label>
-              <input
-                type="password"
+              <PasswordInput
                 id="register-password"
                 name="password"
                 className="form-input"

@@ -18212,3 +18212,65 @@ body,
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* ============================================================
+   29. PASSWORD VISIBILITY TOGGLE INPUT
+   ============================================================ */
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input-wrapper .form-input.password-input,
+.auth-page .password-input-wrapper .form-input.password-input,
+.public-main .password-input-wrapper .form-input.password-input,
+.dashboard-layout .password-input-wrapper .form-input.password-input {
+  padding-right: 42px;
+}
+
+.password-input::-ms-reveal,
+.password-input::-ms-clear {
+  display: none;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-xs);
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: color 0.16s ease, background-color 0.16s ease;
+}
+
+.password-toggle-btn:hover:not(:disabled) {
+  color: var(--ink-primary);
+  background: rgba(26, 25, 23, 0.05);
+}
+
+.password-toggle-btn:active:not(:disabled) {
+  background: rgba(26, 25, 23, 0.08);
+}
+
+.password-toggle-btn:focus-visible {
+  outline: 2px solid #4E6F9E;
+  outline-offset: 1px;
+  color: var(--ink-primary);
+}
+
+.password-toggle-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
