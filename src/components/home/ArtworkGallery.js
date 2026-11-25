@@ -130,11 +130,11 @@ export default function ArtworkGallery({
   const activeArtwork = filtered[safeIndex] || null;
 
   const selectedCategoryLabel = useMemo(() => {
-    if (selectedCategory === 'ALL') return 'All Categories';
+    if (selectedCategory === 'ALL') return 'All categories';
     const match = categories.find(
       (c) => String(c.id) === String(selectedCategory) || c.name === selectedCategory
     );
-    return match?.name || 'All Categories';
+    return match?.name || 'All categories';
   }, [selectedCategory, categories]);
 
   const resetCardTilt = useCallback(() => {
@@ -296,7 +296,7 @@ export default function ArtworkGallery({
         <header className="editorial-gallery-header">
           <div className="editorial-section-title-group">
             <span className="editorial-eyebrow">CURATED EXHIBITION</span>
-            <h2 className="editorial-section-heading">Artwork Gallery</h2>
+            <h2 className="editorial-section-heading">Artwork gallery</h2>
           </div>
 
           <div className="editorial-gallery-controls">
@@ -335,7 +335,7 @@ export default function ArtworkGallery({
                     className={`editorial-cat-option ${selectedCategory === 'ALL' ? 'selected' : ''}`}
                     onClick={() => handleSelectCategory('ALL')}
                   >
-                    <span>All Categories</span>
+                    <span>All categories</span>
                   </button>
                   {categories.map((cat) => {
                     const isSelected = String(selectedCategory) === String(cat.id);
@@ -370,10 +370,10 @@ export default function ArtworkGallery({
                 className="btn-editorial-outline"
                 onClick={() => handleSelectCategory('ALL')}
               >
-                Show All Categories
+                Show all categories
               </button>
               <Link href="/dashboard/member/artworks/create" className="btn-editorial-solid">
-                Submit Artwork
+                Submit artwork
               </Link>
             </div>
           </div>
@@ -477,7 +477,7 @@ export default function ArtworkGallery({
                   }}
                   aria-pressed={isRevealed}
                 >
-                  {isRevealed ? 'View Artwork' : 'Artwork Info'}
+                  {isRevealed ? 'View artwork' : 'Artwork info'}
                 </button>
               </div>
             </div>
@@ -531,7 +531,7 @@ export default function ArtworkGallery({
               </div>
 
               <Link href="/explore" className="exhibition-archive-link" id="btn-load-more">
-                <span>View All Artworks</span>
+                <span>View all artworks</span>
               </Link>
             </div>
           </div>

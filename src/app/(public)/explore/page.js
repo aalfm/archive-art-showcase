@@ -2,6 +2,7 @@ import { query } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import PublicPageContainer from '@/components/layout/PublicPageContainer';
 import ArtworkCard from '@/components/ui/ArtworkCard';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import ExploreFilters from './ExploreFilters';
 
 export const dynamic = 'force-dynamic';
@@ -65,19 +66,34 @@ async function getLikedArtworkIds(userId) {
 }
 
 export default async function ExplorePage({ searchParams }) {
+  const resolvedParams = await searchParams;
   const [session, data] = await Promise.all([
     getSession(),
-    getArtworks(await searchParams),
+    getArtworks(resolvedParams),
   ]);
   const isAdmin = session?.user?.role === 'admin';
   const likedIds = isAdmin ? new Set() : await getLikedArtworkIds(session?.user?.id);
+  const selectedCategory = resolvedParams?.category
+    ? data.categories.find((c) => String(c.id) === String(resolvedParams.category))
+    : null;
+  const breadcrumbItems = selectedCategory
+    ? [
+        { label: 'Home', href: '/' },
+        { label: 'Explore', href: '/explore' },
+        { label: selectedCategory.name },
+      ]
+    : [
+        { label: 'Home', href: '/' },
+        { label: 'Explore' },
+      ];
 
   return (
     <PublicPageContainer>
+      <Breadcrumb items={breadcrumbItems} className="arthive-breadcrumb--public" />
       <div className="showcase-header">
         <div className="showcase-title-area">
           <span className="editorial-eyebrow">ARCHIVE COLLECTION</span>
-          <h1 className="showcase-heading">Explore Artworks</h1>
+          <h1 className="showcase-heading">Explore artworks</h1>
           <p className="showcase-subtitle">
             Discover curated architectural works from creators on ARCHIVE.
           </p>
@@ -89,8 +105,8 @@ export default async function ExplorePage({ searchParams }) {
       <div className="masonry-grid">
         {data.artworks.length === 0 ? (
           <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--surface)' }}>
-              NO MATCHING ARTWORKS
+            <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--ink-primary)' }}>
+              No matching artworks
             </p>
             <p style={{ marginTop: 8, color: 'var(--surface)', fontSize: '0.88rem' }}>
               Try adjusting your filters or search keywords.
