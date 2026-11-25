@@ -13,7 +13,7 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=1200&q=85',
 ];
 
-export default function HeroSection({ artworks }) {
+export default function HeroSection({ artworks, userRole = null }) {
   const displayItems = artworks.length >= 4
     ? artworks.slice(0, 4)
     : [...artworks, ...Array(4 - artworks.length).fill(null)].map((item, i) =>
@@ -361,8 +361,10 @@ export default function HeroSection({ artworks }) {
           Discover new perspectives in architecture and spatial design. Explore curated works, share ideas, and inspire the ARCHIVE community.
         </p>
         <div className="hero-cta-row">
-          <Link href="/explore" className="btn-primary">Explore works</Link>
-          <Link href="/register" className="btn-secondary">Join now</Link>
+          <Link href="/explore" className="btn-primary">Explore Works</Link>
+          {userRole !== 'curator' && (
+            <Link href="/register" className="btn-secondary">Join Now</Link>
+          )}
         </div>
       </div>
 
@@ -427,7 +429,7 @@ export default function HeroSection({ artworks }) {
                       <h3 className="fragment-title">{item.title}</h3>
                       <p className="fragment-sub">{item.creator_name}</p>
                       <span className="fragment-action-pill">
-                        <span>{String(item.id).startsWith('fallback-') ? 'Explore gallery' : 'View work'}</span>
+                        <span>{String(item.id).startsWith('fallback-') ? 'Explore Gallery' : 'View Work'}</span>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                           <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
@@ -441,19 +443,9 @@ export default function HeroSection({ artworks }) {
         </div>
 
         <div className="carousel-controls">
-          <button type="button" className="carousel-btn" onClick={handlePrev} aria-label="Previous work" id="btn-carousel-prev">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-          </button>
           <span className="carousel-indicator" id="carousel-angle-indicator">
             Curated architectural plates
           </span>
-          <button type="button" className="carousel-btn" onClick={handleNext} aria-label="Next work" id="btn-carousel-next">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          </button>
         </div>
       </div>
 

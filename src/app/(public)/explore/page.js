@@ -72,7 +72,9 @@ export default async function ExplorePage({ searchParams }) {
     getArtworks(resolvedParams),
   ]);
   const isAdmin = session?.user?.role === 'admin';
-  const likedIds = isAdmin ? new Set() : await getLikedArtworkIds(session?.user?.id);
+  const isCurator = session?.user?.role === 'curator';
+  const isReadOnly = isAdmin || isCurator;
+  const likedIds = isReadOnly ? new Set() : await getLikedArtworkIds(session?.user?.id);
   const selectedCategory = resolvedParams?.category
     ? data.categories.find((c) => String(c.id) === String(resolvedParams.category))
     : null;
@@ -93,7 +95,7 @@ export default async function ExplorePage({ searchParams }) {
       <div className="showcase-header">
         <div className="showcase-title-area">
           <span className="editorial-eyebrow">ARCHIVE COLLECTION</span>
-          <h1 className="showcase-heading">Explore artworks</h1>
+          <h1 className="showcase-heading">Explore Artworks</h1>
           <p className="showcase-subtitle">
             Discover curated architectural works from creators on ARCHIVE.
           </p>
@@ -120,6 +122,7 @@ export default async function ExplorePage({ searchParams }) {
               priority={idx < 6}
               isLoggedIn={Boolean(session?.user)}
               isAdmin={isAdmin}
+              isReadOnly={isReadOnly}
               initialLiked={likedIds.has(artwork.id)}
             />
           ))

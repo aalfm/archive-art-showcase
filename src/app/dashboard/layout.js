@@ -11,7 +11,7 @@ export default async function DashboardLayout({ children }) {
   if (!session) {
     const inactiveUser = await getInactiveSessionUser();
     if (inactiveUser) {
-      if (inactiveUser.role === 'admin' || inactiveUser.role === 'curator') {
+      if (inactiveUser.role === 'admin') {
         return (
           <div className="dashboard-layout">
             <DashboardSidebar user={inactiveUser} isInactive />
@@ -36,8 +36,8 @@ export default async function DashboardLayout({ children }) {
     redirect('/login');
   }
 
-  // Admin and Curator share the dedicated sidebar dashboard layout
-  if (session.user.role === 'admin' || session.user.role === 'curator') {
+  // Admin keeps its dedicated sidebar dashboard layout
+  if (session.user.role === 'admin') {
     return (
       <div className="dashboard-layout">
         <DashboardSidebar user={session.user} />
@@ -48,7 +48,7 @@ export default async function DashboardLayout({ children }) {
     );
   }
 
-  // Member dashboard uses the top Navbar with role-based profile dropdown
+  // Member and Curator share the top Navbar dashboard shell with role-based profile dropdown
   return (
     <>
       <Navbar user={session.user} />

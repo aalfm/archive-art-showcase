@@ -25,9 +25,14 @@ export default async function NotFound() {
               Back to Admin Dashboard
             </Link>
           ) : isCurator ? (
-            <Link href={getCuratorDashboardPath(session.user)} className="btn-primary">
-              Back to Curator Dashboard
-            </Link>
+            <>
+              <Link href={getCuratorDashboardPath(session.user)} className="btn-primary">
+                Back to Curator Dashboard
+              </Link>
+              <Link href="/explore" className="btn-secondary">
+                Explore works
+              </Link>
+            </>
           ) : (
             <>
               <Link href="/" className="btn-primary">

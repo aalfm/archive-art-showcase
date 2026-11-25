@@ -19,7 +19,7 @@ const MAX_REPORT_DETAILS = 500;
 export default function ArtworkInteractions({
   artworkId, likeCount = 0, userLiked = false, userFavorited = false,
   userReported = false, isLoggedIn = false, isOwner = false, isAdmin = false,
-  comments = [], userId, showComments = false,
+  isCurator = false, comments = [], userId, showComments = false,
 }) {
   const router = useRouter();
   const commentFormRef = useRef(null);
@@ -40,7 +40,7 @@ export default function ArtworkInteractions({
   const loginRedirectUrl = `/login?redirect=${encodeURIComponent(`/artworks/${artworkId}`)}`;
 
   const handleLike = async () => {
-    if (isAdmin) return;
+    if (isAdmin || isCurator) return;
     if (!isLoggedIn) { router.push(loginRedirectUrl); return; }
     if (loading.like) return;
     setLoading(l => ({ ...l, like: true }));
@@ -54,7 +54,7 @@ export default function ArtworkInteractions({
   };
 
   const handleFavorite = async () => {
-    if (isAdmin) return;
+    if (isAdmin || isCurator) return;
     if (!isLoggedIn) { router.push(loginRedirectUrl); return; }
     if (loading.fav) return;
     setLoading(l => ({ ...l, fav: true }));
@@ -90,6 +90,10 @@ export default function ArtworkInteractions({
         {isAdmin ? (
           <div className="comment-guest-notice">
             <p>Administrator accounts can moderate comments below but cannot post comments.</p>
+          </div>
+        ) : isCurator ? (
+          <div className="comment-guest-notice">
+            <p>Curator accounts browse in read-only mode and cannot post comments.</p>
           </div>
         ) : isLoggedIn ? (
           <form ref={commentFormRef} action={commentAction} className="comment-form">
@@ -153,7 +157,7 @@ export default function ArtworkInteractions({
                         {new Date(comment.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
                     </div>
-                    {(userId === comment.user_id || isAdmin) && (
+                    {((!isCurator && userId === comment.user_id) || isAdmin) && (
                       <form action={async () => { await deleteComment(comment.id, artworkId); }}>
                         <button type="submit" className="comment-delete-btn" aria-label="Delete comment">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -174,8 +178,8 @@ export default function ArtworkInteractions({
     );
   }
 
-  // Admin view: read-only like count, no member social interactions (like, favorite, report)
-  if (isAdmin) {
+  // Admin & Curator views: read-only like count, no member social interactions (like, favorite, report)
+  if (isAdmin || isCurator) {
     return (
       <div className="artwork-interactions">
         <div className="interaction-buttons">
@@ -189,7 +193,7 @@ export default function ArtworkInteractions({
             <span>{likeCountState}</span>
           </span>
           <span className="interaction-admin-note">
-            View &amp; moderation access only
+            {isAdmin ? 'View & moderation access only' : 'Read-only browsing mode'}
           </span>
         </div>
       </div>
@@ -289,11 +293,11 @@ export default function ArtworkInteractions({
           <input type="hidden" name="artwork_id" value={artworkId} />
           <input type="hidden" name="reason" value={reportReason} />
           <div className="form-group">
-            <label htmlFor={`report-reason-${artworkId}`} className="form-label">Report reason</label>
+            <label htmlFor={`report-reason-${artworkId}`} className="form-label">Report Reason</label>
             <FilterDropdown
               id={`report-reason-${artworkId}`}
               className="report-reason-dropdown"
-              ariaLabel="Report reason"
+              ariaLabel="Report Reason"
               value={reportReason}
               options={REPORT_REASON_OPTIONS}
               placeholder="Select a reason..."
@@ -310,7 +314,7 @@ export default function ArtworkInteractions({
           {reportReason === 'Other' && (
             <div className="form-group report-details-group">
               <div className="report-details-label-row">
-                <label htmlFor={`report-details-${artworkId}`} className="form-label">Additional details</label>
+                <label htmlFor={`report-details-${artworkId}`} className="form-label">Additional Details</label>
                 <span className="report-char-counter">
                   {reportDetails.length}/{MAX_REPORT_DETAILS}
                 </span>
@@ -335,7 +339,7 @@ export default function ArtworkInteractions({
           {reportError && <p className="form-error" style={{ marginBottom: 12 }}>{reportError}</p>}
 
           <div style={{ display: 'flex', gap: 8 }}>
-            <button type="submit" className="btn-danger" style={{ flex: 1 }}>Submit report</button>
+            <button type="submit" className="btn-danger" style={{ flex: 1 }}>Submit Report</button>
             <button
               type="button"
               className="btn-secondary"

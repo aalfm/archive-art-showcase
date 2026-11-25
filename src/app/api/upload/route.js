@@ -21,6 +21,17 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Please sign in first.' }, { status: 401 });
     }
 
+    const canUpload =
+      session.user.role === 'member' ||
+      session.user.role === 'admin' ||
+      (session.user.role === 'curator' && session.user.curator_status === 'approved');
+    if (!canUpload) {
+      return NextResponse.json(
+        { error: 'You do not have permission to upload files.' },
+        { status: 403 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file');
 

@@ -160,19 +160,15 @@ export function getCuratorDashboardPath(user) {
 }
 
 /**
- * Enforce Dashboard-only access on public-facing routes for Admin and Curator users.
- * Redirects authenticated Admin users to /dashboard/admin and Curator users to
- * their Curator Dashboard while leaving Member and unauthenticated visitors unaffected.
+ * Enforce Dashboard-only access on public-facing routes for Admin users.
+ * Redirects authenticated Admin users to /dashboard/admin while allowing
+ * Members, Curators (read-only browsing), and unauthenticated visitors to browse public pages.
  */
 export async function restrictAdminFromPublic(session) {
   const activeSession = session === undefined ? await getSession() : session;
   if (activeSession?.user?.role === 'admin') {
     const { redirect } = await import('next/navigation');
     redirect('/dashboard/admin');
-  }
-  if (activeSession?.user?.role === 'curator') {
-    const { redirect } = await import('next/navigation');
-    redirect(getCuratorDashboardPath(activeSession.user));
   }
   return activeSession;
 }

@@ -200,6 +200,9 @@ export async function submitToChallenge(prevState, formData) {
 export async function withdrawSubmission(rawSubmissionId) {
   const session = await getSession();
   if (!session) return { error: 'Please sign in.' };
+  if (session.user.role !== 'member') {
+    return { error: 'Only members can withdraw challenge submissions.' };
+  }
 
   const submissionId = toId(rawSubmissionId);
   if (!submissionId) return { error: 'Invalid submission ID.' };

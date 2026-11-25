@@ -32,9 +32,9 @@ export default function DashboardSidebar({ user, isInactive = false }) {
 
   const memberLinks = [
     { href: '/dashboard/member', label: 'Overview', icon: 'grid' },
-    { href: '/dashboard/member/profile', label: 'My profile', icon: 'user' },
-    { href: '/dashboard/member/artworks', label: 'My artworks', icon: 'image' },
-    { href: '/dashboard/member/artworks/create', label: 'Upload artwork', icon: 'plus-square' },
+    { href: '/dashboard/member/profile', label: 'My Profile', icon: 'user' },
+    { href: '/dashboard/member/artworks', label: 'My Artworks', icon: 'image' },
+    { href: '/dashboard/member/artworks/create', label: 'Upload Artwork', icon: 'plus-square' },
     { href: '/dashboard/member/favorites', label: 'Favorites', icon: 'heart' },
     { href: '/dashboard/member/submissions', label: 'Submissions', icon: 'send' },
     { href: '/dashboard/member/settings', label: 'Settings', icon: 'settings' },
@@ -42,25 +42,24 @@ export default function DashboardSidebar({ user, isInactive = false }) {
 
   const curatorLinks = [
     { href: '/dashboard/curator', label: 'Overview', icon: 'grid' },
-    { href: '/dashboard/curator/challenges', label: 'Challenges', icon: 'award' },
-    { href: '/dashboard/curator/challenges/create', label: 'Create challenge', icon: 'plus-square' },
+    { href: '/dashboard/curator/challenges', label: 'My Challenges', icon: 'award' },
   ];
 
   const pendingCuratorLinks = [
-    { href: '/dashboard/curator/pending', label: 'Verification status', icon: 'shield' },
+    { href: '/dashboard/curator/pending', label: 'Verification Status', icon: 'shield' },
   ];
 
   const adminLinks = [
     { href: '/dashboard/admin', label: 'Overview', icon: 'grid' },
-    { href: '/dashboard/admin/users', label: 'User management', icon: 'users' },
-    { href: '/dashboard/admin/curators', label: 'Curator verification', icon: 'shield' },
+    { href: '/dashboard/admin/users', label: 'User Management', icon: 'users' },
+    { href: '/dashboard/admin/curators', label: 'Curator Verification', icon: 'shield' },
     { href: '/dashboard/admin/challenges', label: 'Challenges', icon: 'award' },
     { href: '/dashboard/admin/categories', label: 'Categories', icon: 'tag' },
-    { href: '/dashboard/admin/reports', label: 'Content moderation', icon: 'flag' },
+    { href: '/dashboard/admin/reports', label: 'Content Moderation', icon: 'flag' },
   ];
 
   const inactiveLinks = [
-    { href: pathname || '/dashboard/member', label: 'Account status', icon: 'shield' },
+    { href: pathname || '/dashboard/member', label: 'Account Status', icon: 'shield' },
   ];
 
   const rawLinks = isInactive
@@ -97,7 +96,7 @@ export default function DashboardSidebar({ user, isInactive = false }) {
 
   const isAdmin = user.role === 'admin';
   const isCurator = user.role === 'curator';
-  const isDashboardOnly = isAdmin || isCurator;
+  const isDashboardOnly = isAdmin;
   const brandHref = isAdmin
     ? '/dashboard/admin'
     : isCurator
@@ -209,7 +208,7 @@ export default function DashboardSidebar({ user, isInactive = false }) {
 
         <div className="sidebar-divider" style={{ marginTop: 'auto' }}></div>
 
-        {/* Back to site (member only) + logout */}
+        {/* Explore / Back to site (non-admin) + logout */}
         <div className="sidebar-footer">
           {!isDashboardOnly && (
             <Link href="/" className="sidebar-nav-item" onClick={() => setDrawerOpen(false)}>
@@ -217,7 +216,7 @@ export default function DashboardSidebar({ user, isInactive = false }) {
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
               </svg>
-              <span>Back to site</span>
+              <span>{isCurator ? 'Explore Site' : 'Back to Site'}</span>
             </Link>
           )}
           <form action={logoutUser}>
@@ -227,7 +226,7 @@ export default function DashboardSidebar({ user, isInactive = false }) {
                 <polyline points="16 17 21 12 16 7"></polyline>
                 <line x1="21" y1="12" x2="9" y2="12"></line>
               </svg>
-              <span>Sign out</span>
+              <span>Sign Out</span>
             </button>
           </form>
         </div>

@@ -13,6 +13,7 @@ export default function ArtworkGallery({
   artworks = [],
   latestArtworks = [],
   categories = [],
+  userRole = null,
 }) {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [catOpen, setCatOpen] = useState(false);
@@ -130,11 +131,11 @@ export default function ArtworkGallery({
   const activeArtwork = filtered[safeIndex] || null;
 
   const selectedCategoryLabel = useMemo(() => {
-    if (selectedCategory === 'ALL') return 'All categories';
+    if (selectedCategory === 'ALL') return 'All Categories';
     const match = categories.find(
       (c) => String(c.id) === String(selectedCategory) || c.name === selectedCategory
     );
-    return match?.name || 'All categories';
+    return match?.name || 'All Categories';
   }, [selectedCategory, categories]);
 
   const resetCardTilt = useCallback(() => {
@@ -296,7 +297,7 @@ export default function ArtworkGallery({
         <header className="editorial-gallery-header">
           <div className="editorial-section-title-group">
             <span className="editorial-eyebrow">CURATED EXHIBITION</span>
-            <h2 className="editorial-section-heading">Artwork gallery</h2>
+            <h2 className="editorial-section-heading">Artwork Gallery</h2>
           </div>
 
           <div className="editorial-gallery-controls">
@@ -335,7 +336,7 @@ export default function ArtworkGallery({
                     className={`editorial-cat-option ${selectedCategory === 'ALL' ? 'selected' : ''}`}
                     onClick={() => handleSelectCategory('ALL')}
                   >
-                    <span>All categories</span>
+                    <span>All Categories</span>
                   </button>
                   {categories.map((cat) => {
                     const isSelected = String(selectedCategory) === String(cat.id);
@@ -370,11 +371,13 @@ export default function ArtworkGallery({
                 className="btn-editorial-outline"
                 onClick={() => handleSelectCategory('ALL')}
               >
-                Show all categories
+                Show All Categories
               </button>
-              <Link href="/dashboard/member/artworks/create" className="btn-editorial-solid">
-                Submit artwork
-              </Link>
+              {userRole !== 'curator' && userRole !== 'admin' && (
+                <Link href="/dashboard/member/artworks/create" className="btn-editorial-solid">
+                  Submit Artwork
+                </Link>
+              )}
             </div>
           </div>
         ) : (
@@ -477,7 +480,7 @@ export default function ArtworkGallery({
                   }}
                   aria-pressed={isRevealed}
                 >
-                  {isRevealed ? 'View artwork' : 'Artwork info'}
+                  {isRevealed ? 'View Artwork' : 'Artwork Info'}
                 </button>
               </div>
             </div>
@@ -497,7 +500,7 @@ export default function ArtworkGallery({
                   aria-label="Previous artwork"
                   id="btn-gallery-prev"
                 >
-                  Prev<ArrowLeft size={16} strokeWidth={1.75} />
+                  Prev
                 </button>
 
                 {filtered.length > 1 && (
@@ -526,12 +529,12 @@ export default function ArtworkGallery({
                   aria-label="Next artwork"
                   id="btn-gallery-next"
                 >
-                  Next <ArrowRight size={16} strokeWidth={1.75} />
+                  Next
                 </button>
               </div>
 
               <Link href="/explore" className="exhibition-archive-link" id="btn-load-more">
-                <span>View all artworks</span>
+                <span>View All Artworks</span>
               </Link>
             </div>
           </div>

@@ -106,16 +106,19 @@ export default async function HomePage() {
   const popularArtworks = [...data.artworks].sort((a, b) => Number(b.like_count || 0) - Number(a.like_count || 0));
   const latestArtworks = data.artworks;
 
+  const userRole = session?.user?.role || null;
+
   return (
     <>
       <Navbar user={session?.user || null} />
       <main>
-        <HeroSection artworks={data.artworks.slice(0, 4)} />
+        <HeroSection artworks={data.artworks.slice(0, 4)} userRole={userRole} />
         <ArtworkGallery
           artworks={data.artworks}
           popularArtworks={popularArtworks}
           latestArtworks={latestArtworks}
           categories={data.categories}
+          userRole={userRole}
         />
         {data.challenges.length > 0 && (
           <ChallengesSection challenges={data.challenges} initialNow={data.serverNow} />
