@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import FilterDropdown from '@/components/ui/FilterDropdown';
 
 const ROLE_OPTIONS = [
-  { value: '', label: 'All Roles' },
+  { value: '', label: 'All roles' },
   { value: 'admin', label: 'Admin' },
   { value: 'member', label: 'Member' },
   { value: 'curator', label: 'Curator' },
@@ -109,7 +109,7 @@ export default function UserFilters({ initialSearch = '', initialRole = '' }) {
         ariaLabel="Filter by role"
         value={role}
         options={ROLE_OPTIONS}
-        placeholder="All Roles"
+        placeholder="All roles"
         onSelect={handleRoleSelect}
       />
     </form>

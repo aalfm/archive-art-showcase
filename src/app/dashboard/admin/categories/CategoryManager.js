@@ -59,7 +59,7 @@ export default function CategoryManager({ categories }) {
       {/* Create Category Form */}
       <div style={{ maxWidth: 540, background: 'var(--bg-elevated)', border: '1px solid var(--bg-secondary)', borderRadius: 'var(--radius-xs)', padding: 24, marginBottom: 32 }}>
         <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
-          Add Category
+          Add category
         </h2>
 
         {createState?.error && (
@@ -73,7 +73,7 @@ export default function CategoryManager({ categories }) {
           </div>
         )}
 
-        <form ref={createFormRef} action={createAction} style={{ display: 'flex', gap: 12 }}>
+        <form ref={createFormRef} action={createAction} className="category-create-form">
           <input
             type="text"
             name="name"
@@ -106,71 +106,84 @@ export default function CategoryManager({ categories }) {
       </h2>
 
       <div className="data-table-wrap">
-        <table className="data-table">
+        <table className="data-table dashboard-responsive-table admin-categories-table">
+          <colgroup>
+            <col className="admin-cat-col-id" />
+            <col className="admin-cat-col-name" />
+            <col className="admin-cat-col-artworks" />
+            <col className="admin-cat-col-actions" />
+          </colgroup>
           <thead>
             <tr>
-              <th style={{ width: 80 }}>ID</th>
-              <th>Category Name</th>
+              <th>ID</th>
+              <th>Category name</th>
               <th>Artworks</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {categories.map((cat) => (
-              <tr key={cat.id}>
-                <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--surface)' }}>#{cat.id}</td>
-                <td>
-                  {editingId === cat.id ? (
-                    <form action={updateAction} style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
-                      <input type="hidden" name="category_id" value={cat.id} />
-                      <input
-                        type="text"
-                        name="name"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        className="form-input"
-                        style={{ padding: '4px 10px', fontSize: '0.85rem', width: 220 }}
-                        required
-                        minLength={2}
-                      />
-                      <button type="submit" className="btn-primary" disabled={isUpdating} style={{ padding: '4px 10px', fontSize: '0.74rem' }}>
-                        Save
-                      </button>
-                      <button type="button" className="btn-secondary" onClick={() => setEditingId(null)} style={{ padding: '4px 10px', fontSize: '0.74rem' }}>
-                        Cancel
-                      </button>
-                    </form>
-                  ) : (
-                    <span style={{ fontWeight: 700, fontSize: '0.92rem' }}>{cat.name}</span>
-                  )}
-                </td>
-                <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem' }}>
-                  {cat.artwork_count} artworks
-                </td>
-                <td>
-                  {editingId !== cat.id && (
-                    <div style={{ display: 'inline-flex', gap: 8 }}>
-                      <button
-                        onClick={() => startEdit(cat)}
-                        className="btn-secondary"
-                        style={{ padding: '5px 12px', fontSize: '0.74rem' }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => requestDelete(cat.id, cat.name, parseInt(cat.artwork_count))}
-                        disabled={loading}
-                        className="btn-danger"
-                        style={{ padding: '5px 12px', fontSize: '0.74rem' }}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
+            {categories.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="data-table-empty-cell">
+                  No categories available yet.
                 </td>
               </tr>
-            ))}
+            ) : (
+              categories.map((cat) => (
+                <tr key={cat.id}>
+                  <td data-label="ID" className="table-cell-meta">#{cat.id}</td>
+                  <td data-label="Category name" data-cell="primary">
+                    {editingId === cat.id ? (
+                      <form action={updateAction} className="table-inline-edit-form">
+                        <input type="hidden" name="category_id" value={cat.id} />
+                        <input
+                          type="text"
+                          name="name"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="form-input table-inline-edit-input"
+                          required
+                          minLength={2}
+                        />
+                        <div className="table-actions-group">
+                          <button type="submit" className="btn-primary table-action-btn" disabled={isUpdating}>
+                            Save
+                          </button>
+                          <button type="button" className="btn-secondary table-action-btn" onClick={() => setEditingId(null)}>
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <span className="table-cell-title">{cat.name}</span>
+                    )}
+                  </td>
+                  <td data-label="Artworks" className="table-cell-num">
+                    {cat.artwork_count} artworks
+                  </td>
+                  <td data-label="Actions" data-cell="actions">
+                    {editingId !== cat.id && (
+                      <div className="table-actions-group">
+                        <button
+                          onClick={() => startEdit(cat)}
+                          className="btn-secondary table-action-btn"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => requestDelete(cat.id, cat.name, parseInt(cat.artwork_count))}
+                          disabled={loading}
+                          className="btn-danger table-action-btn"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -179,7 +192,7 @@ export default function CategoryManager({ categories }) {
         isOpen={Boolean(confirmTarget)}
         onClose={() => setConfirmTarget(null)}
         onConfirm={executeDelete}
-        title="Delete Category"
+        title="Delete category"
         message={confirmTarget ? `Delete category "${confirmTarget.name}"?` : ''}
         confirmLabel="Delete"
       />

@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { applyAvatarPolicy } from '@/lib/avatar';
+import { formatRoleLabel } from '@/lib/utils';
 import { query } from '@/lib/db';
 import UserAvatar from '@/components/ui/UserAvatar';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import UserStatusButton from './UserStatusButton';
 import UserFilters from './UserFilters';
 
@@ -44,11 +46,27 @@ export default async function AdminUsersPage({ searchParams }) {
   const res = await query(sql, params);
   const users = res.rows.map((row) => applyAvatarPolicy(row));
 
+  const roleBreadcrumbLabel =
+    roleFilter && ['member', 'curator', 'admin'].includes(roleFilter)
+      ? `${formatRoleLabel(roleFilter)}s`
+      : null;
+  const breadcrumbItems = roleBreadcrumbLabel
+    ? [
+        { label: 'Dashboard', href: '/dashboard/admin' },
+        { label: 'User Management', href: '/dashboard/admin/users' },
+        { label: roleBreadcrumbLabel },
+      ]
+    : [
+        { label: 'Dashboard', href: '/dashboard/admin' },
+        { label: 'User Management' },
+      ];
+
   return (
     <div>
+      <Breadcrumb items={breadcrumbItems} />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">User Management</h1>
+          <h1 className="dashboard-title">User management</h1>
           <p className="dashboard-subtitle">Manage member accounts, curators, and access roles ({users.length} users).</p>
         </div>
       </div>
@@ -58,15 +76,25 @@ export default async function AdminUsersPage({ searchParams }) {
 
       {/* Users Table */}
       <div className="data-table-wrap">
-        <table className="data-table admin-users-table">
+        <table className="data-table dashboard-responsive-table admin-users-table">
+          <colgroup>
+            <col className="admin-users-col-name" />
+            <col className="admin-users-col-email" />
+            <col className="admin-users-col-role" />
+            <col className="admin-users-col-account" />
+            <col className="admin-users-col-curator" />
+            <col className="admin-users-col-artworks" />
+            <col className="admin-users-col-joined" />
+            <col className="admin-users-col-actions" />
+          </colgroup>
           <thead>
             <tr>
-              <th>User Name</th>
+              <th>User name</th>
               <th>Email</th>
               <th>Role</th>
-              <th>Account Status</th>
-              <th>Curator Status</th>
-              <th>Active Artworks</th>
+              <th>Account status</th>
+              <th>Curator status</th>
+              <th>Active artworks</th>
               <th>Joined</th>
               <th>Actions</th>
             </tr>
@@ -74,7 +102,7 @@ export default async function AdminUsersPage({ searchParams }) {
           <tbody>
             {users.length === 0 ? (
               <tr>
-                <td colSpan={8} style={{ textAlign: 'left', padding: 32, color: 'var(--surface)' }}>
+                <td colSpan={8} className="data-table-empty-cell">
                   No users found.
                 </td>
               </tr>
@@ -83,7 +111,7 @@ export default async function AdminUsersPage({ searchParams }) {
                 const isActive = u.is_active !== false;
                 return (
                   <tr key={u.id}>
-                    <td style={{ fontWeight: 600 }}>
+                    <td data-label="User name" data-cell="primary" style={{ fontWeight: 600 }}>
                       <div className="dashboard-user-cell">
                         <UserAvatar
                           src={u.profile_image}
@@ -92,7 +120,10 @@ export default async function AdminUsersPage({ searchParams }) {
                           size={28}
                         />
                         {u.role === 'member' ? (
-                          <Link href={`/artists/${u.id}`} target="_blank" className="dashboard-user-link dashboard-user-cell-name">
+                          <Link
+                            href={`/dashboard/admin/users/${u.id}`}
+                            className="dashboard-user-link dashboard-user-cell-name"
+                          >
                             {u.name}
                           </Link>
                         ) : (
@@ -100,8 +131,10 @@ export default async function AdminUsersPage({ searchParams }) {
                         )}
                       </div>
                     </td>
-                    <td style={{ fontSize: '0.82rem', color: 'var(--surface)' }}>{u.email}</td>
-                    <td>
+                    <td data-label="Email" className="table-cell-break">
+                      {u.email}
+                    </td>
+                    <td data-label="Role">
                       <span
                         className={`badge ${
                           u.role === 'admin'
@@ -111,37 +144,48 @@ export default async function AdminUsersPage({ searchParams }) {
                               : 'badge-role-member'
                         }`}
                       >
-                        {u.role}
+                        {formatRoleLabel(u.role)}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Account status">
                       <span className={`badge ${isActive ? 'badge-approved' : 'badge-rejected'}`}>
                         {isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Curator status">
                       {u.role === 'curator' ? (
                         <span className={`badge badge-${u.curator_status}`}>
                           {u.curator_status === 'approved' ? 'Verified' : u.curator_status === 'pending' ? 'Pending' : 'Rejected'}
                         </span>
                       ) : (
-                        <span style={{ color: 'var(--surface)', fontSize: '0.78rem' }}>—</span>
+                        <span className="table-cell-muted">—</span>
                       )}
                     </td>
-                    <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
+                    <td data-label="Active artworks" className="table-cell-num">
                       {u.artwork_count}
                     </td>
-                    <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem', color: 'var(--surface)' }}>
+                    <td data-label="Joined" className="table-cell-meta">
                       {new Date(u.created_at).toLocaleDateString('en-US')}
                     </td>
-                    <td>
-                      <UserStatusButton
-                        userId={u.id}
-                        userName={u.name}
-                        userRole={u.role}
-                        isActive={isActive}
-                        currentAdminId={currentAdmin.id}
-                      />
+                    <td data-label="Actions" data-cell="actions">
+                      <div className="table-actions-group">
+                        {u.role === 'member' && (
+                          <Link
+                            href={`/dashboard/admin/users/${u.id}`}
+                            className="btn-secondary table-action-btn"
+                            id={`btn-view-member-${u.id}`}
+                          >
+                            View details
+                          </Link>
+                        )}
+                        <UserStatusButton
+                          userId={u.id}
+                          userName={u.name}
+                          userRole={u.role}
+                          isActive={isActive}
+                          currentAdminId={currentAdmin.id}
+                        />
+                      </div>
                     </td>
                   </tr>
                 );

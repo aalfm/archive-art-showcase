@@ -67,22 +67,21 @@ export default function CuratorActionButtons({
   };
 
   return (
-    <div style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+    <div className="table-actions-group">
       <ConfirmActionButton
         label="Approve"
-        title="Approve Curator Application"
+        title="Approve curator application"
         message={`Approve "${curatorName}" (Application #${attemptNumber})? The user will immediately gain full Curator access to create and manage challenges.`}
         confirmLabel="Approve"
         danger={false}
-        buttonClass="btn-primary"
-        buttonStyle={{ padding: '6px 12px', fontSize: '0.74rem' }}
+        buttonClass="btn-primary table-action-btn"
+        buttonStyle={undefined}
         onConfirm={() => updateCuratorStatus(curatorId, 'approved')}
       />
 
       <button
         type="button"
-        className="btn-danger"
-        style={{ padding: '6px 12px', fontSize: '0.74rem' }}
+        className="btn-danger table-action-btn"
         onClick={handleOpenReject}
         id={`btn-reject-curator-${curatorId}`}
       >
@@ -92,7 +91,7 @@ export default function CuratorActionButtons({
       <Modal
         isOpen={rejectOpen}
         onClose={handleCloseReject}
-        title="Reject Curator Application"
+        title="Reject curator application"
         size="md"
       >
         <form onSubmit={handleConfirmReject} noValidate className="reject-curator-form">
@@ -104,7 +103,7 @@ export default function CuratorActionButtons({
           <div className="form-group">
             <div className="reject-reason-label-row">
               <label htmlFor={`reject-reason-input-${curatorId}`} className="form-label">
-                Reason for Rejection *
+                Reason for rejection *
               </label>
               <span className="reject-reason-counter">
                 {reason.length}/{MAX_REJECTION_REASON_LENGTH}
@@ -168,7 +167,7 @@ export default function CuratorActionButtons({
               id={`btn-confirm-reject-curator-${curatorId}`}
               disabled={submitting}
             >
-              {submitting ? 'Rejecting...' : 'Confirm Rejection'}
+              {submitting ? 'Rejecting...' : 'Confirm rejection'}
             </button>
           </div>
         </form>

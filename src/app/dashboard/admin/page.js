@@ -3,6 +3,7 @@ import { requireRole } from '@/lib/auth';
 import { getDashboardStats } from '@/lib/actions/admin.actions';
 import { query } from '@/lib/db';
 import DashboardStatCard from '@/components/ui/DashboardStatCard';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,7 +62,7 @@ export default async function AdminOverviewPage() {
       type: 'Artwork Report',
       title: r.artwork_title,
       meta: `${r.reason} · Reported by ${r.reporter_name} · ${formatShortDate(r.created_at)}`,
-      href: '/dashboard/admin/reports',
+      href: `/dashboard/admin/reports/${r.id}`,
       actionLabel: 'Review',
       createdAt: new Date(r.created_at).getTime(),
     })),
@@ -80,9 +81,10 @@ export default async function AdminOverviewPage() {
 
   return (
     <div className="dash-overview">
+      <Breadcrumb items={[{ label: 'Dashboard' }]} />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Admin Overview</h1>
+          <h1 className="dashboard-title">Admin overview</h1>
           <p className="dashboard-subtitle">
             Platform summary and items requiring administrative review.
           </p>
@@ -92,22 +94,22 @@ export default async function AdminOverviewPage() {
       {/* Primary Metrics (3 Focused Cards) */}
       <div className="dash-kpi-grid">
         <DashboardStatCard
-          label="Total Users"
+          label="Total users"
           value={stats.totalUsers}
           href="/dashboard/admin/users"
-          linkLabel="Manage Users →"
+          linkLabel="Manage users →"
         />
         <DashboardStatCard
-          label="Pending Moderation"
+          label="Pending moderation"
           value={stats.pendingReports}
           href="/dashboard/admin/reports"
-          linkLabel="Review Reports →"
+          linkLabel="Review reports →"
         />
         <DashboardStatCard
-          label="Pending Curators"
+          label="Pending curators"
           value={pendingCuratorCount}
           href="/dashboard/admin/curators"
-          linkLabel="Verify Curators →"
+          linkLabel="Verify curators →"
         />
       </div>
 
@@ -115,13 +117,13 @@ export default async function AdminOverviewPage() {
       <section className="dash-section">
         <div className="dash-section-head">
           <div>
-            <h2 className="dash-section-title">Needs Attention</h2>
+            <h2 className="dash-section-title">Needs attention</h2>
             <p className="dash-section-desc">
               Recent moderation reports and curator verification requests.
             </p>
           </div>
           <Link href="/dashboard/admin/reports" className="dash-inline-link">
-            Moderation Queue →
+            Moderation queue →
           </Link>
         </div>
 
@@ -156,15 +158,19 @@ export default async function AdminOverviewPage() {
         </div>
         <div className="dash-quick-links">
           <Link href="/dashboard/admin/users" className="dash-quick-link">
-            <span>User Management</span>
+            <span>User management</span>
             <span className="dash-quick-arrow" aria-hidden="true">→</span>
           </Link>
           <Link href="/dashboard/admin/curators" className="dash-quick-link">
-            <span>Curator Verification</span>
+            <span>Curator verification</span>
+            <span className="dash-quick-arrow" aria-hidden="true">→</span>
+          </Link>
+          <Link href="/dashboard/admin/challenges" className="dash-quick-link">
+            <span>Challenges &amp; winners</span>
             <span className="dash-quick-arrow" aria-hidden="true">→</span>
           </Link>
           <Link href="/dashboard/admin/reports" className="dash-quick-link">
-            <span>Content Moderation</span>
+            <span>Content moderation</span>
             <span className="dash-quick-arrow" aria-hidden="true">→</span>
           </Link>
           <Link href="/dashboard/admin/categories" className="dash-quick-link">

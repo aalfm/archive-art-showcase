@@ -37,7 +37,7 @@ export default function CuratorHistoryModal({
       <Modal
         isOpen={open}
         onClose={() => setOpen(false)}
-        title={`Application History — ${curatorName}`}
+        title={`Application history — ${curatorName}`}
         size="lg"
       >
         <div className="admin-curator-history-modal">
@@ -74,7 +74,7 @@ export default function CuratorHistoryModal({
 
                   <div className="admin-history-fields">
                     <div>
-                      <span className="curator-summary-label">Portfolio Link</span>
+                      <span className="curator-summary-label">Portfolio link</span>
                       {app.portfolio_url ? (
                         <div>
                           <a
@@ -93,21 +93,21 @@ export default function CuratorHistoryModal({
 
                     {app.background && (
                       <div>
-                        <span className="curator-summary-label">Curatorial Background</span>
+                        <span className="curator-summary-label">Curatorial background</span>
                         <p className="curator-summary-text">{app.background}</p>
                       </div>
                     )}
 
                     {app.supporting_notes && (
                       <div>
-                        <span className="curator-summary-label">Supporting Information</span>
+                        <span className="curator-summary-label">Supporting information</span>
                         <p className="curator-summary-text">{app.supporting_notes}</p>
                       </div>
                     )}
 
                     {app.rejection_reason && (
                       <div className="curator-history-reason">
-                        <span className="curator-summary-label">Reason for Rejection</span>
+                        <span className="curator-summary-label">Reason for rejection</span>
                         <p>{app.rejection_reason}</p>
                       </div>
                     )}

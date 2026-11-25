@@ -1,6 +1,7 @@
 import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
 import UserAvatar from '@/components/ui/UserAvatar';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import CuratorActionButtons from './CuratorActionButtons';
 import CuratorHistoryModal from './CuratorHistoryModal';
 
@@ -80,9 +81,15 @@ export default async function AdminCuratorsPage() {
 
   return (
     <div>
+      <Breadcrumb
+        items={[
+          { label: 'Dashboard', href: '/dashboard/admin' },
+          { label: 'Curator Verification' },
+        ]}
+      />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Curator Verification</h1>
+          <h1 className="dashboard-title">Curator verification</h1>
           <p className="dashboard-subtitle">
             Review curator applications, portfolios, and prior decision history before granting curation authorization.
           </p>
@@ -92,7 +99,7 @@ export default async function AdminCuratorsPage() {
       {/* Pending Section */}
       <div className="dash-section">
         <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
-          Awaiting Approval ({pendingCurators.length})
+          Awaiting approval ({pendingCurators.length})
         </h2>
 
         {pendingCurators.length === 0 ? (
@@ -101,12 +108,19 @@ export default async function AdminCuratorsPage() {
           </div>
         ) : (
           <div className="data-table-wrap">
-            <table className="data-table admin-curators-table">
+            <table className="data-table dashboard-responsive-table admin-curators-table admin-curators-pending-table">
+              <colgroup>
+                <col className="admin-curators-col-name" />
+                <col className="admin-curators-col-email" />
+                <col className="admin-curators-col-app" />
+                <col className="admin-curators-col-date" />
+                <col className="admin-curators-col-decision" />
+              </colgroup>
               <thead>
                 <tr>
                   <th>Applicant</th>
                   <th>Email</th>
-                  <th>Portfolio &amp; Application</th>
+                  <th>Portfolio &amp; application</th>
                   <th>Submitted</th>
                   <th>Decision</th>
                 </tr>
@@ -122,7 +136,7 @@ export default async function AdminCuratorsPage() {
 
                   return (
                     <tr key={c.id}>
-                      <td>
+                      <td data-label="Applicant" data-cell="primary">
                         <div className="dashboard-user-cell">
                           <UserAvatar src={null} role={c.role} name={c.name} size={28} />
                           <div className="admin-curator-name-col">
@@ -137,8 +151,10 @@ export default async function AdminCuratorsPage() {
                           </div>
                         </div>
                       </td>
-                      <td style={{ fontSize: '0.82rem', color: 'var(--surface)' }}>{c.email}</td>
-                      <td>
+                      <td data-label="Email" className="table-cell-break">
+                        {c.email}
+                      </td>
+                      <td data-label="Portfolio & application">
                         <div className="admin-curator-app-cell">
                           {portfolioUrl ? (
                             <a
@@ -147,13 +163,15 @@ export default async function AdminCuratorsPage() {
                               rel="noopener noreferrer"
                               className="admin-curator-portfolio-link"
                             >
-                              View Portfolio ↗
+                              View portfolio
                             </a>
                           ) : (
                             <span className="admin-curator-no-portfolio">No portfolio provided</span>
                           )}
                           {background && (
-                            <p className="admin-curator-bio-snippet">{background}</p>
+                            <p className="admin-curator-bio-snippet" title={background}>
+                              {background}
+                            </p>
                           )}
                           <CuratorHistoryModal
                             curatorName={c.name}
@@ -161,16 +179,16 @@ export default async function AdminCuratorsPage() {
                             applications={history}
                             buttonLabel={
                               history.length > 1
-                                ? `View History (${history.length})`
-                                : 'View Details'
+                                ? `View history (${history.length})`
+                                : 'View details'
                             }
                           />
                         </div>
                       </td>
-                      <td style={{ fontSize: '0.78rem', color: 'var(--surface)', whiteSpace: 'nowrap' }}>
+                      <td data-label="Submitted" className="table-cell-meta">
                         {formatDate(latestApp?.submitted_at || c.created_at)}
                       </td>
-                      <td>
+                      <td data-label="Decision" data-cell="actions">
                         <CuratorActionButtons
                           curatorId={c.id}
                           curatorName={c.name}
@@ -191,7 +209,7 @@ export default async function AdminCuratorsPage() {
         <div className="dash-section-head" style={{ marginBottom: 14 }}>
           <div>
             <h2 className="dash-section-title">
-              Verification History ({historyCurators.length})
+              Verification history ({historyCurators.length})
             </h2>
             <p className="dash-section-desc">
               Past approval and rejection decisions. Rejected applicants must reapply before they can be reviewed again.
@@ -200,77 +218,96 @@ export default async function AdminCuratorsPage() {
         </div>
 
         <div className="data-table-wrap">
-          <table className="data-table admin-curators-table">
+          <table className="data-table dashboard-responsive-table admin-curators-table admin-curators-history-table">
+            <colgroup>
+              <col className="admin-curators-hist-col-name" />
+              <col className="admin-curators-hist-col-email" />
+              <col className="admin-curators-hist-col-status" />
+              <col className="admin-curators-hist-col-summary" />
+              <col className="admin-curators-hist-col-history" />
+            </colgroup>
             <thead>
               <tr>
                 <th>Curator</th>
                 <th>Email</th>
                 <th>Status</th>
-                <th>Decision Summary</th>
+                <th>Decision summary</th>
                 <th>History</th>
               </tr>
             </thead>
             <tbody>
-              {historyCurators.map((c) => {
-                const history = appsByUser.get(c.id) || [];
-                const latestApp = history[0] || null;
-                const attemptCount = history.length || 1;
+              {historyCurators.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="data-table-empty-cell">
+                    No verification history yet.
+                  </td>
+                </tr>
+              ) : (
+                historyCurators.map((c) => {
+                  const history = appsByUser.get(c.id) || [];
+                  const latestApp = history[0] || null;
+                  const attemptCount = history.length || 1;
 
-                return (
-                  <tr key={c.id}>
-                    <td>
-                      <div className="dashboard-user-cell">
-                        <UserAvatar src={null} role={c.role} name={c.name} size={28} />
-                        <div className="admin-curator-name-col">
-                          <span className="dashboard-user-cell-name" style={{ fontWeight: 600 }}>
-                            {c.name}
-                          </span>
-                          {attemptCount > 1 && (
-                            <span className="admin-curator-attempt-note">
-                              {attemptCount} attempts
+                  return (
+                    <tr key={c.id}>
+                      <td data-label="Curator" data-cell="primary">
+                        <div className="dashboard-user-cell">
+                          <UserAvatar src={null} role={c.role} name={c.name} size={28} />
+                          <div className="admin-curator-name-col">
+                            <span className="dashboard-user-cell-name" style={{ fontWeight: 600 }}>
+                              {c.name}
                             </span>
-                          )}
+                            {attemptCount > 1 && (
+                              <span className="admin-curator-attempt-note">
+                                {attemptCount} attempts
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td style={{ fontSize: '0.82rem', color: 'var(--surface)' }}>{c.email}</td>
-                    <td>
-                      <div className="admin-curator-status-col">
-                        <span className={`badge badge-${c.curator_status}`}>
-                          {c.curator_status === 'approved' ? 'Approved' : 'Rejected'}
-                        </span>
-                        <span className="admin-curator-review-meta">
-                          {formatDate(latestApp?.reviewed_at || c.created_at)}
-                          {latestApp?.reviewed_by_name ? ` · ${latestApp.reviewed_by_name}` : ''}
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      {c.curator_status === 'rejected' && latestApp?.rejection_reason ? (
-                        <p className="admin-curator-reason-snippet">
-                          {latestApp.rejection_reason}
-                        </p>
-                      ) : c.curator_status === 'approved' ? (
-                        <span className="admin-curator-approved-note">
-                          Verified curator access granted
-                        </span>
-                      ) : (
-                        <span className="admin-curator-no-portfolio">—</span>
-                      )}
-                    </td>
-                    <td>
-                      <CuratorHistoryModal
-                        curatorName={c.name}
-                        curatorEmail={c.email}
-                        applications={history}
-                        buttonLabel={
-                          attemptCount > 1 ? `History (${attemptCount})` : 'View Record'
-                        }
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+                      <td data-label="Email" className="table-cell-break">
+                        {c.email}
+                      </td>
+                      <td data-label="Status">
+                        <div className="admin-curator-status-col">
+                          <span className={`badge badge-${c.curator_status}`}>
+                            {c.curator_status === 'approved' ? 'Approved' : 'Rejected'}
+                          </span>
+                          <span className="admin-curator-review-meta">
+                            {formatDate(latestApp?.reviewed_at || c.created_at)}
+                            {latestApp?.reviewed_by_name ? ` · ${latestApp.reviewed_by_name}` : ''}
+                          </span>
+                        </div>
+                      </td>
+                      <td data-label="Decision summary">
+                        {c.curator_status === 'rejected' && latestApp?.rejection_reason ? (
+                          <p className="admin-curator-reason-snippet" title={latestApp.rejection_reason}>
+                            {latestApp.rejection_reason}
+                          </p>
+                        ) : c.curator_status === 'approved' ? (
+                          <span className="admin-curator-approved-note">
+                            Verified curator access granted
+                          </span>
+                        ) : (
+                          <span className="admin-curator-no-portfolio">—</span>
+                        )}
+                      </td>
+                      <td data-label="History" data-cell="actions">
+                        <div className="table-actions-group">
+                          <CuratorHistoryModal
+                            curatorName={c.name}
+                            curatorEmail={c.email}
+                            applications={history}
+                            buttonLabel={
+                              attemptCount > 1 ? `History (${attemptCount})` : 'View record'
+                            }
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

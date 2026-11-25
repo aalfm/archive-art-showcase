@@ -203,6 +203,10 @@ export async function setUserActiveStatus(rawUserId, nextActive) {
 
     await client.query('COMMIT');
     revalidatePath('/dashboard/admin/users');
+    revalidatePath(`/dashboard/admin/users/${userId}`);
+    revalidatePath('/dashboard/admin/reports');
+    revalidatePath('/dashboard/admin/reports/[id]', 'page');
+    revalidatePath('/dashboard/admin/artworks/[id]', 'page');
     revalidatePath('/dashboard/admin');
     revalidatePath('/artists');
     revalidatePath(`/artists/${userId}`);
@@ -274,16 +278,37 @@ export async function deleteCategory(categoryId) {
   }
 }
 
-export async function dismissReport(reportId) {
+export async function dismissReport(rawReportId, rawAdminNote = '') {
   const session = await getSession();
   requireAdmin(session);
 
+  const reportId = toId(rawReportId);
+  if (!reportId) return { error: 'Invalid report ID.' };
+
+  const adminNote = typeof rawAdminNote === 'string' ? rawAdminNote.trim().slice(0, 500) : '';
+
   try {
-    await query(
-      'UPDATE reports SET status=\'dismissed\' WHERE id=$1 AND status=\'pending\'',
-      [reportId]
+    const res = await query(
+      `UPDATE reports
+       SET status = 'dismissed',
+           admin_note = CASE WHEN $2 <> '' THEN $2 ELSE admin_note END
+       WHERE id = $1 AND status = 'pending'
+       RETURNING artwork_id`,
+      [reportId, adminNote]
     );
+
+    if (res.rows.length === 0) {
+      return { error: 'This report has already been resolved or no longer exists.' };
+    }
+
+    const artworkId = res.rows[0].artwork_id;
+    revalidatePath('/dashboard/admin');
     revalidatePath('/dashboard/admin/reports');
+    revalidatePath(`/dashboard/admin/reports/${reportId}`);
+    if (artworkId) {
+      revalidatePath(`/dashboard/admin/artworks/${artworkId}`);
+    }
+    revalidatePath('/dashboard/admin/users/[id]', 'page');
     return { success: true };
   } catch (err) {
     console.error('[Admin] Dismiss report error:', err);
@@ -291,32 +316,69 @@ export async function dismissReport(reportId) {
   }
 }
 
-export async function takeDownArtwork(reportId, artworkId) {
+export async function takeDownArtwork(rawReportId, rawArtworkId, rawAdminNote = '') {
   const session = await getSession();
   requireAdmin(session);
+
+  const reportId = toId(rawReportId);
+  const artworkId = toId(rawArtworkId);
+  if (!artworkId) return { error: 'Invalid artwork ID.' };
+
+  const adminNote = typeof rawAdminNote === 'string' ? rawAdminNote.trim().slice(0, 500) : '';
 
   const client = await getClient();
   try {
     await client.query('BEGIN');
 
     // Mark artwork as taken down
-    await client.query(
-      'UPDATE artworks SET status=\'taken_down\' WHERE id=$1',
+    const artRes = await client.query(
+      `UPDATE artworks
+       SET status = 'taken_down'
+       WHERE id = $1
+       RETURNING user_id`,
       [artworkId]
     );
 
-    // Update all pending reports for this artwork to taken_down
+    if (artRes.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return { error: 'Artwork not found.' };
+    }
+
+    const ownerId = artRes.rows[0].user_id;
+
+    // Update all pending reports for this artwork to taken_down (preserving report history)
     await client.query(
-      'UPDATE reports SET status=\'taken_down\' WHERE artwork_id=$1 AND status=\'pending\'',
-      [artworkId]
+      `UPDATE reports
+       SET status = 'taken_down',
+           admin_note = CASE WHEN $2 <> '' THEN $2 ELSE admin_note END
+       WHERE artwork_id = $1 AND status = 'pending'`,
+      [artworkId, adminNote]
     );
+
+    if (reportId && adminNote) {
+      await client.query(
+        `UPDATE reports SET admin_note = $2 WHERE id = $1`,
+        [reportId, adminNote]
+      );
+    }
 
     await client.query('COMMIT');
     revalidatePath('/');
     revalidatePath('/artists');
-    revalidatePath('/dashboard/admin/reports');
     revalidatePath('/explore');
     revalidatePath(`/artworks/${artworkId}`);
+    revalidatePath('/dashboard/admin');
+    revalidatePath('/dashboard/admin/reports');
+    if (reportId) {
+      revalidatePath(`/dashboard/admin/reports/${reportId}`);
+    }
+    revalidatePath('/dashboard/admin/reports/[id]', 'page');
+    revalidatePath(`/dashboard/admin/artworks/${artworkId}`);
+    if (ownerId) {
+      revalidatePath(`/dashboard/admin/users/${ownerId}`);
+      revalidatePath(`/artists/${ownerId}`);
+    }
+    revalidatePath('/dashboard/admin/users');
     return { success: true };
   } catch (err) {
     await client.query('ROLLBACK');
