@@ -15031,13 +15031,20 @@ body,
 
 /* 7. Curator — My Challenges (5 cols: inherited 24 / 17 / 19 / 17 / 23) */
 
-/* 8. Curator & Admin — Challenge Submissions (6 cols) */
+/* 8. Curator — Challenge Submissions (6 cols) */
 .curator-sub-col-thumb { width: 10%; }
 .curator-sub-col-title { width: 25%; }
 .curator-sub-col-artist { width: 16%; }
 .curator-sub-col-status { width: 14%; }
 .curator-sub-col-date { width: 11%; }
 .curator-sub-col-winner { width: 24%; }
+
+/* 8b. Admin — Challenge Submissions Read-Only (5 cols) */
+.admin-sub-col-thumb { width: 10%; }
+.admin-sub-col-title { width: 32%; }
+.admin-sub-col-artist { width: 20%; }
+.admin-sub-col-status { width: 25%; }
+.admin-sub-col-date { width: 13%; }
 
 /* 9. Member — My Artworks (6 cols) */
 .member-art-col-thumb { width: 11%; }

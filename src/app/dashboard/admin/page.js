@@ -150,35 +150,6 @@ export default async function AdminOverviewPage() {
           </div>
         )}
       </section>
-
-      {/* Direct Links to Full Management Pages */}
-      <section className="dash-section">
-        <div className="dash-section-head">
-          <h2 className="dash-section-title">Management</h2>
-        </div>
-        <div className="dash-quick-links">
-          <Link href="/dashboard/admin/users" className="dash-quick-link">
-            <span>User Management</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-          <Link href="/dashboard/admin/curators" className="dash-quick-link">
-            <span>Curator Verification</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-          <Link href="/dashboard/admin/challenges" className="dash-quick-link">
-            <span>Challenges &amp; Winners</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-          <Link href="/dashboard/admin/reports" className="dash-quick-link">
-            <span>Content Moderation</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-          <Link href="/dashboard/admin/categories" className="dash-quick-link">
-            <span>Categories</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-        </div>
-      </section>
     </div>
   );
 }

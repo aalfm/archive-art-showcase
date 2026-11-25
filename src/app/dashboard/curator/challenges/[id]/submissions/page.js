@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { requireRole } from '@/lib/auth';
+import { isChallengeOwnerCurator } from '@/lib/challenge-auth';
 import { query } from '@/lib/db';
 import WinnerSelectControl from './WinnerSelectControl';
 import { formatEditorialTitle, toId } from '@/lib/utils';
@@ -78,8 +79,9 @@ export default async function ChallengeSubmissionsPage(props) {
   }
 
   const challenge = chalRes.rows[0];
+  const canManageWinners = isChallengeOwnerCurator(user, challenge);
 
-  if (Number(challenge.curator_id) !== Number(user.id) && user.role !== 'admin') {
+  if (!canManageWinners) {
     redirect('/dashboard/curator/challenges');
   }
 
@@ -152,7 +154,7 @@ export default async function ChallengeSubmissionsPage(props) {
         </div>
       )}
 
-      {/* Published Winner Placements Summary (matches Admin Challenge Winner view) */}
+      {/* Published Winner Placements Summary */}
       {hasEnded && (
         <section className="dash-section" aria-labelledby="curator-winners-summary-heading">
           <div className="dash-section-head">
@@ -326,6 +328,7 @@ export default async function ChallengeSubmissionsPage(props) {
                           currentNote={sub.winner_note}
                           hasEnded={hasEnded}
                           artworkStatus={sub.artwork_status}
+                          canManage={canManageWinners}
                         />
                       </td>
                     </tr>

@@ -7,7 +7,7 @@ import Breadcrumb from '@/components/ui/Breadcrumb';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Challenge Management — ARCHIVE',
+  title: 'Challenges — ARCHIVE Admin',
 };
 
 function formatSchedule(startDate, endDate) {
@@ -119,9 +119,9 @@ export default async function AdminChallengesPage(props) {
       <Breadcrumb items={breadcrumbItems} />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Challenge Management</h1>
+          <h1 className="dashboard-title">Challenges</h1>
           <p className="dashboard-subtitle">
-            Review architecture challenges, oversee submissions, and publish official competition winners ({allChallenges.length} total).
+            Read-only overview of architecture challenges, submissions, and curator-selected winners ({allChallenges.length} total).
           </p>
         </div>
       </div>
@@ -232,9 +232,10 @@ export default async function AdminChallengesPage(props) {
                       <div className="table-actions-group">
                         <Link
                           href={`/dashboard/admin/challenges/${ch.id}`}
-                          className={isCompleted ? 'btn-primary table-action-btn' : 'btn-secondary table-action-btn'}
+                          className="btn-secondary table-action-btn"
+                          id={`btn-admin-view-challenge-${ch.id}`}
                         >
-                          {isCompleted ? 'Manage Winners' : 'View Entries'}
+                          {isCompleted ? 'View Results' : 'View Entries'}
                         </Link>
                       </div>
                     </td>

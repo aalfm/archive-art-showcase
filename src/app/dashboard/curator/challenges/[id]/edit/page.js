@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
+import { isChallengeOwnerCurator } from '@/lib/challenge-auth';
 import { query } from '@/lib/db';
 import EditChallengeForm from './EditChallengeForm';
 import { formatEditorialTitle, toId } from '@/lib/utils';
@@ -25,7 +26,7 @@ export default async function EditChallengePage(props) {
 
   const challenge = res.rows[0];
 
-  if (Number(challenge.curator_id) !== Number(user.id)) {
+  if (!isChallengeOwnerCurator(user, challenge)) {
     redirect('/dashboard/curator/challenges');
   }
 

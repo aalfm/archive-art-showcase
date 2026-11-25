@@ -3,6 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import { query, getClient } from '@/lib/db';
 import { getSession } from '@/lib/auth';
+import {
+  authorizeChallengeOwner,
+  authorizeCuratorChallengeActor,
+} from '@/lib/challenge-auth';
 import { isUploadedImagePath, toId } from '@/lib/utils';
 
 function revalidateChallengePaths(challengeId) {
@@ -14,25 +18,21 @@ function revalidateChallengePaths(challengeId) {
     revalidatePath(`/dashboard/curator/challenges/${challengeId}`);
     revalidatePath(`/dashboard/curator/challenges/${challengeId}/submissions`);
   }
+  revalidatePath('/dashboard/admin');
   revalidatePath('/dashboard/admin/challenges');
+  revalidatePath('/dashboard/admin/users/[id]', 'page');
+  revalidatePath('/dashboard/admin/artworks/[id]', 'page');
+  revalidatePath('/dashboard/curator');
   revalidatePath('/dashboard/curator/challenges');
+  revalidatePath('/dashboard/member');
   revalidatePath('/dashboard/member/submissions');
-}
-
-function canManageChallengeWinners(user, challenge) {
-  if (!user || !challenge) return false;
-  if (user.role === 'admin') return true;
-  return (
-    user.role === 'curator' &&
-    user.curator_status === 'approved' &&
-    Number(challenge.curator_id) === Number(user.id)
-  );
 }
 
 export async function createChallenge(prevState, formData) {
   const session = await getSession();
-  if (!session || session.user.role !== 'curator' || session.user.curator_status !== 'approved') {
-    return { error: 'Only verified curators can create challenges.' };
+  const auth = authorizeCuratorChallengeActor(session, 'create challenges');
+  if (!auth.ok) {
+    return { error: auth.error, status: auth.status, code: auth.code };
   }
 
   const title = formData.get('title')?.toString().trim();
@@ -49,7 +49,9 @@ export async function createChallenge(prevState, formData) {
   if (!isUploadedImagePath(bannerUrl)) {
     return { error: 'Please upload a challenge banner file from your device (JPG, PNG, or WebP).' };
   }
-  if (new Date(endDate) <= new Date(startDate)) {
+  const parsedStart = new Date(startDate);
+  const parsedEnd = new Date(endDate);
+  if (Number.isNaN(parsedStart.getTime()) || Number.isNaN(parsedEnd.getTime()) || parsedEnd <= parsedStart) {
     return { error: 'End date must be after start date.' };
   }
 
@@ -57,7 +59,7 @@ export async function createChallenge(prevState, formData) {
     const result = await query(
       `INSERT INTO challenges (curator_id, title, description, rules, prize, banner_url, start_date, end_date)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-      [session.user.id, title, description, rules, prize, bannerUrl, startDate, endDate]
+      [auth.user.id, title, description, rules, prize, bannerUrl, startDate, endDate]
     );
 
     revalidateChallengePaths(result.rows[0].id);
@@ -70,11 +72,9 @@ export async function createChallenge(prevState, formData) {
 
 export async function updateChallenge(prevState, formData) {
   const session = await getSession();
-  if (!session || (session.user.role !== 'curator' && session.user.role !== 'admin')) {
-    return { error: 'Not authorized.' };
-  }
-  if (session.user.role === 'curator' && session.user.curator_status !== 'approved') {
-    return { error: 'Curator account is not verified yet.' };
+  const auth = authorizeCuratorChallengeActor(session, 'edit challenges');
+  if (!auth.ok) {
+    return { error: auth.error, status: auth.status, code: auth.code };
   }
 
   const challengeId = toId(formData.get('challenge_id'));
@@ -89,17 +89,22 @@ export async function updateChallenge(prevState, formData) {
   if (!challengeId || !title || !description || !rules || !prize || !bannerUrl || !startDate || !endDate) {
     return { error: 'All fields are required.' };
   }
-  if (new Date(endDate) <= new Date(startDate)) {
+  const parsedStart = new Date(startDate);
+  const parsedEnd = new Date(endDate);
+  if (Number.isNaN(parsedStart.getTime()) || Number.isNaN(parsedEnd.getTime()) || parsedEnd <= parsedStart) {
     return { error: 'End date must be after start date.' };
   }
 
   try {
-    const challenge = await query('SELECT curator_id, banner_url FROM challenges WHERE id=$1', [challengeId]);
-    if (challenge.rows.length === 0) return { error: 'Challenge not found.' };
-    if (challenge.rows[0].curator_id !== session.user.id && session.user.role !== 'admin') {
-      return { error: 'Not authorized to edit this challenge.' };
+    const challengeRes = await query('SELECT curator_id, banner_url FROM challenges WHERE id=$1', [challengeId]);
+    if (challengeRes.rows.length === 0) {
+      return { error: 'Challenge not found.', status: 404 };
     }
-    if (bannerUrl !== challenge.rows[0].banner_url && !isUploadedImagePath(bannerUrl)) {
+    const ownership = authorizeChallengeOwner(auth.user, challengeRes.rows[0], 'edit this challenge');
+    if (!ownership.ok) {
+      return { error: ownership.error, status: ownership.status, code: ownership.code };
+    }
+    if (bannerUrl !== challengeRes.rows[0].banner_url && !isUploadedImagePath(bannerUrl)) {
       return { error: 'Please upload a challenge banner file from your device (JPG, PNG, or WebP).' };
     }
 
@@ -119,16 +124,22 @@ export async function updateChallenge(prevState, formData) {
 
 export async function deleteChallenge(rawChallengeId) {
   const session = await getSession();
-  if (!session) return { error: 'Please sign in.' };
+  const auth = authorizeCuratorChallengeActor(session, 'delete challenges');
+  if (!auth.ok) {
+    return { error: auth.error, status: auth.status, code: auth.code };
+  }
 
   const challengeId = toId(rawChallengeId);
   if (!challengeId) return { error: 'Invalid challenge ID.' };
 
   try {
-    const challenge = await query('SELECT curator_id FROM challenges WHERE id=$1', [challengeId]);
-    if (challenge.rows.length === 0) return { error: 'Challenge not found.' };
-    if (challenge.rows[0].curator_id !== session.user.id && session.user.role !== 'admin') {
-      return { error: 'Not authorized.' };
+    const challengeRes = await query('SELECT curator_id FROM challenges WHERE id=$1', [challengeId]);
+    if (challengeRes.rows.length === 0) {
+      return { error: 'Challenge not found.', status: 404 };
+    }
+    const ownership = authorizeChallengeOwner(auth.user, challengeRes.rows[0], 'delete this challenge');
+    if (!ownership.ok) {
+      return { error: ownership.error, status: ownership.status, code: ownership.code };
     }
 
     await query('DELETE FROM challenges WHERE id=$1', [challengeId]);
@@ -142,8 +153,11 @@ export async function deleteChallenge(rawChallengeId) {
 
 export async function submitToChallenge(prevState, formData) {
   const session = await getSession();
-  if (!session || session.user.role !== 'member') {
-    return { error: 'Only members can submit artworks.' };
+  if (!session) {
+    return { error: 'Please sign in first.', status: 401, code: 'UNAUTHORIZED' };
+  }
+  if (session.user.role !== 'member') {
+    return { error: 'Only members can submit artworks.', status: 403, code: 'FORBIDDEN' };
   }
 
   const challengeId = toId(formData.get('challenge_id'));
@@ -167,8 +181,8 @@ export async function submitToChallenge(prevState, formData) {
       [artworkId]
     );
     if (artwork.rows.length === 0) return { error: 'Artwork not found.' };
-    if (artwork.rows[0].user_id !== session.user.id) {
-      return { error: 'This artwork does not belong to you.' };
+    if (Number(artwork.rows[0].user_id) !== Number(session.user.id)) {
+      return { error: 'This artwork does not belong to you.', status: 403, code: 'FORBIDDEN' };
     }
 
     // Check duplicate submission (member already submitted to this challenge)
@@ -185,10 +199,7 @@ export async function submitToChallenge(prevState, formData) {
       [challengeId, artworkId, session.user.id]
     );
 
-    revalidatePath(`/challenges/${challengeId}`);
-    revalidatePath('/challenges');
-    revalidatePath('/dashboard/member/submissions');
-    revalidatePath(`/dashboard/curator/challenges/${challengeId}/submissions`);
+    revalidateChallengePaths(challengeId);
     return { success: true };
   } catch (err) {
     if (err.code === '23505') return { error: 'Artwork has already been submitted to this challenge.' };
@@ -199,9 +210,9 @@ export async function submitToChallenge(prevState, formData) {
 
 export async function withdrawSubmission(rawSubmissionId) {
   const session = await getSession();
-  if (!session) return { error: 'Please sign in.' };
+  if (!session) return { error: 'Please sign in.', status: 401, code: 'UNAUTHORIZED' };
   if (session.user.role !== 'member') {
-    return { error: 'Only members can withdraw challenge submissions.' };
+    return { error: 'Only members can withdraw challenge submissions.', status: 403, code: 'FORBIDDEN' };
   }
 
   const submissionId = toId(rawSubmissionId);
@@ -214,18 +225,16 @@ export async function withdrawSubmission(rawSubmissionId) {
        WHERE s.id=$1`,
       [submissionId]
     );
-    if (submission.rows.length === 0) return { error: 'Submission not found.' };
-    if (submission.rows[0].member_id !== session.user.id) {
-      return { error: 'Not authorized.' };
+    if (submission.rows.length === 0) return { error: 'Submission not found.', status: 404 };
+    if (Number(submission.rows[0].member_id) !== Number(session.user.id)) {
+      return { error: 'Not authorized.', status: 403, code: 'FORBIDDEN' };
     }
     if (new Date(submission.rows[0].end_date) < new Date()) {
       return { error: 'Challenge has ended; submission cannot be withdrawn.' };
     }
 
     await query('DELETE FROM submissions WHERE id=$1', [submissionId]);
-    revalidatePath('/dashboard/member/submissions');
-    revalidatePath(`/challenges/${submission.rows[0].challenge_id}`);
-    revalidatePath(`/dashboard/curator/challenges/${submission.rows[0].challenge_id}/submissions`);
+    revalidateChallengePaths(submission.rows[0].challenge_id);
     return { success: true };
   } catch (err) {
     console.error('[Submission] Withdraw error:', err);
@@ -235,12 +244,9 @@ export async function withdrawSubmission(rawSubmissionId) {
 
 export async function selectWinner(prevState, formData) {
   const session = await getSession();
-  if (
-    !session ||
-    (session.user.role !== 'admin' &&
-      !(session.user.role === 'curator' && session.user.curator_status === 'approved'))
-  ) {
-    return { error: 'Not authorized to manage challenge winners.' };
+  const auth = authorizeCuratorChallengeActor(session, 'select or update challenge winners');
+  if (!auth.ok) {
+    return { error: auth.error, status: auth.status, code: auth.code };
   }
 
   const challengeId = toId(formData.get('challenge_id'));
@@ -257,19 +263,20 @@ export async function selectWinner(prevState, formData) {
   try {
     await client.query('BEGIN');
 
-    // Verify challenge exists, actor has permission, and competition has ended
+    // Verify challenge exists, actor owns it as an approved curator, and competition has ended
     const challengeRes = await client.query(
       'SELECT id, curator_id, end_date FROM challenges WHERE id = $1',
       [challengeId]
     );
     if (challengeRes.rows.length === 0) {
       await client.query('ROLLBACK');
-      return { error: 'Challenge not found.' };
+      return { error: 'Challenge not found.', status: 404 };
     }
     const challenge = challengeRes.rows[0];
-    if (!canManageChallengeWinners(session.user, challenge)) {
+    const ownership = authorizeChallengeOwner(auth.user, challenge, 'manage winners for this challenge');
+    if (!ownership.ok) {
       await client.query('ROLLBACK');
-      return { error: 'You are not authorized to manage winners for this challenge.' };
+      return { error: ownership.error, status: ownership.status, code: ownership.code };
     }
     if (new Date(challenge.end_date) > new Date()) {
       await client.query('ROLLBACK');
@@ -322,12 +329,9 @@ export async function selectWinner(prevState, formData) {
 
 export async function clearWinner(rawChallengeId, rawSubmissionId) {
   const session = await getSession();
-  if (
-    !session ||
-    (session.user.role !== 'admin' &&
-      !(session.user.role === 'curator' && session.user.curator_status === 'approved'))
-  ) {
-    return { error: 'Not authorized to manage challenge winners.' };
+  const auth = authorizeCuratorChallengeActor(session, 'manage challenge winners');
+  if (!auth.ok) {
+    return { error: auth.error, status: auth.status, code: auth.code };
   }
 
   const challengeId = toId(rawChallengeId);
@@ -342,10 +346,15 @@ export async function clearWinner(rawChallengeId, rawSubmissionId) {
       [challengeId]
     );
     if (challengeRes.rows.length === 0) {
-      return { error: 'Challenge not found.' };
+      return { error: 'Challenge not found.', status: 404 };
     }
-    if (!canManageChallengeWinners(session.user, challengeRes.rows[0])) {
-      return { error: 'You are not authorized to manage winners for this challenge.' };
+    const challenge = challengeRes.rows[0];
+    const ownership = authorizeChallengeOwner(auth.user, challenge, 'manage winners for this challenge');
+    if (!ownership.ok) {
+      return { error: ownership.error, status: ownership.status, code: ownership.code };
+    }
+    if (new Date(challenge.end_date) > new Date()) {
+      return { error: 'Winner results can only be updated after the challenge has ended.' };
     }
 
     const updated = await query(
@@ -353,7 +362,7 @@ export async function clearWinner(rawChallengeId, rawSubmissionId) {
       [submissionId, challengeId]
     );
     if (updated.rows.length === 0) {
-      return { error: 'Submission not found for this challenge.' };
+      return { error: 'Submission not found for this challenge.', status: 404 };
     }
 
     revalidateChallengePaths(challengeId);

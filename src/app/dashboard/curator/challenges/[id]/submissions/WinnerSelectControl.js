@@ -12,6 +12,7 @@ export default function WinnerSelectControl({
   currentNote = '',
   hasEnded,
   artworkStatus = 'active',
+  canManage = false,
 }) {
   const router = useRouter();
   const [selectedRank, setSelectedRank] = useState(currentRank ? String(currentRank) : '');
@@ -29,6 +30,10 @@ export default function WinnerSelectControl({
     }
     return res;
   }, null);
+
+  if (!canManage) {
+    return null;
+  }
 
   if (!hasEnded) {
     return (

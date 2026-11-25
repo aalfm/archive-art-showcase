@@ -23,7 +23,6 @@ export async function POST(request) {
 
     const canUpload =
       session.user.role === 'member' ||
-      session.user.role === 'admin' ||
       (session.user.role === 'curator' && session.user.curator_status === 'approved');
     if (!canUpload) {
       return NextResponse.json(

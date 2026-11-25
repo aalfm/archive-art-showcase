@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { requireRole } from '@/lib/auth';
+import { isChallengeOwnerCurator } from '@/lib/challenge-auth';
 import { query } from '@/lib/db';
 import { formatEditorialTitle, toId } from '@/lib/utils';
 import Breadcrumb from '@/components/ui/Breadcrumb';
@@ -75,7 +76,7 @@ export default async function CuratorChallengeDetailPage(props) {
   }
 
   const challenge = res.rows[0];
-  const canEdit = Number(challenge.curator_id) === Number(user.id);
+  const canEdit = isChallengeOwnerCurator(user, challenge);
 
   // Enforce strict ownership authorization on the server side
   if (!canEdit) {

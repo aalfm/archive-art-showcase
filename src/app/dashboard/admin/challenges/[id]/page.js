@@ -5,12 +5,11 @@ import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { formatEditorialTitle, toId } from '@/lib/utils';
 import Breadcrumb from '@/components/ui/Breadcrumb';
-import WinnerSelectControl from '@/app/dashboard/curator/challenges/[id]/submissions/WinnerSelectControl';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Manage Challenge Winners — ARCHIVE',
+  title: 'Challenge Details — ARCHIVE Admin',
 };
 
 const RANK_LABELS = {
@@ -126,11 +125,11 @@ export default async function AdminChallengeDetailPage(props) {
 
       {!hasEnded && (
         <div className="form-alert form-alert-info" style={{ marginBottom: 24 }}>
-          Winners can be assigned once the competition ends on {formatDate(challenge.end_date)}.
+          This competition is {challenge.status === 'upcoming' ? 'upcoming' : 'currently active'}. Winners will be selected by the challenge curator after it ends on {formatDate(challenge.end_date)}.
         </div>
       )}
 
-      {/* Current Winner Announcement Overview */}
+      {/* Current Winner Announcement Overview (Read-Only) */}
       {hasEnded && (
         <section className="dash-section" aria-labelledby="admin-winners-summary-heading">
           <div className="dash-section-head">
@@ -139,7 +138,7 @@ export default async function AdminChallengeDetailPage(props) {
                 Published winner placements
               </h2>
               <p className="dash-section-desc">
-                Changes saved below update the public challenge page immediately.
+                Official 1st, 2nd, and 3rd Place results selected by the challenge curator (read-only).
               </p>
             </div>
           </div>
@@ -188,7 +187,7 @@ export default async function AdminChallengeDetailPage(props) {
         </section>
       )}
 
-      {/* Submissions & Winner Assignment Table */}
+      {/* Submissions Read-Only Overview Table */}
       <section className="dash-section">
         <div className="dash-section-head">
           <div>
@@ -196,7 +195,7 @@ export default async function AdminChallengeDetailPage(props) {
               Submitted artworks ({submissions.length})
             </h2>
             <p className="dash-section-desc">
-              Select a valid submission to assign or update 1st, 2nd, or 3rd Place along with an optional selection note.
+              Read-only overview of participant submissions and curator evaluation results.
             </p>
           </div>
         </div>
@@ -207,14 +206,13 @@ export default async function AdminChallengeDetailPage(props) {
           </div>
         ) : (
           <div className="data-table-wrap">
-            <table className="data-table dashboard-responsive-table curator-submissions-table">
+            <table className="data-table dashboard-responsive-table admin-challenge-submissions-table">
               <colgroup>
-                <col className="curator-sub-col-thumb" />
-                <col className="curator-sub-col-title" />
-                <col className="curator-sub-col-artist" />
-                <col className="curator-sub-col-status" />
-                <col className="curator-sub-col-date" />
-                <col className="curator-sub-col-winner" />
+                <col className="admin-sub-col-thumb" />
+                <col className="admin-sub-col-title" />
+                <col className="admin-sub-col-artist" />
+                <col className="admin-sub-col-status" />
+                <col className="admin-sub-col-date" />
               </colgroup>
               <thead>
                 <tr>
@@ -223,7 +221,6 @@ export default async function AdminChallengeDetailPage(props) {
                   <th>Artist</th>
                   <th>Placement</th>
                   <th>Submitted</th>
-                  <th>Winner selection</th>
                 </tr>
               </thead>
               <tbody>
@@ -257,27 +254,23 @@ export default async function AdminChallengeDetailPage(props) {
                       <div className="table-cell-submeta">{sub.artist_email}</div>
                     </td>
                     <td data-label="Placement">
-                      {sub.winner_rank ? (
-                        <span className="badge badge-approved">
-                          {RANK_LABELS[sub.winner_rank] || `Rank #${sub.winner_rank}`}
-                        </span>
+                      {sub.artwork_status !== 'active' ? (
+                        <span className="table-cell-muted">Artwork unavailable</span>
+                      ) : sub.winner_rank ? (
+                        <div className="admin-challenge-winners-cell">
+                          <span className="badge badge-approved">
+                            {RANK_LABELS[sub.winner_rank] || `Rank #${sub.winner_rank}`}
+                          </span>
+                          {sub.winner_note && (
+                            <p className="table-cell-submeta">{sub.winner_note}</p>
+                          )}
+                        </div>
                       ) : (
                         <span className="table-cell-muted">Participant</span>
                       )}
                     </td>
                     <td data-label="Submitted" className="table-cell-meta">
                       {new Date(sub.created_at).toLocaleDateString('en-US')}
-                    </td>
-                    <td data-label="Winner selection" data-cell="actions">
-                      <WinnerSelectControl
-                        key={`${sub.submission_id}-${sub.winner_rank || 'none'}-${sub.winner_note || ''}`}
-                        challengeId={challenge.id}
-                        submissionId={sub.submission_id}
-                        currentRank={sub.winner_rank}
-                        currentNote={sub.winner_note}
-                        hasEnded={hasEnded}
-                        artworkStatus={sub.artwork_status}
-                      />
                     </td>
                   </tr>
                 ))}

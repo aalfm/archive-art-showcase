@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { query } from '@/lib/db';
 import { getSession } from '@/lib/auth';
+import { isChallengeOwnerCurator } from '@/lib/challenge-auth';
 import { resolveUserAvatarSrc } from '@/lib/avatar';
 import { resolveRoleReturnContext } from '@/lib/member-navigation';
 import UserAvatar from '@/components/ui/UserAvatar';
@@ -113,16 +114,8 @@ export default async function ChallengeDetailPage(props) {
   const isActive = challenge.challenge_status === 'active';
   const isUpcoming = challenge.challenge_status === 'upcoming';
 
-  const canManageWinners =
-    user?.role === 'admin' ||
-    (user?.role === 'curator' &&
-      user.curator_status === 'approved' &&
-      Number(challenge.curator_id) === Number(user.id));
-
-  const manageHref =
-    user?.role === 'admin'
-      ? `/dashboard/admin/challenges/${challenge.id}`
-      : `/dashboard/curator/challenges/${challenge.id}/submissions`;
+  const canManageWinners = isChallengeOwnerCurator(user, challenge);
+  const manageHref = `/dashboard/curator/challenges/${challenge.id}/submissions`;
 
   // Check if member has already submitted
   let userSubmission = null;
@@ -209,7 +202,7 @@ export default async function ChallengeDetailPage(props) {
                   ? `${winners.length} ${winners.length === 1 ? 'winning entry' : 'winning entries'}`
                   : 'Results Pending'}
               </span>
-              {canManageWinners && (
+              {canManageWinners && isCompleted && (
                 <Link href={manageHref} className="btn-secondary challenge-manage-winners-btn">
                   Manage Winners
                 </Link>
