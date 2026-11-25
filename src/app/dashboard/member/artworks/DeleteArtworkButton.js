@@ -7,10 +7,12 @@ export default function DeleteArtworkButton({ artworkId, artworkTitle }) {
   return (
     <ConfirmActionButton
       label="Delete"
-      title="Delete Artwork"
+      title="Delete artwork"
       message={`Are you sure you want to delete "${artworkTitle}"? This action cannot be undone.`}
-      confirmLabel="Delete Artwork"
-      buttonTitle="Delete Artwork"
+      confirmLabel="Delete artwork"
+      buttonClass="btn-danger table-action-btn"
+      buttonStyle={undefined}
+      buttonTitle="Delete artwork"
       onConfirm={() => deleteArtwork(artworkId)}
     />
   );

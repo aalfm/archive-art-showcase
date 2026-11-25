@@ -1,4 +1,6 @@
 import { requireRole } from '@/lib/auth';
+import { formatRoleLabel } from '@/lib/utils';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import SettingsForm from './SettingsForm';
 
 export const dynamic = 'force-dynamic';
@@ -11,49 +13,49 @@ export default async function MemberSettingsPage() {
   const user = await requireRole('member');
 
   return (
-    <div>
+    <div className="member-form-page">
+      <Breadcrumb
+        items={[
+          { label: 'Dashboard', href: '/dashboard/member' },
+          { label: 'Settings' },
+        ]}
+      />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Account Settings</h1>
+          <h1 className="dashboard-title">Account settings</h1>
           <p className="dashboard-subtitle">Manage the security and credentials of your ARCHIVE account.</p>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 36, alignItems: 'start' }}>
-        <div>
-          <h2 className="dash-section-title" style={{ marginBottom: 16 }}>
-            Change Password
+      <div className="member-settings-grid">
+        <section className="member-settings-card">
+          <h2 className="dash-section-title member-settings-card-title">
+            Change password
           </h2>
           <SettingsForm />
-        </div>
+        </section>
 
-        <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--bg-secondary)', borderRadius: 'var(--radius-xs)', padding: 24 }}>
-          <h2 className="dash-section-title" style={{ marginBottom: 16 }}>
-            Account Information
+        <section className="member-settings-card">
+          <h2 className="dash-section-title member-settings-card-title">
+            Account information
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div>
-              <span style={{ fontSize: '0.74rem', color: 'var(--surface)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }}>
-                Email
-              </span>
-              <p style={{ fontWeight: 600, color: 'var(--text-primary)', marginTop: 2 }}>{user.email}</p>
+          <div className="member-settings-meta-list">
+            <div className="member-settings-meta-item">
+              <span className="member-settings-meta-label">Email</span>
+              <p className="member-settings-meta-value">{user.email}</p>
             </div>
-            <div>
-              <span style={{ fontSize: '0.74rem', color: 'var(--surface)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }}>
-                Role
-              </span>
-              <p style={{ fontWeight: 600, color: 'var(--accent)', marginTop: 2, textTransform: 'uppercase' }}>{user.role}</p>
+            <div className="member-settings-meta-item">
+              <span className="member-settings-meta-label">Role</span>
+              <p className="member-settings-meta-value is-accent">{formatRoleLabel(user.role)}</p>
             </div>
-            <div>
-              <span style={{ fontSize: '0.74rem', color: 'var(--surface)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }}>
-                Member Since
-              </span>
-              <p style={{ color: 'var(--text-primary)', marginTop: 2 }}>
+            <div className="member-settings-meta-item">
+              <span className="member-settings-meta-label">Member since</span>
+              <p className="member-settings-meta-value">
                 {new Date(user.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );

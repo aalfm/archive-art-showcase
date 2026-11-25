@@ -19,7 +19,7 @@ export default function RemoveFavoriteButton({ artworkId }) {
       className="btn-danger"
       style={{ padding: '6px 12px', fontSize: '0.78rem' }}
     >
-      {loading ? '...' : 'Remove Favorite'}
+      {loading ? '...' : 'Remove favorite'}
     </button>
   );
 }

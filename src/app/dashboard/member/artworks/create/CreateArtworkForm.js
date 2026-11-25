@@ -18,16 +18,16 @@ export default function CreateArtworkForm({ categories }) {
   }, null);
 
   return (
-    <div style={{ maxWidth: 680 }}>
+    <div className="member-form-panel">
       {state?.error && (
         <div className="form-alert form-alert-error" role="alert">
           {state.error}
         </div>
       )}
 
-      <form action={formAction} className="dashboard-form">
+      <form action={formAction} className="dashboard-form member-profile-form">
         <div className="form-group">
-          <label className="form-label">Artwork Image *</label>
+          <label className="form-label">Artwork image *</label>
           <ImageUpload
             currentImage={imageUrl}
             onUpload={(url) => setImageUrl(url)}
@@ -36,34 +36,36 @@ export default function CreateArtworkForm({ categories }) {
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="title" className="form-label">Artwork Title *</label>
-          <input
-            id="title"
-            name="title"
-            type="text"
-            className="form-input"
-            placeholder="e.g. Echoes of Neo-Kyoto"
-            required
-            minLength={3}
-            maxLength={200}
-          />
+        <div className="dashboard-form-grid-2">
+          <div className="form-group">
+            <label htmlFor="title" className="form-label">Artwork title *</label>
+            <input
+              id="title"
+              name="title"
+              type="text"
+              className="form-input"
+              placeholder="e.g. Echoes of Neo-Kyoto"
+              required
+              minLength={3}
+              maxLength={200}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="category_id" className="form-label">Category *</label>
+            <select id="category_id" name="category_id" className="form-select" required>
+              <option value="">Select a category...</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="form-group">
-          <label htmlFor="category_id" className="form-label">Category *</label>
-          <select id="category_id" name="category_id" className="form-select" required>
-            <option value="">Select a category...</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="description" className="form-label">Artwork Description *</label>
+          <label htmlFor="description" className="form-label">Artwork description *</label>
           <textarea
             id="description"
             name="description"
@@ -76,7 +78,7 @@ export default function CreateArtworkForm({ categories }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="tags" className="form-label">Tags (Comma-separated) *</label>
+          <label htmlFor="tags" className="form-label">Tags (comma-separated) *</label>
           <input
             id="tags"
             name="tags"
@@ -85,19 +87,20 @@ export default function CreateArtworkForm({ categories }) {
             placeholder="cyberpunk, 3d, blender, octane"
             required
           />
-          <span style={{ fontSize: '0.74rem', color: 'var(--surface)', fontFamily: 'var(--font-mono)' }}>
+          <span className="member-field-hint">
             Example: digital art, surrealism, concept art
           </span>
         </div>
 
-        <button
-          type="submit"
-          className="btn-primary"
-          disabled={isPending || !imageUrl}
-          style={{ width: '100%', marginTop: 16 }}
-        >
-          {isPending ? 'Publishing Artwork...' : 'Publish Artwork'}
-        </button>
+        <div className="dashboard-form-actions">
+          <button
+            type="submit"
+            className="btn-primary dashboard-submit-btn"
+            disabled={isPending || !imageUrl}
+          >
+            {isPending ? 'Publishing artwork...' : 'Publish artwork'}
+          </button>
+        </div>
       </form>
     </div>
   );

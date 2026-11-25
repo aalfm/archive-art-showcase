@@ -23,19 +23,27 @@ export default function ProfileForm({ user }) {
   }, null);
 
   return (
-    <div className="dashboard-form-panel">
+    <div className="member-form-panel member-profile-panel">
       <div className="profile-identity-preview">
-        <UserAvatar src={profileImage} role={user.role} name={user.name} size={64} />
-        <div className="profile-identity-meta">
-          <span className="profile-identity-name">{user.name}</span>
-          <span className="profile-identity-hint">
-            {!allowProfilePhoto
-              ? 'Default role avatar is used for this account'
-              : profileImage
-                ? 'Current profile photo preview'
-                : 'No profile photo uploaded — default icon is shown'}
-          </span>
+        <div className="profile-identity-lead">
+          <UserAvatar src={profileImage} role={user.role} name={user.name} size={56} />
+          <div className="profile-identity-meta">
+            <span className="profile-identity-name">{user.name}</span>
+            <span className="profile-identity-hint">
+              {!allowProfilePhoto
+                ? 'Default role avatar is used for this account'
+                : profileImage
+                  ? 'Current profile photo preview'
+                  : 'No profile photo uploaded — default icon is shown'}
+            </span>
+          </div>
         </div>
+        {user.email && (
+          <div className="profile-identity-aside">
+            <span className="profile-identity-email">{user.email}</span>
+            <span className="badge badge-role-member">Member</span>
+          </div>
+        )}
       </div>
 
       {state?.error && (
@@ -49,10 +57,10 @@ export default function ProfileForm({ user }) {
         </div>
       )}
 
-      <form action={formAction} className="dashboard-form">
+      <form action={formAction} className="dashboard-form member-profile-form">
         {allowProfilePhoto && (
-          <div className="form-group">
-            <label className="form-label">Profile Photo</label>
+          <div className="form-group member-profile-photo-group">
+            <label className="form-label">Profile photo</label>
             <ImageUpload
               currentImage={profileImage}
               onUpload={(url) => setProfileImage(url)}
@@ -64,7 +72,7 @@ export default function ProfileForm({ user }) {
 
         <div className="dashboard-form-grid-2">
           <div className="form-group">
-            <label htmlFor="name" className="form-label">Display Name *</label>
+            <label htmlFor="name" className="form-label">Display name *</label>
             <input
               id="name"
               name="name"
@@ -77,7 +85,7 @@ export default function ProfileForm({ user }) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="external_link" className="form-label">Portfolio / Website Link</label>
+            <label htmlFor="external_link" className="form-label">Portfolio / website link</label>
             <input
               id="external_link"
               name="external_link"
@@ -107,7 +115,7 @@ export default function ProfileForm({ user }) {
             className="btn-primary dashboard-submit-btn"
             disabled={isPending}
           >
-            {isPending ? 'Saving...' : 'Save Changes'}
+            {isPending ? 'Saving...' : 'Save changes'}
           </button>
         </div>
       </form>

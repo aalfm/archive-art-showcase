@@ -17,7 +17,7 @@ export default function EditArtworkForm({ artwork, categories }) {
   }, null);
 
   return (
-    <div style={{ maxWidth: 680 }}>
+    <div className="member-form-panel">
       {state?.error && (
         <div className="form-alert form-alert-error" role="alert">
           {state.error}
@@ -26,45 +26,47 @@ export default function EditArtworkForm({ artwork, categories }) {
 
       {/* Non-editable image display as per PRD */}
       <div className="form-group">
-        <label className="form-label">Artwork Image (Cannot Be Changed)</label>
-        <div style={{ position: 'relative', width: '100%', height: 240, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--bg-secondary)' }}>
-          <Image src={artwork.image_url} alt={artwork.title} fill style={{ objectFit: 'cover' }} sizes="680px" />
+        <label className="form-label">Artwork image (cannot be changed)</label>
+        <div className="member-readonly-artwork-preview">
+          <Image src={artwork.image_url} alt={artwork.title} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 100vw, 960px" />
         </div>
-        <span style={{ fontSize: '0.74rem', color: 'var(--surface)', fontFamily: 'var(--font-mono)' }}>
-          ARCHIVE Policy: Original artwork files cannot be replaced after publication.
+        <span className="member-field-hint">
+          ARCHIVE policy: Original artwork files cannot be replaced after publication.
         </span>
       </div>
 
-      <form action={formAction} className="dashboard-form">
+      <form action={formAction} className="dashboard-form member-profile-form">
         <input type="hidden" name="artwork_id" value={artwork.id} />
 
-        <div className="form-group">
-          <label htmlFor="title" className="form-label">Artwork Title *</label>
-          <input
-            id="title"
-            name="title"
-            type="text"
-            className="form-input"
-            defaultValue={artwork.title}
-            required
-            minLength={3}
-            maxLength={200}
-          />
+        <div className="dashboard-form-grid-2">
+          <div className="form-group">
+            <label htmlFor="title" className="form-label">Artwork title *</label>
+            <input
+              id="title"
+              name="title"
+              type="text"
+              className="form-input"
+              defaultValue={artwork.title}
+              required
+              minLength={3}
+              maxLength={200}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="category_id" className="form-label">Category *</label>
+            <select id="category_id" name="category_id" className="form-select" defaultValue={artwork.category_id} required>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="form-group">
-          <label htmlFor="category_id" className="form-label">Category *</label>
-          <select id="category_id" name="category_id" className="form-select" defaultValue={artwork.category_id} required>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="description" className="form-label">Artwork Description *</label>
+          <label htmlFor="description" className="form-label">Artwork description *</label>
           <textarea
             id="description"
             name="description"
@@ -77,7 +79,7 @@ export default function EditArtworkForm({ artwork, categories }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="tags" className="form-label">Tags (Comma-separated) *</label>
+          <label htmlFor="tags" className="form-label">Tags (comma-separated) *</label>
           <input
             id="tags"
             name="tags"
@@ -88,14 +90,13 @@ export default function EditArtworkForm({ artwork, categories }) {
           />
         </div>
 
-        <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+        <div className="dashboard-form-actions">
           <button
             type="submit"
-            className="btn-primary"
+            className="btn-primary dashboard-submit-btn"
             disabled={isPending}
-            style={{ flex: 1 }}
           >
-            {isPending ? 'Saving Changes...' : 'Save Changes'}
+            {isPending ? 'Saving changes...' : 'Save changes'}
           </button>
           <button
             type="button"

@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
 import RemoveFavoriteButton from './RemoveFavoriteButton';
 import { Heart } from '@/components/ui/Icons';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,13 +32,19 @@ export default async function MemberFavoritesPage() {
 
   return (
     <div>
+      <Breadcrumb
+        items={[
+          { label: 'Dashboard', href: '/dashboard/member' },
+          { label: 'Favorites' },
+        ]}
+      />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">My Favorites</h1>
+          <h1 className="dashboard-title">My favorites</h1>
           <p className="dashboard-subtitle">Artworks you have saved to your collection ({favorites.length} total).</p>
         </div>
         <Link href="/explore" className="btn-secondary">
-          Explore More
+          Explore more
         </Link>
       </div>
 
@@ -47,7 +54,7 @@ export default async function MemberFavoritesPage() {
             You haven&apos;t saved any favorite artworks yet.
           </p>
           <Link href="/explore" className="btn-primary">
-            Explore Artworks
+            Explore artworks
           </Link>
         </div>
       ) : (

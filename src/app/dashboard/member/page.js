@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
+import { formatEditorialTitle } from '@/lib/utils';
 import DashboardStatCard from '@/components/ui/DashboardStatCard';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,13 +89,13 @@ export default async function MemberOverviewPage() {
       const statusText = sub.winner_rank
         ? `Ranked #${sub.winner_rank}`
         : sub.challenge_ended
-          ? 'Judging Closed'
-          : 'Under Review';
+          ? 'Judging closed'
+          : 'Under review';
 
       return {
         key: `sub-${sub.id}`,
-        kicker: 'Challenge Entry',
-        title: sub.challenge_title,
+        kicker: 'Challenge entry',
+        title: formatEditorialTitle(sub.challenge_title),
         meta: `${sub.artwork_title} · ${statusText} · ${formatShortDate(sub.created_at)}`,
         href: '/dashboard/member/submissions',
         actionLabel: 'Status',
@@ -102,8 +104,8 @@ export default async function MemberOverviewPage() {
     }),
     ...recentArtworksRes.rows.map((art) => ({
       key: `art-${art.id}`,
-      kicker: art.status === 'active' ? 'Published Work' : 'Taken Down',
-      title: art.title,
+      kicker: art.status === 'active' ? 'Published work' : 'Taken down',
+      title: formatEditorialTitle(art.title),
       meta: `${art.category_name} · ${art.like_count} ${art.like_count === 1 ? 'like' : 'likes'} · ${formatShortDate(art.created_at)}`,
       href: `/dashboard/member/artworks/${art.id}/edit`,
       actionLabel: 'Manage',
@@ -117,37 +119,43 @@ export default async function MemberOverviewPage() {
 
   return (
     <div className="dash-overview">
+      <Breadcrumb
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Overview' },
+        ]}
+      />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Member Overview</h1>
+          <h1 className="dashboard-title">Member overview</h1>
           <p className="dashboard-subtitle">
             Welcome back, {user.name}. Here is a brief summary of your works and challenges.
           </p>
         </div>
         <Link href="/dashboard/member/artworks/create" className="btn-primary">
-          + Upload Artwork
+          + Upload artwork
         </Link>
       </div>
 
       {/* Primary Metrics (3 Focused Cards) */}
       <div className="dash-kpi-grid">
         <DashboardStatCard
-          label="Published Artworks"
+          label="Published artworks"
           value={stats.published_artworks}
           href="/dashboard/member/artworks"
-          linkLabel="My Artworks →"
+          linkLabel="My artworks →"
         />
         <DashboardStatCard
-          label="Active Challenges"
+          label="Active challenges"
           value={stats.active_challenges}
           href="/dashboard/member/submissions"
-          linkLabel="My Submissions →"
+          linkLabel="My submissions →"
         />
         <DashboardStatCard
-          label="Under Review"
+          label="Under review"
           value={underReviewTotal}
           href={underReviewHref}
-          linkLabel="View Status →"
+          linkLabel="View status →"
         />
       </div>
 
@@ -155,7 +163,7 @@ export default async function MemberOverviewPage() {
       {hasModerationNotice && (
         <div className="dash-notice" role="status">
           <div className="dash-notice-body">
-            <span className="dash-notice-label">Artwork Status Notice</span>
+            <span className="dash-notice-label">Artwork status notice</span>
             <p className="dash-notice-text">
               {stats.artworks_in_review > 0
                 ? `${stats.artworks_in_review} ${stats.artworks_in_review === 1 ? 'artwork is' : 'artworks are'} currently under moderation review.`
@@ -167,7 +175,7 @@ export default async function MemberOverviewPage() {
             </p>
           </div>
           <Link href="/dashboard/member/artworks" className="dash-row-link">
-            Review Artworks →
+            Review artworks →
           </Link>
         </div>
       )}
@@ -176,13 +184,13 @@ export default async function MemberOverviewPage() {
       <section className="dash-section">
         <div className="dash-section-head">
           <div>
-            <h2 className="dash-section-title">Recent Activity</h2>
+            <h2 className="dash-section-title">Recent activity</h2>
             <p className="dash-section-desc">
               Your latest published works and active challenge entries.
             </p>
           </div>
           <Link href="/dashboard/member/artworks" className="dash-inline-link">
-            All Artworks →
+            All artworks →
           </Link>
         </div>
 
@@ -190,7 +198,7 @@ export default async function MemberOverviewPage() {
           <div className="dash-empty dash-empty--with-cta">
             <p>You haven&apos;t published an artwork or joined a challenge yet.</p>
             <Link href="/dashboard/member/artworks/create" className="btn-primary">
-              Upload Your First Artwork
+              Upload your first artwork
             </Link>
           </div>
         ) : (
@@ -213,31 +221,6 @@ export default async function MemberOverviewPage() {
             </ul>
           </div>
         )}
-      </section>
-
-      {/* Quick Navigation to Full Sections */}
-      <section className="dash-section">
-        <div className="dash-section-head">
-          <h2 className="dash-section-title">Manage Workspace</h2>
-        </div>
-        <div className="dash-quick-links">
-          <Link href="/dashboard/member/artworks" className="dash-quick-link">
-            <span>My Artworks</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-          <Link href="/dashboard/member/submissions" className="dash-quick-link">
-            <span>Challenge Submissions</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-          <Link href="/dashboard/member/favorites" className="dash-quick-link">
-            <span>Saved Favorites</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-          <Link href="/dashboard/member/profile" className="dash-quick-link">
-            <span>Profile &amp; Settings</span>
-            <span className="dash-quick-arrow" aria-hidden="true">→</span>
-          </Link>
-        </div>
       </section>
     </div>
   );
