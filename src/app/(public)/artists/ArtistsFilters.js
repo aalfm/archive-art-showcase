@@ -24,7 +24,7 @@ function ArtistsFiltersInner({ categories = [] }) {
   }
 
   const categoryOptions = [
-    { value: '', label: 'All Specializations' },
+    { value: '', label: 'All specializations' },
     ...categories.map((cat) => ({ value: String(cat.id), label: cat.name })),
   ];
 
@@ -129,7 +129,7 @@ function ArtistsFiltersInner({ categories = [] }) {
             ariaLabel="Filter by specialization"
             value={paramCategory}
             options={categoryOptions}
-            placeholder="All Specializations"
+            placeholder="All specializations"
             onSelect={(val) => {
               if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
               applyFilters(search, val);

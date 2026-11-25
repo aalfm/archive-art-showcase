@@ -15,11 +15,11 @@ function LoginForm() {
       <div className="auth-container">
         <div className="auth-brand">
           <h1 className="auth-title">ARCHIVE</h1>
-          <p className="auth-subtitle">Digital Art Showcase Platform</p>
+          <p className="auth-subtitle">Digital art showcase platform</p>
         </div>
 
         <div className="auth-card">
-          <h2 className="auth-heading">Welcome Back</h2>
+          <h2 className="auth-heading">Welcome back</h2>
           <p className="auth-desc">Sign in to your ARCHIVE account</p>
 
           {state?.error && (
@@ -67,7 +67,7 @@ function LoginForm() {
             <button
               type="submit"
               className="btn-primary"
-              style={{ width: '100%', padding: '12px', fontSize: '0.9rem', letterSpacing: '0.08em' }}
+              style={{ width: '100%', padding: '12px', fontSize: '0.9rem' }}
               disabled={isPending}
               id="btn-login-submit"
             >
@@ -76,7 +76,7 @@ function LoginForm() {
                   <span className="spinner-sm"></span>
                   Verifying...
                 </span>
-              ) : 'SIGN IN'}
+              ) : 'Sign in'}
             </button>
           </form>
 
@@ -88,10 +88,10 @@ function LoginForm() {
             <p>Don&apos;t have an account?</p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
               <Link href="/register?role=member" className="btn-secondary" style={{ flex: 1 }}>
-                Register as Member
+                Register as member
               </Link>
               <Link href="/register?role=curator" className="btn-secondary" style={{ flex: 1 }}>
-                Register as Curator
+                Register as curator
               </Link>
             </div>
           </div>

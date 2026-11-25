@@ -45,7 +45,7 @@ function RegisterForm() {
         </div>
 
         <div className="auth-card">
-          <h2 className="auth-heading">Create Account</h2>
+          <h2 className="auth-heading">Create account</h2>
 
           {/* Role Selector */}
           <div className="role-selector" role="group" aria-label="Choose account type">
@@ -112,7 +112,7 @@ function RegisterForm() {
             <input type="hidden" name="role" value={selectedRole} />
 
             <div className="form-group">
-              <label htmlFor="register-name" className="form-label">Full Name</label>
+              <label htmlFor="register-name" className="form-label">Full name</label>
               <input
                 type="text"
                 id="register-name"
@@ -127,7 +127,7 @@ function RegisterForm() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="register-email" className="form-label">Email</label>
+              <label htmlFor="register-email" className="form-label">Email address</label>
               <input
                 type="email"
                 id="register-email"
@@ -171,7 +171,7 @@ function RegisterForm() {
                   </div>
 
                   <label htmlFor="register-portfolio" className="form-label">
-                    Curatorial Portfolio Link (Optional)
+                    Curatorial portfolio link (optional)
                   </label>
                   <input
                     type="text"
@@ -198,7 +198,7 @@ function RegisterForm() {
 
                 <div className="form-group">
                   <label htmlFor="register-bio" className="form-label">
-                    Curatorial Background (Optional)
+                    Curatorial background (optional)
                   </label>
                   <textarea
                     id="register-bio"
@@ -215,7 +215,7 @@ function RegisterForm() {
             <button
               type="submit"
               className="btn-primary"
-              style={{ width: '100%', padding: '12px', fontSize: '0.9rem', letterSpacing: '0.08em' }}
+              style={{ width: '100%', padding: '12px', fontSize: '0.9rem' }}
               disabled={isPending}
               id="btn-register-submit"
             >
@@ -224,7 +224,7 @@ function RegisterForm() {
                   <span className="spinner-sm"></span>
                   Registering...
                 </span>
-              ) : `REGISTER AS ${selectedRole.toUpperCase()}`}
+              ) : selectedRole === 'curator' ? 'Register as curator' : 'Register as member'}
             </button>
           </form>
 

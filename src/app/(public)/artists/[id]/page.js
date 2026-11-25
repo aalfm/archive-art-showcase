@@ -7,6 +7,7 @@ import { applyAvatarPolicy } from '@/lib/avatar';
 import { toId } from '@/lib/utils';
 import { Heart } from '@/components/ui/Icons';
 import UserAvatar from '@/components/ui/UserAvatar';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -68,14 +69,16 @@ export default async function CreatorProfilePage(props) {
     year: 'numeric',
   });
 
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Artists', href: '/artists' },
+    { label: user.name },
+  ];
+
   if (user.is_active === false) {
     return (
       <div className="creator-profile-page artist-inactive-page">
-        <div className="detail-breadcrumb">
-          <Link href="/artists">Artists</Link>
-          <span>›</span>
-          <span className="detail-breadcrumb-current">{user.name}</span>
-        </div>
+        <Breadcrumb items={breadcrumbItems} className="arthive-breadcrumb--detail" />
 
         <section
           className="artist-inactive-card"
@@ -125,10 +128,10 @@ export default async function CreatorProfilePage(props) {
 
           <div className="artist-inactive-actions">
             <Link href="/explore" className="btn-primary">
-              Explore Artworks
+              Explore artworks
             </Link>
             <Link href="/artists" className="btn-secondary">
-              Back to Artists
+              Back to artists
             </Link>
           </div>
         </section>
@@ -140,6 +143,8 @@ export default async function CreatorProfilePage(props) {
 
   return (
     <div className="creator-profile-page">
+      <Breadcrumb items={breadcrumbItems} className="arthive-breadcrumb--detail" />
+
       {/* Profile Header */}
       <div className="creator-profile-header">
         <div className="creator-profile-avatar-wrap">
@@ -172,7 +177,7 @@ export default async function CreatorProfilePage(props) {
             </div>
             <div className="creator-stat">
               <span className="creator-stat-value">{totalLikes}</span>
-              <span className="creator-stat-label">Total Likes</span>
+              <span className="creator-stat-label">Total likes</span>
             </div>
             <div className="creator-stat">
               <span className="creator-stat-value">{joinDate}</span>
@@ -185,7 +190,7 @@ export default async function CreatorProfilePage(props) {
       {/* Artwork Gallery */}
       <div className="showcase-container creator-profile-gallery">
         <h2 className="showcase-heading creator-profile-gallery-heading">
-          Artwork Gallery
+          Artwork gallery
         </h2>
         {artworks.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px' }}>

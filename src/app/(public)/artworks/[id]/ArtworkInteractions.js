@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toggleLike, toggleFavorite, reportArtwork, addComment, deleteComment } from '@/lib/actions/artwork.actions';
 import FilterDropdown from '@/components/ui/FilterDropdown';
 import UserAvatar from '@/components/ui/UserAvatar';
+import { formatRoleLabel } from '@/lib/utils';
 
 const REPORT_REASON_OPTIONS = [
   { value: 'SARA', label: 'Hate Speech / Discrimination' },
@@ -121,7 +122,7 @@ export default function ArtworkInteractions({
         ) : (
           <div className="comment-guest-notice">
             <p>
-              <a href={loginRedirectUrl} className="comment-guest-link">Sign In</a> to leave a comment.
+              <a href={loginRedirectUrl} className="comment-guest-link">Sign in</a> to leave a comment.
             </p>
           </div>
         )}
@@ -146,7 +147,7 @@ export default function ArtworkInteractions({
                     <div className="comment-author-meta">
                       <span className="comment-author">{comment.user_name || 'User'}</span>
                       {comment.user_role && (
-                        <span className="comment-role-tag">{comment.user_role}</span>
+                        <span className="comment-role-tag">{formatRoleLabel(comment.user_role)}</span>
                       )}
                       <span className="comment-date">
                         {new Date(comment.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -288,11 +289,11 @@ export default function ArtworkInteractions({
           <input type="hidden" name="artwork_id" value={artworkId} />
           <input type="hidden" name="reason" value={reportReason} />
           <div className="form-group">
-            <label htmlFor={`report-reason-${artworkId}`} className="form-label">Report Reason</label>
+            <label htmlFor={`report-reason-${artworkId}`} className="form-label">Report reason</label>
             <FilterDropdown
               id={`report-reason-${artworkId}`}
               className="report-reason-dropdown"
-              ariaLabel="Report Reason"
+              ariaLabel="Report reason"
               value={reportReason}
               options={REPORT_REASON_OPTIONS}
               placeholder="Select a reason..."
@@ -309,7 +310,7 @@ export default function ArtworkInteractions({
           {reportReason === 'Other' && (
             <div className="form-group report-details-group">
               <div className="report-details-label-row">
-                <label htmlFor={`report-details-${artworkId}`} className="form-label">Additional Details</label>
+                <label htmlFor={`report-details-${artworkId}`} className="form-label">Additional details</label>
                 <span className="report-char-counter">
                   {reportDetails.length}/{MAX_REPORT_DETAILS}
                 </span>
@@ -334,7 +335,7 @@ export default function ArtworkInteractions({
           {reportError && <p className="form-error" style={{ marginBottom: 12 }}>{reportError}</p>}
 
           <div style={{ display: 'flex', gap: 8 }}>
-            <button type="submit" className="btn-danger" style={{ flex: 1 }}>Submit Report</button>
+            <button type="submit" className="btn-danger" style={{ flex: 1 }}>Submit report</button>
             <button
               type="button"
               className="btn-secondary"

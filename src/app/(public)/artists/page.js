@@ -4,6 +4,7 @@ import { query } from '@/lib/db';
 import { applyAvatarPolicy } from '@/lib/avatar';
 import PublicPageContainer from '@/components/layout/PublicPageContainer';
 import ArtistDirectoryCard from '@/components/artists/ArtistDirectoryCard';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import ArtistsFilters from './ArtistsFilters';
 
 export const dynamic = 'force-dynamic';
@@ -111,9 +112,23 @@ async function getArtistsDirectoryData(searchParams) {
 export default async function ArtistsPage({ searchParams }) {
   const resolvedParams = await searchParams;
   const { artists, categories, hasFilters, error } = await getArtistsDirectoryData(resolvedParams);
+  const selectedCategory = resolvedParams?.category
+    ? categories.find((c) => String(c.id) === String(resolvedParams.category))
+    : null;
+  const breadcrumbItems = selectedCategory
+    ? [
+        { label: 'Home', href: '/' },
+        { label: 'Artists', href: '/artists' },
+        { label: selectedCategory.name },
+      ]
+    : [
+        { label: 'Home', href: '/' },
+        { label: 'Artists' },
+      ];
 
   return (
     <PublicPageContainer>
+      <Breadcrumb items={breadcrumbItems} className="arthive-breadcrumb--public" />
       <div className="showcase-header">
         <div className="showcase-title-area">
           <span className="editorial-eyebrow">CREATOR DIRECTORY</span>
@@ -129,8 +144,8 @@ export default async function ArtistsPage({ searchParams }) {
       <div className="masonry-grid">
         {error ? (
           <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--ink-primary)' }}>
-              UNABLE TO LOAD ARTISTS
+            <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--ink-primary)' }}>
+              Unable to load artists
             </p>
             <p style={{ marginTop: 8, color: 'var(--ink-secondary)', fontSize: '0.88rem' }}>
               {error}
@@ -138,8 +153,8 @@ export default async function ArtistsPage({ searchParams }) {
           </div>
         ) : artists.length === 0 ? (
           <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1rem', color: 'var(--surface)' }}>
-              {hasFilters ? 'NO MATCHING ARTISTS' : 'NO ARTISTS AVAILABLE'}
+            <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--ink-primary)' }}>
+              {hasFilters ? 'No matching artists' : 'No artists available'}
             </p>
             <p style={{ marginTop: 8, color: 'var(--surface)', fontSize: '0.88rem' }}>
               {hasFilters
@@ -148,7 +163,7 @@ export default async function ArtistsPage({ searchParams }) {
             </p>
             {hasFilters && (
               <Link href="/artists" className="btn-secondary" style={{ marginTop: 18 }}>
-                Reset Filters
+                Reset filters
               </Link>
             )}
           </div>

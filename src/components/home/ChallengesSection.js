@@ -4,6 +4,7 @@ import { useCallback, useMemo, useRef, useState, useSyncExternalStore } from 're
 import Link from 'next/link';
 import DepthCarousel from '@/components/ui/DepthCarousel';
 import { Clock3, Trophy } from '@/components/ui/Icons';
+import { formatEditorialTitle } from '@/lib/utils';
 
 function subscribeViewport(callback) {
   const mobileMq = window.matchMedia('(max-width: 639px)');
@@ -107,13 +108,13 @@ export default function ChallengesSection({ challenges = [], initialNow }) {
         <header className="editorial-section-header">
           <div className="editorial-section-title-group">
             <span className="editorial-eyebrow">OPEN CALLS &amp; COMPETITIONS</span>
-            <h2 className="editorial-section-heading">Active Challenges</h2>
+            <h2 className="editorial-section-heading">Active challenges</h2>
             <p className="editorial-section-subtitle">
               Join curatorial challenges and present spatial concepts to the ARCHIVE community.
             </p>
           </div>
           <Link href="/challenges" className="editorial-header-link">
-            <span>View All Challenges</span>
+            <span>View all challenges</span>
           </Link>
         </header>
 
@@ -215,7 +216,7 @@ export default function ChallengesSection({ challenges = [], initialNow }) {
               </div>
 
               <h3 className="challenges-active-title" id="home-challenge-title">
-                {activeChallenge.title}
+                {formatEditorialTitle(activeChallenge.title)}
               </h3>
 
               {activeChallenge.description && (
@@ -261,7 +262,7 @@ export default function ChallengesSection({ challenges = [], initialNow }) {
                   className="btn-primary challenges-view-btn"
                   id="home-btn-view-challenge"
                 >
-                  <span>View Detail</span>
+                  <span>View detail</span>
                 </Link>
               </div>
             </div>

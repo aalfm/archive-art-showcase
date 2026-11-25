@@ -72,7 +72,7 @@ export default function ArtistDirectoryCard({ artist }) {
           </div>
 
           <span className="artist-dir-cta">
-            <span>View Profile</span>
+            <span>View profile</span>
             <ArrowRight size={14} strokeWidth={1.75} className="artist-dir-cta-arrow" />
           </span>
         </div>

@@ -50,7 +50,7 @@ export default function ArtistProfile({ artist, index = 0, total = 1 }) {
 
           <div className="artist-showcase-links">
             <Link href={`/artists/${artist.id}`} className="editorial-inline-cta">
-              <span>View Artist Page</span>
+              <span>View artist page</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
@@ -78,15 +78,15 @@ export default function ArtistProfile({ artist, index = 0, total = 1 }) {
 
       <div className="artist-showcase-stats">
         <div className="artist-stat-item">
-          <span className="artist-stat-label">Published Works</span>
+          <span className="artist-stat-label">Published works</span>
           <span className="artist-stat-value">{artist.artwork_count ?? 0}</span>
         </div>
         <div className="artist-stat-item">
-          <span className="artist-stat-label">Total Likes</span>
+          <span className="artist-stat-label">Total likes</span>
           <span className="artist-stat-value">{artist.total_likes ?? 0}</span>
         </div>
         <div className="artist-stat-item">
-          <span className="artist-stat-label">Member Since</span>
+          <span className="artist-stat-label">Member since</span>
           <span className="artist-stat-value">{formatJoinDate(artist.created_at)}</span>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { query } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { resolveUserAvatarSrc } from '@/lib/avatar';
 import UserAvatar from '@/components/ui/UserAvatar';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import ArtworkInteractions from './ArtworkInteractions';
 import { toId } from '@/lib/utils';
 
@@ -13,7 +14,7 @@ export const dynamic = 'force-dynamic';
 async function getArtwork(id) {
   const artworkRes = await query(`
     SELECT a.id, a.title, a.description, a.image_url, a.tags, a.like_count, a.status, a.created_at,
-           c.name as category_name,
+           c.id as category_id, c.name as category_name,
            u.id as creator_id, u.name as creator_name, u.bio as creator_bio,
            u.role as creator_role,
            CASE WHEN LOWER(u.role) = 'member' THEN u.profile_image ELSE NULL END as creator_image,
@@ -86,7 +87,10 @@ export async function generateMetadata(props) {
 }
 
 export default async function ArtworkDetailPage(props) {
-  const params = await props.params;
+  const [params, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
   if (!toId(params.id)) notFound();
   const [data, session] = await Promise.all([
     getArtwork(params.id),
@@ -97,6 +101,8 @@ export default async function ArtworkDetailPage(props) {
 
   const { artwork, comments, otherWorks } = data;
   const user = session?.user || null;
+  const rawFrom = Array.isArray(searchParams?.from) ? searchParams.from[0] : searchParams?.from;
+  const isFromMemberSubmissions = user?.role === 'member' && rawFrom === 'submissions';
 
   const isAdmin = user?.role === 'admin';
   let userLiked = false;
@@ -119,15 +125,42 @@ export default async function ArtworkDetailPage(props) {
     day: 'numeric', month: 'long', year: 'numeric'
   });
 
+  const breadcrumbItems = isFromMemberSubmissions
+    ? [
+        { label: 'Dashboard', href: '/dashboard/member' },
+        { label: 'Submissions', href: '/dashboard/member/submissions' },
+        { label: artwork.title },
+      ]
+    : [
+        { label: 'Home', href: '/' },
+        { label: 'Explore', href: '/explore' },
+        ...(artwork.category_name
+          ? [
+              {
+                label: artwork.category_name,
+                href: artwork.category_id ? `/explore?category=${artwork.category_id}` : '/explore',
+              },
+            ]
+          : []),
+        { label: artwork.title },
+      ];
+
   return (
     <div className="artwork-detail-page">
-      <div className="detail-breadcrumb">
-        <Link href="/explore">Explore</Link>
-        <span>›</span>
-        <span>{artwork.category_name}</span>
-        <span>›</span>
-        <span className="detail-breadcrumb-current">{artwork.title}</span>
-      </div>
+      {isFromMemberSubmissions ? (
+        <div className="detail-context-bar">
+          <Breadcrumb items={breadcrumbItems} className="arthive-breadcrumb--detail" />
+          <Link href="/dashboard/member/submissions" className="detail-back-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+            <span>Back to submissions</span>
+          </Link>
+        </div>
+      ) : (
+        <Breadcrumb items={breadcrumbItems} className="arthive-breadcrumb--detail" />
+      )}
 
       <div className="artwork-detail-layout">
         <div className="artwork-detail-image-col">
@@ -135,9 +168,10 @@ export default async function ArtworkDetailPage(props) {
             <Image
               src={artwork.image_url}
               alt={artwork.title}
-              fill
+              width={0}
+              height={0}
               className="artwork-detail-image"
-              sizes="(max-width: 768px) 100vw, 60vw"
+              sizes="(max-width: 900px) 100vw, 58vw"
               priority
             />
           </div>
@@ -185,7 +219,7 @@ export default async function ArtworkDetailPage(props) {
           )}
 
           <div className="artwork-description">
-            <h3>About This Artwork</h3>
+            <h3>About this artwork</h3>
             <p>{artwork.description}</p>
           </div>
 
