@@ -27,7 +27,7 @@ export default async function Footer({ user }) {
                 isAuthenticated ? 'footer-links-list--horizontal' : 'footer-links-list--vertical'
               }`}
             >
-              <li><Link href="/explore">Explore works</Link></li>
+              <li><Link href="/explore">Explore Works</Link></li>
               <li><Link href="/challenges">Challenges</Link></li>
               <li><Link href="/artists">Artists</Link></li>
             </ul>
@@ -37,9 +37,9 @@ export default async function Footer({ user }) {
             <div className="footer-links-col footer-links-col--account">
               <h4 className="footer-links-heading">Account</h4>
               <ul className="footer-links-list footer-links-list--vertical">
-                <li><Link href="/login">Sign in</Link></li>
-                <li><Link href="/register?role=member">Register as member</Link></li>
-                <li><Link href="/register?role=curator">Register as curator</Link></li>
+                <li><Link href="/login">Sign In</Link></li>
+                <li><Link href="/register?role=member">Register as Member</Link></li>
+                <li><Link href="/register?role=curator">Register as Curator</Link></li>
               </ul>
             </div>
           )}

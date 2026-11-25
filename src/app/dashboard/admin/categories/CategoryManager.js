@@ -59,7 +59,7 @@ export default function CategoryManager({ categories }) {
       {/* Create Category Form */}
       <div style={{ maxWidth: 540, background: 'var(--bg-elevated)', border: '1px solid var(--bg-secondary)', borderRadius: 'var(--radius-xs)', padding: 24, marginBottom: 32 }}>
         <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
-          Add category
+          Add Category
         </h2>
 
         {createState?.error && (

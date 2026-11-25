@@ -104,14 +104,14 @@ export default async function ChallengesPage(props) {
       <div className="showcase-header">
         <div className="showcase-title-area">
           <span className="editorial-eyebrow">COMPETITIONS &amp; ARCHIVE</span>
-          <h1 className="showcase-heading">Architecture challenges</h1>
+          <h1 className="showcase-heading">Architecture Challenges</h1>
           <p className="showcase-subtitle">
             Explore active competitions, upcoming open calls, and completed challenge archives with winning works.
           </p>
         </div>
         {session?.user?.role === 'curator' && session.user.curator_status === 'approved' && (
           <Link href="/dashboard/curator/challenges/create" className="btn-primary">
-            + Create challenge
+            + Create Challenge
           </Link>
         )}
       </div>

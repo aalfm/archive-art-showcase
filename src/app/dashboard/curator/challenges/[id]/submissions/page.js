@@ -5,6 +5,7 @@ import { requireRole } from '@/lib/auth';
 import { query } from '@/lib/db';
 import WinnerSelectControl from './WinnerSelectControl';
 import { formatEditorialTitle, toId } from '@/lib/utils';
+import { buildRoleDetailHref } from '@/lib/member-navigation';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 
 export const dynamic = 'force-dynamic';
@@ -110,7 +111,7 @@ export default async function ChallengeSubmissionsPage(props) {
       <Breadcrumb
         items={[
           { label: 'Dashboard', href: '/dashboard/curator' },
-          { label: 'Challenges', href: '/dashboard/curator/challenges' },
+          { label: 'My Challenges', href: '/dashboard/curator/challenges' },
           { label: title, href: `/dashboard/curator/challenges/${challenge.id}` },
           { label: 'Submissions' },
         ]}
@@ -129,10 +130,10 @@ export default async function ChallengeSubmissionsPage(props) {
 
         <div className="admin-detail-header-actions">
           <Link href="/dashboard/curator/challenges" className="btn-secondary">
-            ← Back to challenges
+            ← Back to Challenges
           </Link>
           <Link href={`/dashboard/curator/challenges/${challenge.id}`} className="btn-secondary">
-            View challenge details
+            View Challenge Details
           </Link>
         </div>
       </div>
@@ -157,7 +158,7 @@ export default async function ChallengeSubmissionsPage(props) {
           <div className="dash-section-head">
             <div>
               <h2 id="curator-winners-summary-heading" className="dash-section-title">
-                Published winner placements
+                Published Winner Placements
               </h2>
               <p className="dash-section-desc">
                 Assign or update 1st, 2nd, and 3rd Place below. Changes publish immediately.
@@ -207,7 +208,7 @@ export default async function ChallengeSubmissionsPage(props) {
         <div className="dash-section-head">
           <div>
             <h2 className="dash-section-title">
-              Submitted artworks ({submissions.length})
+              Submitted Artworks ({submissions.length})
             </h2>
             <p className="dash-section-desc">
               Review submitted works and assign placements once the submission period closes.
@@ -233,68 +234,103 @@ export default async function ChallengeSubmissionsPage(props) {
               <thead>
                 <tr>
                   <th>Artwork</th>
-                  <th>Title &amp; description</th>
+                  <th>Title &amp; Description</th>
                   <th>Artist</th>
                   <th>Placement</th>
                   <th>Submitted</th>
-                  <th>Winner selection</th>
+                  <th>Winner Selection</th>
                 </tr>
               </thead>
               <tbody>
-                {submissions.map((sub) => (
-                  <tr key={sub.submission_id}>
-                    <td data-label="Artwork" data-cell="thumb">
-                      <div className="table-thumb-square">
-                        <Image
-                          src={sub.image_url}
-                          alt={sub.artwork_title}
-                          fill
-                          style={{ objectFit: 'cover' }}
-                          sizes="64px"
+                {submissions.map((sub) => {
+                  const returnPath = `/dashboard/curator/challenges/${challenge.id}/submissions`;
+                  const artworkHref =
+                    sub.artwork_status === 'active'
+                      ? buildRoleDetailHref(`/artworks/${sub.artwork_id}`, 'curator-challenges', returnPath)
+                      : null;
+                  const artistHref = buildRoleDetailHref(`/artists/${sub.artist_id}`, 'curator-challenges', returnPath);
+
+                  return (
+                    <tr key={sub.submission_id}>
+                      <td data-label="Artwork" data-cell="thumb">
+                        {artworkHref ? (
+                          <Link
+                            href={artworkHref}
+                            className="table-thumb-link"
+                            aria-label={`View artwork: ${sub.artwork_title}`}
+                            title={sub.artwork_title}
+                          >
+                            <div className="table-thumb-square">
+                              <Image
+                                src={sub.image_url}
+                                alt={sub.artwork_title}
+                                fill
+                                className="table-thumb-img"
+                                style={{ objectFit: 'cover' }}
+                                sizes="64px"
+                              />
+                            </div>
+                          </Link>
+                        ) : (
+                          <div className="table-thumb-square">
+                            <Image
+                              src={sub.image_url}
+                              alt={sub.artwork_title}
+                              fill
+                              style={{ objectFit: 'cover' }}
+                              sizes="64px"
+                            />
+                          </div>
+                        )}
+                      </td>
+                      <td data-label="Title & description" data-cell="primary">
+                        {artworkHref ? (
+                          <Link href={artworkHref} className="dashboard-table-link">
+                            {sub.artwork_title}
+                          </Link>
+                        ) : (
+                          <span className="table-cell-title">
+                            {sub.artwork_title}
+                          </span>
+                        )}
+                        {sub.description && (
+                          <p className="table-cell-desc">
+                            {sub.description}
+                          </p>
+                        )}
+                      </td>
+                      <td data-label="Artist">
+                        <Link href={artistHref} className="dashboard-table-link">
+                          {sub.artist_name}
+                        </Link>
+                        <div className="table-cell-submeta">{sub.artist_email}</div>
+                      </td>
+                      <td data-label="Placement">
+                        {sub.winner_rank ? (
+                          <span className="badge badge-approved">
+                            {RANK_LABELS[sub.winner_rank] || `Rank #${sub.winner_rank}`}
+                          </span>
+                        ) : (
+                          <span className="table-cell-muted">Participant</span>
+                        )}
+                      </td>
+                      <td data-label="Submitted" className="table-cell-meta">
+                        {new Date(sub.created_at).toLocaleDateString('en-US')}
+                      </td>
+                      <td data-label="Winner selection" data-cell="actions">
+                        <WinnerSelectControl
+                          key={`${sub.submission_id}-${sub.winner_rank || 'none'}-${sub.winner_note || ''}`}
+                          challengeId={challenge.id}
+                          submissionId={sub.submission_id}
+                          currentRank={sub.winner_rank}
+                          currentNote={sub.winner_note}
+                          hasEnded={hasEnded}
+                          artworkStatus={sub.artwork_status}
                         />
-                      </div>
-                    </td>
-                    <td data-label="Title & description" data-cell="primary">
-                      <span className="table-cell-title">
-                        {sub.artwork_title}
-                      </span>
-                      {sub.description && (
-                        <p className="table-cell-desc">
-                          {sub.description}
-                        </p>
-                      )}
-                    </td>
-                    <td data-label="Artist">
-                      <span className="dashboard-user-cell-name">
-                        {sub.artist_name}
-                      </span>
-                      <div className="table-cell-submeta">{sub.artist_email}</div>
-                    </td>
-                    <td data-label="Placement">
-                      {sub.winner_rank ? (
-                        <span className="badge badge-approved">
-                          {RANK_LABELS[sub.winner_rank] || `Rank #${sub.winner_rank}`}
-                        </span>
-                      ) : (
-                        <span className="table-cell-muted">Participant</span>
-                      )}
-                    </td>
-                    <td data-label="Submitted" className="table-cell-meta">
-                      {new Date(sub.created_at).toLocaleDateString('en-US')}
-                    </td>
-                    <td data-label="Winner selection" data-cell="actions">
-                      <WinnerSelectControl
-                        key={`${sub.submission_id}-${sub.winner_rank || 'none'}-${sub.winner_note || ''}`}
-                        challengeId={challenge.id}
-                        submissionId={sub.submission_id}
-                        currentRank={sub.winner_rank}
-                        currentNote={sub.winner_note}
-                        hasEnded={hasEnded}
-                        artworkStatus={sub.artwork_status}
-                      />
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -28,7 +28,7 @@ export default function SettingsForm() {
 
       <form ref={formRef} action={formAction} className="dashboard-form member-profile-form">
         <div className="form-group">
-          <label htmlFor="current_password" className="form-label">Current password *</label>
+          <label htmlFor="current_password" className="form-label">Current Password *</label>
           <input
             id="current_password"
             name="current_password"
@@ -40,7 +40,7 @@ export default function SettingsForm() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="new_password" className="form-label">New password *</label>
+          <label htmlFor="new_password" className="form-label">New Password *</label>
           <input
             id="new_password"
             name="new_password"
@@ -51,12 +51,12 @@ export default function SettingsForm() {
             autoComplete="new-password"
           />
           <span className="member-field-hint">
-            Minimum 8 characters
+            Minimum 8 characters.
           </span>
         </div>
 
         <div className="form-group">
-          <label htmlFor="confirm_password" className="form-label">Confirm new password *</label>
+          <label htmlFor="confirm_password" className="form-label">Confirm New Password *</label>
           <input
             id="confirm_password"
             name="confirm_password"
@@ -74,7 +74,7 @@ export default function SettingsForm() {
             className="btn-primary dashboard-submit-btn"
             disabled={isPending}
           >
-            {isPending ? 'Updating password...' : 'Change password'}
+            {isPending ? 'Updating Password...' : 'Change Password'}
           </button>
         </div>
       </form>

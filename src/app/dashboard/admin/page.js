@@ -84,7 +84,7 @@ export default async function AdminOverviewPage() {
       <Breadcrumb items={[{ label: 'Dashboard' }]} />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Admin overview</h1>
+          <h1 className="dashboard-title">Admin Overview</h1>
           <p className="dashboard-subtitle">
             Platform summary and items requiring administrative review.
           </p>
@@ -94,22 +94,22 @@ export default async function AdminOverviewPage() {
       {/* Primary Metrics (3 Focused Cards) */}
       <div className="dash-kpi-grid">
         <DashboardStatCard
-          label="Total users"
+          label="Total Users"
           value={stats.totalUsers}
           href="/dashboard/admin/users"
-          linkLabel="Manage users →"
+          linkLabel="Manage Users →"
         />
         <DashboardStatCard
-          label="Pending moderation"
+          label="Pending Moderation"
           value={stats.pendingReports}
           href="/dashboard/admin/reports"
-          linkLabel="Review reports →"
+          linkLabel="Review Reports →"
         />
         <DashboardStatCard
-          label="Pending curators"
+          label="Pending Curators"
           value={pendingCuratorCount}
           href="/dashboard/admin/curators"
-          linkLabel="Verify curators →"
+          linkLabel="Verify Curators →"
         />
       </div>
 
@@ -117,13 +117,13 @@ export default async function AdminOverviewPage() {
       <section className="dash-section">
         <div className="dash-section-head">
           <div>
-            <h2 className="dash-section-title">Needs attention</h2>
+            <h2 className="dash-section-title">Needs Attention</h2>
             <p className="dash-section-desc">
               Recent moderation reports and curator verification requests.
             </p>
           </div>
           <Link href="/dashboard/admin/reports" className="dash-inline-link">
-            Moderation queue →
+            Moderation Queue →
           </Link>
         </div>
 
@@ -158,19 +158,19 @@ export default async function AdminOverviewPage() {
         </div>
         <div className="dash-quick-links">
           <Link href="/dashboard/admin/users" className="dash-quick-link">
-            <span>User management</span>
+            <span>User Management</span>
             <span className="dash-quick-arrow" aria-hidden="true">→</span>
           </Link>
           <Link href="/dashboard/admin/curators" className="dash-quick-link">
-            <span>Curator verification</span>
+            <span>Curator Verification</span>
             <span className="dash-quick-arrow" aria-hidden="true">→</span>
           </Link>
           <Link href="/dashboard/admin/challenges" className="dash-quick-link">
-            <span>Challenges &amp; winners</span>
+            <span>Challenges &amp; Winners</span>
             <span className="dash-quick-arrow" aria-hidden="true">→</span>
           </Link>
           <Link href="/dashboard/admin/reports" className="dash-quick-link">
-            <span>Content moderation</span>
+            <span>Content Moderation</span>
             <span className="dash-quick-arrow" aria-hidden="true">→</span>
           </Link>
           <Link href="/dashboard/admin/categories" className="dash-quick-link">

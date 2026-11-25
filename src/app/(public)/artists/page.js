@@ -163,7 +163,7 @@ export default async function ArtistsPage({ searchParams }) {
             </p>
             {hasFilters && (
               <Link href="/artists" className="btn-secondary" style={{ marginTop: 18 }}>
-                Reset filters
+                Reset Filters
               </Link>
             )}
           </div>

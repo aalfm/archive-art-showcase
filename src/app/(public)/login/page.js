@@ -19,8 +19,8 @@ function LoginForm() {
         </div>
 
         <div className="auth-card">
-          <h2 className="auth-heading">Welcome back</h2>
-          <p className="auth-desc">Sign in to your ARCHIVE account</p>
+          <h2 className="auth-heading">Welcome Back</h2>
+          <p className="auth-desc">Sign in to your ARCHIVE account.</p>
 
           {state?.error && (
             <div className="form-alert form-alert-error" role="alert">
@@ -76,7 +76,7 @@ function LoginForm() {
                   <span className="spinner-sm"></span>
                   Verifying...
                 </span>
-              ) : 'Sign in'}
+              ) : 'Sign In'}
             </button>
           </form>
 
@@ -88,21 +88,12 @@ function LoginForm() {
             <p>Don&apos;t have an account?</p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
               <Link href="/register?role=member" className="btn-secondary" style={{ flex: 1 }}>
-                Register as member
+                Register as Member
               </Link>
               <Link href="/register?role=curator" className="btn-secondary" style={{ flex: 1 }}>
-                Register as curator
+                Register as Curator
               </Link>
             </div>
-          </div>
-
-          {/* Demo credentials hint */}
-          <div className="auth-demo-hint">
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--surface)', textAlign: 'center', marginTop: 20, lineHeight: 1.8 }}>
-              Demo: admin@arthive.com / Admin@123<br/>
-              kurator@arthive.com / Curator@123<br/>
-              member@arthive.com / Member@123
-            </p>
           </div>
         </div>
       </div>

@@ -108,13 +108,13 @@ export default function ChallengesSection({ challenges = [], initialNow }) {
         <header className="editorial-section-header">
           <div className="editorial-section-title-group">
             <span className="editorial-eyebrow">OPEN CALLS &amp; COMPETITIONS</span>
-            <h2 className="editorial-section-heading">Active challenges</h2>
+            <h2 className="editorial-section-heading">Active Challenges</h2>
             <p className="editorial-section-subtitle">
               Join curatorial challenges and present spatial concepts to the ARCHIVE community.
             </p>
           </div>
           <Link href="/challenges" className="editorial-header-link">
-            <span>View all challenges</span>
+            <span>View All Challenges</span>
           </Link>
         </header>
 
@@ -262,7 +262,7 @@ export default function ChallengesSection({ challenges = [], initialNow }) {
                   className="btn-primary challenges-view-btn"
                   id="home-btn-view-challenge"
                 >
-                  <span>View detail</span>
+                  <span>View Detail</span>
                 </Link>
               </div>
             </div>

@@ -65,38 +65,43 @@ export default async function CuratorOverviewPage() {
 
   return (
     <div className="dash-overview">
-      <Breadcrumb items={[{ label: 'Dashboard' }]} />
+      <Breadcrumb
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Overview' },
+        ]}
+      />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Curator overview</h1>
+          <h1 className="dashboard-title">Curator Overview</h1>
           <p className="dashboard-subtitle">
-            Summary of your challenges and submissions awaiting review.
+            Welcome back, {user.name}. Here is a brief summary of your challenges and submissions awaiting review.
           </p>
         </div>
         <Link href="/dashboard/curator/challenges/create" className="btn-primary">
-          + Create challenge
+          + Create Challenge
         </Link>
       </div>
 
       {/* Primary Metrics (3 Focused Cards) */}
       <div className="dash-kpi-grid">
         <DashboardStatCard
-          label="Managed challenges"
+          label="Managed Challenges"
           value={stats.total_challenges}
           href="/dashboard/curator/challenges"
-          linkLabel="Manage challenges →"
+          linkLabel="My Challenges →"
         />
         <DashboardStatCard
-          label="Active challenges"
+          label="Active Challenges"
           value={stats.active_challenges}
-          href="/dashboard/curator/challenges"
-          linkLabel="View active →"
+          href="/dashboard/curator/challenges?status=active"
+          linkLabel="View Active →"
         />
         <DashboardStatCard
-          label="Submissions to review"
+          label="Submissions to Review"
           value={stats.pending_review_submissions}
           href="/dashboard/curator/challenges"
-          linkLabel="Review entries →"
+          linkLabel="Review Entries →"
         />
       </div>
 
@@ -104,13 +109,13 @@ export default async function CuratorOverviewPage() {
       <section className="dash-section">
         <div className="dash-section-head">
           <div>
-            <h2 className="dash-section-title">Recent challenge activity</h2>
+            <h2 className="dash-section-title">Recent Challenge Activity</h2>
             <p className="dash-section-desc">
               Latest programs under your curation. Open full management to edit or judge entries.
             </p>
           </div>
           <Link href="/dashboard/curator/challenges" className="dash-inline-link">
-            Manage all →
+            Manage All →
           </Link>
         </div>
 
@@ -118,7 +123,7 @@ export default async function CuratorOverviewPage() {
           <div className="dash-empty dash-empty--with-cta">
             <p>You haven&apos;t created any challenges yet.</p>
             <Link href="/dashboard/curator/challenges/create" className="btn-primary">
-              Create your first challenge
+              Create Your First Challenge
             </Link>
           </div>
         ) : (

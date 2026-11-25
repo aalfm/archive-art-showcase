@@ -66,7 +66,7 @@ export default async function AdminUsersPage({ searchParams }) {
       <Breadcrumb items={breadcrumbItems} />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">User management</h1>
+          <h1 className="dashboard-title">User Management</h1>
           <p className="dashboard-subtitle">Manage member accounts, curators, and access roles ({users.length} users).</p>
         </div>
       </div>
@@ -89,12 +89,12 @@ export default async function AdminUsersPage({ searchParams }) {
           </colgroup>
           <thead>
             <tr>
-              <th>User name</th>
+              <th>User Name</th>
               <th>Email</th>
               <th>Role</th>
-              <th>Account status</th>
-              <th>Curator status</th>
-              <th>Active artworks</th>
+              <th>Account Status</th>
+              <th>Curator Status</th>
+              <th>Active Artworks</th>
               <th>Joined</th>
               <th>Actions</th>
             </tr>
@@ -175,7 +175,7 @@ export default async function AdminUsersPage({ searchParams }) {
                             className="btn-secondary table-action-btn"
                             id={`btn-view-member-${u.id}`}
                           >
-                            View details
+                            View Details
                           </Link>
                         )}
                         <UserStatusButton

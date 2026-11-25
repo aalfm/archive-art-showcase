@@ -43,7 +43,7 @@ export default async function EditArtworkPage(props) {
       />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Edit artwork</h1>
+          <h1 className="dashboard-title">Edit Artwork</h1>
           <p className="dashboard-subtitle">Update metadata details for &ldquo;{artwork.title}&rdquo;.</p>
         </div>
       </div>

@@ -115,7 +115,7 @@ export default async function CuratorChallengeDetailPage(props) {
       <Breadcrumb
         items={[
           { label: 'Dashboard', href: '/dashboard/curator' },
-          { label: 'Challenges', href: '/dashboard/curator/challenges' },
+          { label: 'My Challenges', href: '/dashboard/curator/challenges' },
           { label: title },
         ]}
       />
@@ -123,7 +123,7 @@ export default async function CuratorChallengeDetailPage(props) {
       <div className="dashboard-header admin-detail-header">
         <div>
           <div className="admin-detail-title-row">
-            <h1 className="dashboard-title">Challenge details</h1>
+            <h1 className="dashboard-title">Challenge Details</h1>
             <span className={`badge ${statusMeta.badgeClass}`}>
               {statusMeta.label}
             </span>
@@ -135,7 +135,7 @@ export default async function CuratorChallengeDetailPage(props) {
 
         <div className="admin-detail-header-actions">
           <Link href="/dashboard/curator/challenges" className="btn-secondary">
-            ← Back to challenges
+            ← Back to Challenges
           </Link>
           <Link
             href={`/dashboard/curator/challenges/${challenge.id}/submissions`}
@@ -160,7 +160,7 @@ export default async function CuratorChallengeDetailPage(props) {
         <div className="dashboard-form curator-readonly-form">
           {/* Cover Image */}
           <div className="form-group">
-            <span className="form-label">Challenge cover image</span>
+            <span className="form-label">Challenge Cover Image</span>
             {challenge.banner_url ? (
               <div className="curator-readonly-banner">
                 <Image
@@ -182,14 +182,14 @@ export default async function CuratorChallengeDetailPage(props) {
           {/* Title & Prize */}
           <div className="dashboard-form-grid-2">
             <div className="form-group">
-              <span className="form-label">Challenge title</span>
+              <span className="form-label">Challenge Title</span>
               <div className="curator-readonly-field curator-readonly-field--strong">
                 {title}
               </div>
             </div>
 
             <div className="form-group">
-              <span className="form-label">Prize / award</span>
+              <span className="form-label">Prize / Award</span>
               <div className="curator-readonly-field">
                 {challenge.prize || '—'}
               </div>
@@ -199,7 +199,7 @@ export default async function CuratorChallengeDetailPage(props) {
           {/* Status & Participation Summary */}
           <div className="dashboard-form-grid-2">
             <div className="form-group">
-              <span className="form-label">Challenge status</span>
+              <span className="form-label">Challenge Status</span>
               <div className="curator-readonly-field curator-readonly-status-field">
                 <span className={`badge ${statusMeta.badgeClass}`}>
                   {statusMeta.label}
@@ -209,7 +209,7 @@ export default async function CuratorChallengeDetailPage(props) {
             </div>
 
             <div className="form-group">
-              <span className="form-label">Participation &amp; curation</span>
+              <span className="form-label">Participation &amp; Curation</span>
               <div className="curator-readonly-field">
                 {submissionCount} {submissionCount === 1 ? 'submission' : 'submissions'} ·{' '}
                 {winnerCount > 0 ? `${winnerCount} ${winnerCount === 1 ? 'winner' : 'winners'} selected` : 'No winners selected yet'}
@@ -220,14 +220,14 @@ export default async function CuratorChallengeDetailPage(props) {
           {/* Start Date & End Date / Submission Deadline */}
           <div className="dashboard-form-grid-2">
             <div className="form-group">
-              <span className="form-label">Start date</span>
+              <span className="form-label">Start Date</span>
               <div className="curator-readonly-field">
                 {formatDateTime(challenge.start_date)}
               </div>
             </div>
 
             <div className="form-group">
-              <span className="form-label">End date &amp; submission deadline</span>
+              <span className="form-label">End Date &amp; Submission Deadline</span>
               <div className="curator-readonly-field">
                 {formatDateTime(challenge.end_date)}
               </div>
@@ -237,14 +237,14 @@ export default async function CuratorChallengeDetailPage(props) {
           {/* Description & Rules / Judging Criteria */}
           <div className="dashboard-form-grid-2">
             <div className="form-group">
-              <span className="form-label">Challenge description</span>
+              <span className="form-label">Challenge Description</span>
               <div className="curator-readonly-textarea">
                 {challenge.description || 'No description provided.'}
               </div>
             </div>
 
             <div className="form-group">
-              <span className="form-label">Rules, submission requirements &amp; judging criteria</span>
+              <span className="form-label">Rules, Submission Requirements &amp; Judging Criteria</span>
               <div className="curator-readonly-textarea">
                 {ruleLines.length > 0 ? (
                   <ol className="curator-readonly-rules-list">
@@ -276,17 +276,17 @@ export default async function CuratorChallengeDetailPage(props) {
                 className="btn-primary dashboard-submit-btn"
                 id="btn-curator-edit-challenge-footer"
               >
-                Edit challenge
+                Edit Challenge
               </Link>
             )}
             <Link
               href={`/dashboard/curator/challenges/${challenge.id}/submissions`}
               className="btn-secondary"
             >
-              View submissions ({submissionCount})
+              View Submissions ({submissionCount})
             </Link>
             <Link href="/dashboard/curator/challenges" className="btn-secondary">
-              Back to challenges
+              Back to Challenges
             </Link>
           </div>
         </div>

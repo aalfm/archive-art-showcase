@@ -113,7 +113,7 @@ export default async function AdminChallengeDetailPage(props) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 8 }}>
             <Link href="/dashboard/admin/challenges" className="dash-inline-link">
-              ← Back to challenges
+              ← Back to Challenges
             </Link>
             <span className={`badge ${badgeClass}`}>{statusLabel}</span>
           </div>

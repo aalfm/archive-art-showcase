@@ -22,7 +22,7 @@ export default async function MemberSettingsPage() {
       />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Account settings</h1>
+          <h1 className="dashboard-title">Account Settings</h1>
           <p className="dashboard-subtitle">Manage the security and credentials of your ARCHIVE account.</p>
         </div>
       </div>
@@ -30,14 +30,14 @@ export default async function MemberSettingsPage() {
       <div className="member-settings-grid">
         <section className="member-settings-card">
           <h2 className="dash-section-title member-settings-card-title">
-            Change password
+            Change Password
           </h2>
           <SettingsForm />
         </section>
 
         <section className="member-settings-card">
           <h2 className="dash-section-title member-settings-card-title">
-            Account information
+            Account Information
           </h2>
           <div className="member-settings-meta-list">
             <div className="member-settings-meta-item">
@@ -49,7 +49,7 @@ export default async function MemberSettingsPage() {
               <p className="member-settings-meta-value is-accent">{formatRoleLabel(user.role)}</p>
             </div>
             <div className="member-settings-meta-item">
-              <span className="member-settings-meta-label">Member since</span>
+              <span className="member-settings-meta-label">Member Since</span>
               <p className="member-settings-meta-value">
                 {new Date(user.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
               </p>

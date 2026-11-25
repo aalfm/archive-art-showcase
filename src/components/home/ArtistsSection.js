@@ -244,13 +244,13 @@ export default function ArtistsSection({ artists = [] }) {
         <header className="editorial-section-header">
           <div className="editorial-section-title-group">
             <span className="editorial-eyebrow">CREATOR DOSSIER</span>
-            <h2 className="editorial-section-heading">Featured artists</h2>
+            <h2 className="editorial-section-heading">Featured Artists</h2>
             <p className="editorial-section-subtitle">
               Open an artist&apos;s portfolio dossier to inspect their architectural works curated on ARTHIVE.
             </p>
           </div>
           <Link href="/artists" className="editorial-header-link">
-            <span>View all artists</span>
+            <span>View All Artists</span>
           </Link>
         </header>
 
@@ -310,7 +310,7 @@ export default function ArtistsSection({ artists = [] }) {
                     className="artist-dossier-profile-link"
                     tabIndex={folderOpen ? 0 : -1}
                   >
-                    <span>Artist profile</span>
+                    <span>Artist Profile</span>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
                       <line x1="7" y1="17" x2="17" y2="7"></line>
                       <polyline points="7 7 17 7 17 17"></polyline>
@@ -327,7 +327,7 @@ export default function ArtistsSection({ artists = [] }) {
                       <line x1="19" y1="12" x2="5" y2="12"></line>
                       <polyline points="12 19 5 12 12 5"></polyline>
                     </svg>
-                    <span>Back to folder</span>
+                    <span>Back to Folder</span>
                   </button>
                 </div>
               </div>

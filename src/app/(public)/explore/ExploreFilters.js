@@ -25,13 +25,13 @@ function ExploreFiltersInner({ categories }) {
   }
 
   const categoryOptions = [
-    { value: '', label: 'All categories' },
+    { value: '', label: 'All Categories' },
     ...categories.map((cat) => ({ value: String(cat.id), label: cat.name })),
   ];
 
   const sortOptions = [
     { value: 'latest', label: 'Latest' },
-    { value: 'popular', label: 'Most popular' },
+    { value: 'popular', label: 'Most Popular' },
   ];
 
   const applyFilters = useCallback(
@@ -102,7 +102,7 @@ function ExploreFiltersInner({ categories }) {
           ariaLabel="Filter by category"
           value={paramCategory}
           options={categoryOptions}
-          placeholder="All categories"
+          placeholder="All Categories"
           onSelect={(val) => {
             if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
             applyFilters(search, val, paramSort);

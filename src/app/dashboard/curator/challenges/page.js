@@ -96,12 +96,12 @@ export default async function CuratorChallengesPage(props) {
     statusFilter !== 'all' && statusLabelMap[statusFilter]
       ? [
           { label: 'Dashboard', href: '/dashboard/curator' },
-          { label: 'Challenges', href: '/dashboard/curator/challenges' },
+          { label: 'My Challenges', href: '/dashboard/curator/challenges' },
           { label: statusLabelMap[statusFilter] },
         ]
       : [
           { label: 'Dashboard', href: '/dashboard/curator' },
-          { label: 'Challenges' },
+          { label: 'My Challenges' },
         ];
 
   return (
@@ -109,13 +109,13 @@ export default async function CuratorChallengesPage(props) {
       <Breadcrumb items={breadcrumbItems} />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">My challenges</h1>
+          <h1 className="dashboard-title">My Challenges</h1>
           <p className="dashboard-subtitle">
             Manage curatorial programs, review submissions, and select winners ({allChallenges.length} total).
           </p>
         </div>
         <Link href="/dashboard/curator/challenges/create" className="btn-primary">
-          + Create challenge
+          + Create Challenge
         </Link>
       </div>
 
@@ -123,7 +123,7 @@ export default async function CuratorChallengesPage(props) {
         <div className="dash-empty dash-empty--with-cta">
           <p>You haven&apos;t created any challenges yet.</p>
           <Link href="/dashboard/curator/challenges/create" className="btn-primary">
-            Create your first challenge
+            Create Your First Challenge
           </Link>
         </div>
       ) : (
@@ -242,7 +242,7 @@ export default async function CuratorChallengesPage(props) {
                               className="btn-secondary table-action-btn"
                               id={`btn-curator-view-challenge-${ch.id}`}
                             >
-                              View details
+                              View Details
                             </Link>
                             <Link
                               href={`/dashboard/curator/challenges/${ch.id}/edit`}

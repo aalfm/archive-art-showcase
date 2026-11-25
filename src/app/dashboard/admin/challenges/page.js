@@ -119,7 +119,7 @@ export default async function AdminChallengesPage(props) {
       <Breadcrumb items={breadcrumbItems} />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Challenge management</h1>
+          <h1 className="dashboard-title">Challenge Management</h1>
           <p className="dashboard-subtitle">
             Review architecture challenges, oversee submissions, and publish official competition winners ({allChallenges.length} total).
           </p>
@@ -159,7 +159,7 @@ export default async function AdminChallengesPage(props) {
               <th>Curator</th>
               <th>Schedule</th>
               <th>Entries</th>
-              <th>Winner results</th>
+              <th>Winner Results</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -223,7 +223,7 @@ export default async function AdminChallengesPage(props) {
                           )}
                         </div>
                       ) : isCompleted ? (
-                        <span className="badge badge-pending">Not announced</span>
+                        <span className="badge badge-pending">Not Announced</span>
                       ) : (
                         <span className="table-cell-muted">—</span>
                       )}
@@ -234,7 +234,7 @@ export default async function AdminChallengesPage(props) {
                           href={`/dashboard/admin/challenges/${ch.id}`}
                           className={isCompleted ? 'btn-primary table-action-btn' : 'btn-secondary table-action-btn'}
                         >
-                          {isCompleted ? 'Manage winners' : 'View entries'}
+                          {isCompleted ? 'Manage Winners' : 'View Entries'}
                         </Link>
                       </div>
                     </td>

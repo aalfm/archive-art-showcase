@@ -62,7 +62,7 @@ export default async function AdminReportsPage() {
       />
       <div className="dashboard-header moderation-page-header">
         <div>
-          <h1 className="dashboard-title">Content moderation</h1>
+          <h1 className="dashboard-title">Content Moderation</h1>
           <p className="dashboard-subtitle">Review community guideline violation reports and take moderation action.</p>
         </div>
       </div>
@@ -70,7 +70,7 @@ export default async function AdminReportsPage() {
       {/* Pending Reports */}
       <section className="moderation-section">
         <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
-          Pending reports ({pendingReports.length})
+          Pending Reports ({pendingReports.length})
         </h2>
 
         {pendingReports.length === 0 ? (
@@ -92,12 +92,12 @@ export default async function AdminReportsPage() {
               <thead>
                 <tr>
                   <th>Artwork</th>
-                  <th>Artwork title</th>
+                  <th>Artwork Title</th>
                   <th>Creator</th>
                   <th>Reporter</th>
-                  <th>Report reason</th>
-                  <th>Total reports</th>
-                  <th>Moderation actions</th>
+                  <th>Report Reason</th>
+                  <th>Total Reports</th>
+                  <th>Moderation Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -158,7 +158,7 @@ export default async function AdminReportsPage() {
       {/* Moderation History */}
       <section className="moderation-section">
         <h2 className="dash-section-title" style={{ marginBottom: 14 }}>
-          Moderation history ({historyReports.length})
+          Moderation History ({historyReports.length})
         </h2>
 
         <div className="data-table-wrap moderation-table-wrap">
@@ -176,8 +176,8 @@ export default async function AdminReportsPage() {
                 <th>Artwork</th>
                 <th>Creator</th>
                 <th>Reason</th>
-                <th>Decision / status</th>
-                <th>Reported at</th>
+                <th>Decision / Status</th>
+                <th>Reported At</th>
                 <th>Details</th>
               </tr>
             </thead>
@@ -225,7 +225,7 @@ export default async function AdminReportsPage() {
                           className="btn-secondary moderation-action-btn"
                           id={`btn-history-view-report-${r.report_id}`}
                         >
-                          View details
+                          View Details
                         </Link>
                       </div>
                     </td>

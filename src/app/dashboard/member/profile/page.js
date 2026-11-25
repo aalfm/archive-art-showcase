@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
+import { buildMemberDetailHref } from '@/lib/member-navigation';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import ProfileForm from './ProfileForm';
 
@@ -9,8 +10,12 @@ export const metadata = {
   title: 'My Profile — ARCHIVE',
 };
 
-export default async function MemberProfilePage() {
-  const user = await requireRole('member');
+export default async function MemberProfilePage(props) {
+  const [user, searchParams] = await Promise.all([
+    requireRole('member'),
+    props?.searchParams,
+  ]);
+  const publicProfileHref = buildMemberDetailHref(`/artists/${user.id}`, 'profile', searchParams);
 
   return (
     <div className="member-form-page member-profile-page">
@@ -22,15 +27,15 @@ export default async function MemberProfilePage() {
       />
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">My profile</h1>
+          <h1 className="dashboard-title">My Profile</h1>
           <p className="dashboard-subtitle">Manage your public profile and creator identity.</p>
         </div>
-        <Link href={`/artists/${user.id}`} className="btn-secondary" target="_blank">
-          View public profile ↗
+        <Link href={publicProfileHref} className="btn-secondary">
+          View Public Profile →
         </Link>
       </div>
 
-      <ProfileForm user={user} />
+      <ProfileForm user={user} publicProfileHref={publicProfileHref} />
     </div>
   );
 }

@@ -289,7 +289,7 @@ export default function ChallengesGallery({
                 onClick={handleResetAll}
                 style={{ marginTop: 18 }}
               >
-                Reset filters
+                Reset Filters
               </button>
             )}
           </div>
@@ -383,11 +383,11 @@ export default function ChallengesGallery({
                       <span>
                         {isCompleted
                           ? winnerCount > 0
-                            ? 'View winners'
-                            : 'View archive'
+                            ? 'View Winners'
+                            : 'View Archive'
                           : userRole === 'member' && normalizedStatus === 'active'
-                            ? 'Enter challenge'
-                            : 'View challenge'}
+                            ? 'Enter Challenge'
+                            : 'View Challenge'}
                       </span>
                       <ArrowRight size={14} strokeWidth={1.75} className="challenge-dir-cta-arrow" />
                     </span>

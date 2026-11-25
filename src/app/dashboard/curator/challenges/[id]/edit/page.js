@@ -36,7 +36,7 @@ export default async function EditChallengePage(props) {
       <Breadcrumb
         items={[
           { label: 'Dashboard', href: '/dashboard/curator' },
-          { label: 'Challenges', href: '/dashboard/curator/challenges' },
+          { label: 'My Challenges', href: '/dashboard/curator/challenges' },
           { label: title, href: `/dashboard/curator/challenges/${challenge.id}` },
           { label: 'Edit' },
         ]}
@@ -44,12 +44,12 @@ export default async function EditChallengePage(props) {
 
       <div className="dashboard-header admin-detail-header">
         <div>
-          <h1 className="dashboard-title">Edit challenge</h1>
+          <h1 className="dashboard-title">Edit Challenge</h1>
           <p className="dashboard-subtitle">Update details for curatorial program &ldquo;{title}&rdquo;.</p>
         </div>
         <div className="admin-detail-header-actions">
           <Link href={`/dashboard/curator/challenges/${challenge.id}`} className="btn-secondary">
-            ← Back to details
+            ← Back to Details
           </Link>
         </div>
       </div>

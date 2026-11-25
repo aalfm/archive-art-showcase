@@ -1,12 +1,17 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { updateArtwork } from '@/lib/actions/artwork.actions';
+import FilterDropdown from '@/components/ui/FilterDropdown';
 
 export default function EditArtworkForm({ artwork, categories }) {
   const router = useRouter();
+  const [categoryId, setCategoryId] = useState(
+    artwork.category_id != null ? String(artwork.category_id) : String(categories[0]?.id ?? '')
+  );
+  const categoryOptions = categories.map((cat) => ({ value: cat.id, label: cat.name }));
 
   const [state, formAction, isPending] = useActionState(async (prevState, formData) => {
     const res = await updateArtwork(prevState, formData);
@@ -26,7 +31,7 @@ export default function EditArtworkForm({ artwork, categories }) {
 
       {/* Non-editable image display as per PRD */}
       <div className="form-group">
-        <label className="form-label">Artwork image (cannot be changed)</label>
+        <label className="form-label">Artwork Image (Cannot Be Changed)</label>
         <div className="member-readonly-artwork-preview">
           <Image src={artwork.image_url} alt={artwork.title} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 100vw, 960px" />
         </div>
@@ -40,7 +45,7 @@ export default function EditArtworkForm({ artwork, categories }) {
 
         <div className="dashboard-form-grid-2">
           <div className="form-group">
-            <label htmlFor="title" className="form-label">Artwork title *</label>
+            <label htmlFor="title" className="form-label">Artwork Title *</label>
             <input
               id="title"
               name="title"
@@ -55,18 +60,21 @@ export default function EditArtworkForm({ artwork, categories }) {
 
           <div className="form-group">
             <label htmlFor="category_id" className="form-label">Category *</label>
-            <select id="category_id" name="category_id" className="form-select" defaultValue={artwork.category_id} required>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+            <input type="hidden" name="category_id" value={categoryId} />
+            <FilterDropdown
+              id="category_id"
+              className="member-category-dropdown"
+              ariaLabel="Category"
+              value={categoryId}
+              options={categoryOptions}
+              placeholder="Select a category..."
+              onSelect={(val) => setCategoryId(String(val))}
+            />
           </div>
         </div>
 
         <div className="form-group">
-          <label htmlFor="description" className="form-label">Artwork description *</label>
+          <label htmlFor="description" className="form-label">Artwork Description *</label>
           <textarea
             id="description"
             name="description"
@@ -79,7 +87,7 @@ export default function EditArtworkForm({ artwork, categories }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="tags" className="form-label">Tags (comma-separated) *</label>
+          <label htmlFor="tags" className="form-label">Tags (Comma-Separated) *</label>
           <input
             id="tags"
             name="tags"
@@ -96,7 +104,7 @@ export default function EditArtworkForm({ artwork, categories }) {
             className="btn-primary dashboard-submit-btn"
             disabled={isPending}
           >
-            {isPending ? 'Saving changes...' : 'Save changes'}
+            {isPending ? 'Saving Changes...' : 'Save Changes'}
           </button>
           <button
             type="button"

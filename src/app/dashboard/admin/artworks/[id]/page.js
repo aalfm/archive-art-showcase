@@ -162,7 +162,7 @@ export default async function AdminArtworkDetailPage(props) {
           <div className="admin-detail-title-row">
             <h1 className="dashboard-title">{title}</h1>
             <span className={`badge ${artwork.status === 'active' ? 'badge-active' : 'badge-taken_down'}`}>
-              {artwork.status === 'active' ? 'Published' : 'Taken down'}
+              {artwork.status === 'active' ? 'Published' : 'Taken Down'}
             </span>
           </div>
           <p className="dashboard-subtitle">
@@ -172,7 +172,7 @@ export default async function AdminArtworkDetailPage(props) {
         <div className="admin-detail-header-actions">
           {artwork.owner_id && (
             <Link href={`/dashboard/admin/users/${artwork.owner_id}`} className="btn-secondary">
-              ← Back to member
+              ← Back to Member
             </Link>
           )}
           {artwork.status === 'active' && (

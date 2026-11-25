@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import FilterDropdown from '@/components/ui/FilterDropdown';
 
 const ROLE_OPTIONS = [
-  { value: '', label: 'All roles' },
+  { value: '', label: 'All Roles' },
   { value: 'admin', label: 'Admin' },
   { value: 'member', label: 'Member' },
   { value: 'curator', label: 'Curator' },

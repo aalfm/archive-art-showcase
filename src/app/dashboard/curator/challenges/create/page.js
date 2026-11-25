@@ -17,21 +17,21 @@ export default async function CreateChallengePage() {
       <Breadcrumb
         items={[
           { label: 'Dashboard', href: '/dashboard/curator' },
-          { label: 'Challenges', href: '/dashboard/curator/challenges' },
+          { label: 'My Challenges', href: '/dashboard/curator/challenges' },
           { label: 'Create Challenge' },
         ]}
       />
 
       <div className="dashboard-header admin-detail-header">
         <div>
-          <h1 className="dashboard-title">Create challenge</h1>
+          <h1 className="dashboard-title">Create Challenge</h1>
           <p className="dashboard-subtitle">
             Launch a curatorial competition and invite creators to submit their finest works.
           </p>
         </div>
         <div className="admin-detail-header-actions">
           <Link href="/dashboard/curator/challenges" className="btn-secondary">
-            ← Back to challenges
+            ← Back to Challenges
           </Link>
         </div>
       </div>
