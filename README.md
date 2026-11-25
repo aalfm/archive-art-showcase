@@ -272,13 +272,13 @@ erDiagram
 1. **Clone Repository**
 
    ```bash
-   git clone https://github.com/aalfm/arthive-art-showcase.git
+   git clone https://github.com/aalfm/archive-art-showcase.git
    ```
 
 2. **Navigate to Project**
 
    ```bash
-   cd arthive-art-showcase
+   cd archive-art-showcase
    ```
 
 3. **Install Dependencies**
@@ -350,9 +350,9 @@ erDiagram
 
 | Role | Email | Password | Status |
 |---|---|---|---|
-| **Admin** | `admin@arthive.com` | `Admin@123` | Active |
-| **Curator** | `kurator@arthive.com` | `Curator@123` | Approved |
-| **Member** | `member@arthive.com` | `Member@123` | Active |
+| **Admin** | `admin@archive.com` | `Admin@123` | Active |
+| **Curator** | `kurator@archive.com` | `Curator@123` | Approved |
+| **Member** | `member@archive.com` | `Member@123` | Active |
 
 </details>
 
@@ -383,7 +383,7 @@ erDiagram
 ## 📂 Project Structure
 
 ```text
-arthive-art-showcase/
+archive-art-showcase/
 ├── database/
 │   ├── schema.sql                  # 11-table PostgreSQL schema, constraints & indexes
 │   └── seed.sql                    # Idempotent demo users, categories, artworks & challenges
@@ -467,4 +467,4 @@ No `LICENSE` file is currently specified in this repository. All rights remain w
 
 ## 👤 Author
 
-**aalfm** — [GitHub](https://github.com/aalfm) · [ARCHIVE Repository](https://github.com/aalfm/arthive-art-showcase)
+**aalfm** — [GitHub](https://github.com/aalfm) · [ARCHIVE Repository](https://github.com/aalfm/archive-art-showcase)

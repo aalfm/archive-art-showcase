@@ -13,12 +13,12 @@ import Breadcrumb from '@/components/ui/Breadcrumb';
  */
 export default function DetailContextBar({ breadcrumbItems, returnHref, backLabel }) {
   if (!returnHref || !backLabel) {
-    return <Breadcrumb items={breadcrumbItems} className="arthive-breadcrumb--detail" />;
+    return <Breadcrumb items={breadcrumbItems} className="archive-breadcrumb--detail" />;
   }
 
   return (
     <div className="detail-context-bar">
-      <Breadcrumb items={breadcrumbItems} className="arthive-breadcrumb--detail" />
+      <Breadcrumb items={breadcrumbItems} className="archive-breadcrumb--detail" />
       <Link href={returnHref} className="detail-back-link">
         <svg
           width="14"

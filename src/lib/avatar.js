@@ -1,5 +1,5 @@
 /**
- * Centralized role-based avatar resolution for ARTHIVE.
+ * Centralized role-based avatar resolution for ARCHIVE.
  *
  * Rules:
  * - admin: never uses profile_image; always renders the Admin default avatar.

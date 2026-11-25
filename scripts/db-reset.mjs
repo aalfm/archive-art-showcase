@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import {
-  ARTHIVE_TABLES,
+  ARCHIVE_TABLES,
   SCHEMA_PATH,
   SEED_PATH,
   collectTableCounts,
@@ -49,7 +49,7 @@ async function main() {
     await client.query(schemaSql);
 
     console.log('[db:reset] Truncating all tables with RESTART IDENTITY CASCADE...');
-    const tableList = ARTHIVE_TABLES.map((t) => `"${t}"`).join(', ');
+    const tableList = ARCHIVE_TABLES.map((t) => `"${t}"`).join(', ');
     await client.query(`TRUNCATE TABLE ${tableList} RESTART IDENTITY CASCADE`);
 
     console.log('[db:reset] Restoring official seed data from database/seed.sql...');

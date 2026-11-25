@@ -1,12 +1,12 @@
 /**
- * Shared validation rules and editorial copy for ARTHIVE Curator
+ * Shared validation rules and editorial copy for ARCHIVE Curator
  * registration, review, rejection reasons, and reapplication workflows.
  */
 
 export const CURATOR_REQUIREMENTS_TITLE = 'Required Curator Application Materials';
 
 export const CURATOR_REQUIREMENTS_BODY =
-  'To apply as an ARTHIVE Curator, you must submit both a valid Portfolio link and your Curriculum Vitae (CV) via file upload or link so Admins can review your curatorial credentials.';
+  'To apply as an ARCHIVE Curator, you must submit both a valid Portfolio link and your Curriculum Vitae (CV) via file upload or link so Admins can review your curatorial credentials.';
 
 export const CURATOR_REQUIREMENTS_NOTE =
   'Portfolio links may point to your personal website, Behance, ArtStation, or institutional profile. For your CV, upload a PDF, DOC, or DOCX file (up to 5 MB) or provide a valid CV link.';
@@ -18,7 +18,7 @@ export const PORTFOLIO_RECOMMENDATION_NOTE = CURATOR_REQUIREMENTS_NOTE;
 export const REJECTION_REASON_EXAMPLES = [
   'Portofolio belum menunjukkan pengalaman yang relevan dengan bidang arsitektur.',
   'CV belum mencantumkan rekam jejak atau pengalaman kuratorial yang memadai.',
-  'Kualitas atau relevansi karya belum memenuhi kriteria kurator ARTHIVE.',
+  'Kualitas atau relevansi karya belum memenuhi kriteria kurator ARCHIVE.',
 ];
 
 export const MAX_PORTFOLIO_URL_LENGTH = 500;

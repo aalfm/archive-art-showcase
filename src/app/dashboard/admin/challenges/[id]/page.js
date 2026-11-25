@@ -118,7 +118,7 @@ export default async function AdminChallengeDetailPage(props) {
           </div>
           <h1 className="dashboard-title">{challengeTitle}</h1>
           <p className="dashboard-subtitle">
-            Curated by {challenge.curator_name || 'ARTHIVE Curator'} · {formatDate(challenge.start_date)} – {formatDate(challenge.end_date)} · Prize: {challenge.prize}
+            Curated by {challenge.curator_name || 'ARCHIVE Curator'} · {formatDate(challenge.start_date)} – {formatDate(challenge.end_date)} · Prize: {challenge.prize}
           </p>
         </div>
       </div>

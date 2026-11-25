@@ -87,10 +87,10 @@ export async function generateMetadata(props) {
   const params = await props.params;
   if (!toId(params.id)) notFound();
   const data = await getChallenge(params.id);
-  if (!data) return { title: 'Challenge not found — ARTHIVE' };
+  if (!data) return { title: 'Challenge not found — ARCHIVE' };
   return {
-    title: `${formatEditorialTitle(data.challenge.title)} — ARTHIVE`,
-    description: data.challenge.description?.substring(0, 160) || 'Architectural challenge on ARTHIVE.',
+    title: `${formatEditorialTitle(data.challenge.title)} — ARCHIVE`,
+    description: data.challenge.description?.substring(0, 160) || 'Architectural challenge on ARCHIVE.',
   };
 }
 
@@ -176,7 +176,7 @@ export default async function ChallengeDetailPage(props) {
             </span>
             <h1 className="challenge-detail-title">{formattedTitle}</h1>
             <p className="challenge-detail-banner-meta">
-              Curated by {challenge.curator_name || 'ARTHIVE Curator'} · {challenge.submission_count}{' '}
+              Curated by {challenge.curator_name || 'ARCHIVE Curator'} · {challenge.submission_count}{' '}
               {Number(challenge.submission_count) === 1 ? 'entry' : 'entries'}
               {isCompleted && winners.length > 0
                 ? ` · ${winners.length} ${winners.length === 1 ? 'winner' : 'winners'}`
@@ -500,7 +500,7 @@ export default async function ChallengeDetailPage(props) {
             <div className="challenge-sidebar-card">
               <h3 className="challenge-sidebar-title">Archive Status</h3>
               <p className="challenge-sidebar-note">
-                This competition ended on {formatDate(challenge.end_date)} and is preserved in the ARTHIVE archive.
+                This competition ended on {formatDate(challenge.end_date)} and is preserved in ARCHIVE.
               </p>
               {canManageWinners && (
                 <Link

@@ -135,7 +135,7 @@ export default async function CreatorProfilePage(props) {
               ACCOUNT INACTIVE
             </span>
             <p className="artist-inactive-notice-message" id="artist-account-inactive-message">
-              This artist account is currently inactive and is no longer available on ARTHIVE.
+              This artist account is currently inactive and is no longer available on ARCHIVE.
             </p>
             <p className="artist-inactive-notice-sub">
               Published artworks by this creator remain accessible in the Explore gallery and through their artwork detail pages.

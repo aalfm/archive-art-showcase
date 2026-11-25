@@ -12,7 +12,7 @@ export default function AccountInactiveNotice({ user }) {
         <div>
           <h1 className="dashboard-title">Account Status</h1>
           <p className="dashboard-subtitle">
-            Informasi status keaktifan akun ARTHIVE Anda.
+            Informasi status keaktifan akun ARCHIVE Anda.
           </p>
         </div>
       </div>
@@ -67,7 +67,7 @@ export default function AccountInactiveNotice({ user }) {
 
         <p className="account-inactive-note">
           Seluruh karya, profil, dan riwayat aktivitas Anda tetap tersimpan dengan aman. Pengaktifan
-          kembali akun hanya dapat dilakukan oleh administrator ARTHIVE.
+          kembali akun hanya dapat dilakukan oleh administrator ARCHIVE.
         </p>
 
         <div className="account-inactive-actions">

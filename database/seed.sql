@@ -1,21 +1,21 @@
 -- ================================================================
--- ARTHIVE DATABASE SEED v3.0
+-- ARCHIVE DATABASE SEED v3.0
 -- PostgreSQL
 --
 -- Run AFTER database/schema.sql
 --
 -- Demo accounts & statuses:
---   admin@arthive.com     / Admin@123    | admin   | Active   | -
---   member@arthive.com    / Member@123   | member  | Active   | -
---   raka@arthive.com      / Member@123   | member  | Active   | -
---   nadia@arthive.com     / Member@123   | member  | Active   | -
---   dimas@arthive.com     / Member@123   | member  | Active   | -
---   sofia@arthive.com     / Member@123   | member  | Inactive | -
---   kevin@arthive.com     / Member@123   | member  | Active   | -
---   kurator@arthive.com   / Curator@123  | curator | Active   | Approved
---   adrian@arthive.com    / Curator@123  | curator | Active   | Approved
---   clara@arthive.com     / Curator@123  | curator | Active   | Rejected
---   pending@arthive.com   / Curator@123  | curator | Active   | Pending
+--   admin@archive.com     / Admin@123    | admin   | Active   | -
+--   member@archive.com    / Member@123   | member  | Active   | -
+--   raka@archive.com      / Member@123   | member  | Active   | -
+--   nadia@archive.com     / Member@123   | member  | Active   | -
+--   dimas@archive.com     / Member@123   | member  | Active   | -
+--   sofia@archive.com     / Member@123   | member  | Inactive | -
+--   kevin@archive.com     / Member@123   | member  | Active   | -
+--   kurator@archive.com   / Curator@123  | curator | Active   | Approved
+--   adrian@archive.com    / Curator@123  | curator | Active   | Approved
+--   clara@archive.com     / Curator@123  | curator | Active   | Rejected
+--   pending@archive.com   / Curator@123  | curator | Active   | Pending
 --
 -- Idempotent & safe to rerun:
 --   1. Users upsert by unique email (preserving separated is_active & curator_status).
@@ -44,30 +44,30 @@ INSERT INTO users (
 )
 VALUES
 (
-    'Admin ARTHIVE',
-    'admin@arthive.com',
+    'Admin ARCHIVE',
+    'admin@archive.com',
     '$2b$12$aa6ltDalcwmxcoD.ZTYxiewEBRnq6DxCsE/NVJIUrhjc3Pfr8oaOi',
     'admin',
     NULL,
     TRUE,
     NULL,
-    'Administrator of ARTHIVE creative architecture showcase platform.',
-    'https://arthive.com'
+    'Administrator of ARCHIVE creative architecture showcase platform.',
+    'https://archive.com'
 ),
 (
     'Kurator Arsitektura',
-    'kurator@arthive.com',
+    'kurator@archive.com',
     '$2b$12$veK5yRY1T60PwASCj9s33.9DZvm235kmGj9v66WwKn89X.TYagIp6',
     'curator',
     'approved',
     TRUE,
     'https://i.pravatar.cc/300?img=60',
     'Kurator seni digital dengan pengalaman di bidang arsitektur kontemporer dan seni parametrik.',
-    'https://arthive.com/kurator'
+    'https://archive.com/kurator'
 ),
 (
     'Anggota Kreatif',
-    'member@arthive.com',
+    'member@archive.com',
     '$2b$12$YMrzvUHUJOhmYbeTfO/um.CchZRhayQqHUkkeRAU85pB7yiAkQap2',
     'member',
     NULL,
@@ -78,7 +78,7 @@ VALUES
 ),
 (
     'Raka Pratama',
-    'raka@arthive.com',
+    'raka@archive.com',
     '$2b$12$YMrzvUHUJOhmYbeTfO/um.CchZRhayQqHUkkeRAU85pB7yiAkQap2',
     'member',
     NULL,
@@ -89,7 +89,7 @@ VALUES
 ),
 (
     'Nadia Putri',
-    'nadia@arthive.com',
+    'nadia@archive.com',
     '$2b$12$YMrzvUHUJOhmYbeTfO/um.CchZRhayQqHUkkeRAU85pB7yiAkQap2',
     'member',
     NULL,
@@ -100,7 +100,7 @@ VALUES
 ),
 (
     'Dimas Arya',
-    'dimas@arthive.com',
+    'dimas@archive.com',
     '$2b$12$YMrzvUHUJOhmYbeTfO/um.CchZRhayQqHUkkeRAU85pB7yiAkQap2',
     'member',
     NULL,
@@ -111,7 +111,7 @@ VALUES
 ),
 (
     'Sofia Anindya',
-    'sofia@arthive.com',
+    'sofia@archive.com',
     '$2b$12$YMrzvUHUJOhmYbeTfO/um.CchZRhayQqHUkkeRAU85pB7yiAkQap2',
     'member',
     NULL,
@@ -122,7 +122,7 @@ VALUES
 ),
 (
     'Kevin Wijaya',
-    'kevin@arthive.com',
+    'kevin@archive.com',
     '$2b$12$YMrzvUHUJOhmYbeTfO/um.CchZRhayQqHUkkeRAU85pB7yiAkQap2',
     'member',
     NULL,
@@ -133,7 +133,7 @@ VALUES
 ),
 (
     'Adrian Mahendra',
-    'adrian@arthive.com',
+    'adrian@archive.com',
     '$2b$12$veK5yRY1T60PwASCj9s33.9DZvm235kmGj9v66WwKn89X.TYagIp6',
     'curator',
     'approved',
@@ -144,7 +144,7 @@ VALUES
 ),
 (
     'Clara Wijaya',
-    'clara@arthive.com',
+    'clara@archive.com',
     '$2b$12$veK5yRY1T60PwASCj9s33.9DZvm235kmGj9v66WwKn89X.TYagIp6',
     'curator',
     'rejected',
@@ -155,7 +155,7 @@ VALUES
 ),
 (
     'Bima Prakoso',
-    'pending@arthive.com',
+    'pending@archive.com',
     '$2b$12$veK5yRY1T60PwASCj9s33.9DZvm235kmGj9v66WwKn89X.TYagIp6',
     'curator',
     'pending',
@@ -205,7 +205,7 @@ SELECT
 FROM (
     VALUES
     (
-        'kurator@arthive.com',
+        'kurator@archive.com',
         'approved',
         NULL,
         'Kurator pameran arsitektur kontemporer dan kompetisi desain spasial tingkat nasional.',
@@ -213,7 +213,7 @@ FROM (
         INTERVAL '28 days'
     ),
     (
-        'adrian@arthive.com',
+        'adrian@archive.com',
         'approved',
         NULL,
         'Peneliti arsitektur modern dan kurator independen untuk ruang publik serta instalasi visual.',
@@ -221,7 +221,7 @@ FROM (
         INTERVAL '19 days'
     ),
     (
-        'clara@arthive.com',
+        'clara@archive.com',
         'rejected',
         'Portofolio belum menunjukkan pengalaman kuratorial yang relevan dengan bidang arsitektur serta informasi profil dan pengalaman masih kurang lengkap.',
         'Tertarik mengkurasi kompetisi eksperimen visual dan instalasi arsitektur digital.',
@@ -229,7 +229,7 @@ FROM (
         INTERVAL '8 days'
     ),
     (
-        'pending@arthive.com',
+        'pending@archive.com',
         'pending',
         NULL,
         'Sejarawan arsitektur dengan pengalaman pengorganisasian pameran desain spasial dan publikasi katalog.',
@@ -238,7 +238,7 @@ FROM (
     )
 ) AS v(email, status, rejection_reason, supporting_notes, submitted_ago, reviewed_ago)
 JOIN users u ON u.email = v.email AND u.role = 'curator'
-LEFT JOIN users adm ON adm.email = 'admin@arthive.com'
+LEFT JOIN users adm ON adm.email = 'admin@archive.com'
 ON CONFLICT (user_id, attempt_number) DO UPDATE SET
     portfolio_url = EXCLUDED.portfolio_url,
     background = EXCLUDED.background,
@@ -300,7 +300,7 @@ FROM (
     VALUES
     -- Original 14 Artworks (preserved verbatim)
     (
-        'member@arthive.com',
+        'member@archive.com',
         'Sydney Opera House',
         'Modern Architecture',
         'Pusat seni pertunjukan ikonik di Sydney, Australia, dirancang oleh Jørn Utzon. Bangunan ini dikenal melalui struktur atap berbentuk cangkang menyerupai layar kapal yang menjadi simbol arsitektur modern ekspresionis.',
@@ -309,7 +309,7 @@ FROM (
         'active'
     ),
     (
-        'raka@arthive.com',
+        'raka@archive.com',
         'Villa Savoye',
         'Modern Architecture',
         'Vila modern yang dirancang oleh Le Corbusier dan Pierre Jeanneret di Poissy, Prancis. Bangunan ini merepresentasikan Five Points of Architecture melalui pilotis, taman atap, denah bebas, fasad bebas, dan jendela horizontal.',
@@ -318,7 +318,7 @@ FROM (
         'active'
     ),
     (
-        'nadia@arthive.com',
+        'nadia@archive.com',
         'Guggenheim Museum Bilbao',
         'Deconstructivist Architecture',
         'Museum seni kontemporer di Bilbao, Spanyol, karya Frank Gehry. Bangunan ini memperlihatkan bentuk geometris dinamis, permukaan lengkung, dan penggunaan titanium, kaca, serta batu kapur.',
@@ -327,7 +327,7 @@ FROM (
         'active'
     ),
     (
-        'sofia@arthive.com',
+        'sofia@archive.com',
         'Fallingwater',
         'Organic Architecture',
         'Rumah tinggal karya Frank Lloyd Wright di Pennsylvania, Amerika Serikat. Bangunan dibangun di atas aliran air terjun dengan teras beton bertingkat yang menyatu dengan lingkungan alam sekitarnya.',
@@ -336,7 +336,7 @@ FROM (
         'active'
     ),
     (
-        'dimas@arthive.com',
+        'dimas@archive.com',
         'Barbican Estate',
         'Brutalist Architecture',
         'Kompleks hunian dan kebudayaan di London yang menjadi salah satu contoh penting arsitektur brutalist. Karakter bangunannya ditandai dengan beton ekspos, komposisi geometris masif, serta hubungan antara ruang publik dan hunian.',
@@ -345,7 +345,7 @@ FROM (
         'active'
     ),
     (
-        'kevin@arthive.com',
+        'kevin@archive.com',
         'Habitat 67',
         'Brutalist Architecture',
         'Kompleks hunian eksperimental di Montreal, Kanada, dirancang oleh Moshe Safdie. Bangunan ini menggunakan modul beton prefabrikasi yang disusun menjadi komposisi bertingkat dengan teras privat.',
@@ -354,7 +354,7 @@ FROM (
         'active'
     ),
     (
-        'raka@arthive.com',
+        'raka@archive.com',
         'The Shard',
         'Contemporary Architecture',
         'Gedung pencakar langit di London karya Renzo Piano. Bentuknya menyerupai pecahan kaca vertikal dengan fasad transparan yang memberikan identitas visual berbeda pada kawasan perkotaan.',
@@ -363,7 +363,7 @@ FROM (
         'active'
     ),
     (
-        'nadia@arthive.com',
+        'nadia@archive.com',
         'Marina Bay Sands',
         'Contemporary Architecture',
         'Kompleks terpadu di Singapura yang dirancang oleh Moshe Safdie. Bangunan ini dikenal dengan tiga menara yang dihubungkan oleh SkyPark di bagian atas, menciptakan siluet arsitektur yang ikonik.',
@@ -372,7 +372,7 @@ FROM (
         'active'
     ),
     (
-        'sofia@arthive.com',
+        'sofia@archive.com',
         'Bosco Verticale',
         'Sustainable Architecture',
         'Kompleks hunian vertikal di Milan, Italia, karya Stefano Boeri. Fasad bangunan dilengkapi vegetasi dan pepohonan untuk mendukung biodiversitas serta menciptakan hubungan antara lingkungan perkotaan dan alam.',
@@ -381,7 +381,7 @@ FROM (
         'active'
     ),
     (
-        'member@arthive.com',
+        'member@archive.com',
         'Menara Phinisi UNM',
         'Contemporary Architecture',
         'Gedung Pusat Pelayanan Akademik Universitas Negeri Makassar yang dirancang oleh Yu Sing. Desainnya terinspirasi dari kapal Phinisi sebagai identitas budaya Sulawesi Selatan dengan pendekatan arsitektur kontemporer dan bentuk fasad yang dinamis.',
@@ -390,7 +390,7 @@ FROM (
         'active'
     ),
     (
-        'raka@arthive.com',
+        'raka@archive.com',
         'Masjid 99 Kubah',
         'Modern Islamic Architecture',
         'Masjid ikonik di kawasan Center Point of Indonesia, Makassar, dengan komposisi kubah berwarna yang terinspirasi dari Asmaul Husna. Desainnya memadukan pendekatan kontemporer dengan identitas arsitektur Islam.',
@@ -399,7 +399,7 @@ FROM (
         'active'
     ),
     (
-        'nadia@arthive.com',
+        'nadia@archive.com',
         'Fort Rotterdam',
         'Colonial Architecture',
         'Benteng bersejarah di Makassar yang berasal dari Kerajaan Gowa dan kemudian dikuasai VOC. Kompleks ini memperlihatkan karakter arsitektur pertahanan kolonial dengan tata ruang dan elemen bangunan bersejarah.',
@@ -408,7 +408,7 @@ FROM (
         'active'
     ),
     (
-        'sofia@arthive.com',
+        'sofia@archive.com',
         'Monumen Mandala',
         'Monumental Architecture',
         'Monumen bersejarah di Makassar yang dibangun untuk mengenang perjuangan pembebasan Irian Barat. Bentuk menara dan elemen geometrisnya menjadi bagian dari identitas kawasan perkotaan.',
@@ -417,7 +417,7 @@ FROM (
         'active'
     ),
     (
-        'kevin@arthive.com',
+        'kevin@archive.com',
         'Masjid Al-Markaz Al-Islami',
         'Modern Islamic Architecture',
         'Kompleks masjid besar di Makassar dengan pendekatan arsitektur Islam modern. Bangunan ini memiliki ruang ibadah luas, bentuk geometris, dan elemen desain yang menggabungkan identitas keislaman dengan arsitektur modern.',
@@ -428,7 +428,7 @@ FROM (
 
     -- Expanded Architectural Demo Artworks (including a moderated taken_down example)
     (
-        'dimas@arthive.com',
+        'dimas@archive.com',
         'Heydar Aliyev Center',
         'Parametric Architecture',
         'Pusat kebudayaan di Baku karya Zaha Hadid Architects yang menonjolkan geometri fluida tanpa sudut tajam, menyatukan alun-alun publik dan selubung bangunan dalam satu tarikan garis berkelanjutan.',
@@ -437,7 +437,7 @@ FROM (
         'active'
     ),
     (
-        'kevin@arthive.com',
+        'kevin@archive.com',
         'Church of the Light',
         'Minimalist Architecture',
         'Kapel beton ekspos di Ibaraki, Jepang, rancangan Tadao Ando. Ruang minimalis ini memanfaatkan bukaan salib presisi pada dinding beton untuk menghadirkan kontras cahaya alami dan keheningan ruang.',
@@ -446,7 +446,7 @@ FROM (
         'active'
     ),
     (
-        'member@arthive.com',
+        'member@archive.com',
         'Westminster Vault Study',
         'Gothic Revival Architecture',
         'Studi visual lengkung runcing, penopang terbang, dan ritme vertikal batu pahat pada arsitektur Gothic Revival yang dikaji ulang melalui perspektif monokrom editorial.',
@@ -455,7 +455,7 @@ FROM (
         'active'
     ),
     (
-        'dimas@arthive.com',
+        'dimas@archive.com',
         'Unattributed Concrete Elevation Draft',
         'Brutalist Architecture',
         'Draf studi elevasi fasad beton ekspos yang diturunkan setelah proses moderasi karena kurangnya atribusi sumber referensi asli.',
@@ -488,9 +488,9 @@ WHERE NOT EXISTS (
 
 -- Reassign previously seeded 'SPACES OF TOMORROW' to an approved curator if Clara is rejected
 UPDATE challenges
-SET curator_id = (SELECT id FROM users WHERE email = 'adrian@arthive.com')
+SET curator_id = (SELECT id FROM users WHERE email = 'adrian@archive.com')
 WHERE title = 'SPACES OF TOMORROW'
-  AND curator_id = (SELECT id FROM users WHERE email = 'clara@arthive.com');
+  AND curator_id = (SELECT id FROM users WHERE email = 'clara@archive.com');
 
 INSERT INTO challenges (
     curator_id,
@@ -515,7 +515,7 @@ FROM (
     VALUES
     -- Active Challenges (NOW() BETWEEN start_date AND end_date)
     (
-        'kurator@arthive.com',
+        'kurator@archive.com',
         'ARCHITECTURAL SPECULATIONS',
         'Tantangan untuk membayangkan ulang ruang kota masa depan melalui karya seni digital. Peserta diajak mengeksplorasi hubungan antara arsitektur, teknologi, dan kehidupan urban.',
         '1. Karya harus orisinal milik peserta.' || chr(10) ||
@@ -528,7 +528,7 @@ FROM (
         NOW() + INTERVAL '30 days'
     ),
     (
-        'adrian@arthive.com',
+        'adrian@archive.com',
         'BRUTALIST EXPRESSIONS',
         'Eksplorasi karakter brutalist architecture melalui komposisi geometris, tekstur beton, bentuk masif, dan ekspresi struktural.',
         '1. Karya harus orisinal milik peserta.' || chr(10) ||
@@ -542,7 +542,7 @@ FROM (
 
     -- Upcoming Challenges (NOW() < start_date)
     (
-        'kurator@arthive.com',
+        'kurator@archive.com',
         'LIGHT & SHADOW',
         'Eksplorasi permainan cahaya dan bayangan dalam fotografi maupun ilustrasi digital. Tantangan ini berfokus pada bagaimana cahaya membentuk persepsi terhadap ruang dan struktur.',
         '1. Karya harus orisinal milik peserta.' || chr(10) ||
@@ -554,7 +554,7 @@ FROM (
         NOW() + INTERVAL '45 days'
     ),
     (
-        'adrian@arthive.com',
+        'adrian@archive.com',
         'SPACES OF TOMORROW',
         'Tantangan desain untuk menciptakan representasi ruang masa depan yang menggabungkan inovasi, keberlanjutan, dan estetika arsitektur.',
         '1. Karya harus orisinal milik peserta.' || chr(10) ||
@@ -568,7 +568,7 @@ FROM (
 
     -- Completed / Ended Challenges (NOW() > end_date)
     (
-        'kurator@arthive.com',
+        'kurator@archive.com',
         'TROPICAL MODERNISM ARCHIVE',
         'Program kuratorial yang mendokumentasikan interpretasi modernisme tropis di Asia Tenggara melalui komposisi cahaya, ventilasi pasif, dan material lokal.',
         '1. Karya harus berfokus pada arsitektur tropis atau kontemporer Nusantara.' || chr(10) ||
@@ -580,7 +580,7 @@ FROM (
         NOW() - INTERVAL '10 days'
     ),
     (
-        'adrian@arthive.com',
+        'adrian@archive.com',
         'MONOLITH & MATERIALITY',
         'Eksplorasi kejujuran material beton, batu, dan kaca dalam arsitektur modern dan minimalis sebagai medium ekspresi ruang yang tenang.',
         '1. Karya harus orisinal milik peserta.' || chr(10) ||
@@ -629,56 +629,56 @@ SELECT
 FROM (
     VALUES
     -- Active Challenge: ARCHITECTURAL SPECULATIONS (awaiting curator review)
-    ('ARCHITECTURAL SPECULATIONS', 'member@arthive.com', 'Menara Phinisi UNM', NULL::INT, NULL::TEXT),
-    ('ARCHITECTURAL SPECULATIONS', 'raka@arthive.com',   'The Shard',          NULL::INT, NULL::TEXT),
-    ('ARCHITECTURAL SPECULATIONS', 'nadia@arthive.com',  'Marina Bay Sands',   NULL::INT, NULL::TEXT),
+    ('ARCHITECTURAL SPECULATIONS', 'member@archive.com', 'Menara Phinisi UNM', NULL::INT, NULL::TEXT),
+    ('ARCHITECTURAL SPECULATIONS', 'raka@archive.com',   'The Shard',          NULL::INT, NULL::TEXT),
+    ('ARCHITECTURAL SPECULATIONS', 'nadia@archive.com',  'Marina Bay Sands',   NULL::INT, NULL::TEXT),
 
     -- Active Challenge: BRUTALIST EXPRESSIONS (awaiting curator review)
-    ('BRUTALIST EXPRESSIONS', 'dimas@arthive.com', 'Barbican Estate', NULL::INT, NULL::TEXT),
-    ('BRUTALIST EXPRESSIONS', 'kevin@arthive.com', 'Habitat 67',      NULL::INT, NULL::TEXT),
+    ('BRUTALIST EXPRESSIONS', 'dimas@archive.com', 'Barbican Estate', NULL::INT, NULL::TEXT),
+    ('BRUTALIST EXPRESSIONS', 'kevin@archive.com', 'Habitat 67',      NULL::INT, NULL::TEXT),
 
     -- Completed Challenge: TROPICAL MODERNISM ARCHIVE (judged with winners + 1 non-winner)
     (
         'TROPICAL MODERNISM ARCHIVE',
-        'raka@arthive.com',
+        'raka@archive.com',
         'Masjid 99 Kubah',
         1,
         'Komposisi ritmis 99 kubah dan respons pencahayaan tropis menampilkan interpretasi monumental yang kontekstual terhadap iklim pesisir.'
     ),
     (
         'TROPICAL MODERNISM ARCHIVE',
-        'nadia@arthive.com',
+        'nadia@archive.com',
         'Fort Rotterdam',
         2,
         'Dokumentasi proporsi batu karang dan pelestarian ruang halaman tropis memperlihatkan kontinuitas arsitektur historis secara jernih.'
     ),
     (
         'TROPICAL MODERNISM ARCHIVE',
-        'kevin@arthive.com',
+        'kevin@archive.com',
         'Masjid Al-Markaz Al-Islami',
         3,
         'Harmoni atap berundak dan ventilasi silang alami menghadirkan keterbukaan ruang publik yang tenang dan berkarakter.'
     ),
-    ('TROPICAL MODERNISM ARCHIVE', 'member@arthive.com', 'Sydney Opera House', NULL::INT, NULL::TEXT),
+    ('TROPICAL MODERNISM ARCHIVE', 'member@archive.com', 'Sydney Opera House', NULL::INT, NULL::TEXT),
 
     -- Completed Challenge: MONOLITH & MATERIALITY (judged winners)
     (
         'MONOLITH & MATERIALITY',
-        'kevin@arthive.com',
+        'kevin@archive.com',
         'Church of the Light',
         1,
         'Kejujuran beton ekspos dan presisi bukaan cahaya salib menghasilkan pengalaman ruang kontemplatif yang sangat kuat.'
     ),
     (
         'MONOLITH & MATERIALITY',
-        'raka@arthive.com',
+        'raka@archive.com',
         'Villa Savoye',
         2,
         'Kejernihan grid struktur, bidang putih minimalis, dan transisi interior-eksterior menjadi studi modernisme yang presisi.'
     ),
     (
         'MONOLITH & MATERIALITY',
-        'dimas@arthive.com',
+        'dimas@archive.com',
         'Heydar Aliyev Center',
         3,
         'Eksplorasi kontinuitas permukaan monolitik tanpa sudut tajam menampilkan penguasaan bentuk dan material yang halus.'
@@ -768,14 +768,14 @@ SELECT
     a.id
 FROM (
     VALUES
-    ('member@arthive.com', 'Fallingwater'),
-    ('member@arthive.com', 'Villa Savoye'),
-    ('member@arthive.com', 'Church of the Light'),
-    ('raka@arthive.com',   'Bosco Verticale'),
-    ('raka@arthive.com',   'Sydney Opera House'),
-    ('nadia@arthive.com',  'Heydar Aliyev Center'),
-    ('dimas@arthive.com',  'Habitat 67'),
-    ('kevin@arthive.com',  'Guggenheim Museum Bilbao')
+    ('member@archive.com', 'Fallingwater'),
+    ('member@archive.com', 'Villa Savoye'),
+    ('member@archive.com', 'Church of the Light'),
+    ('raka@archive.com',   'Bosco Verticale'),
+    ('raka@archive.com',   'Sydney Opera House'),
+    ('nadia@archive.com',  'Heydar Aliyev Center'),
+    ('dimas@archive.com',  'Habitat 67'),
+    ('kevin@archive.com',  'Guggenheim Museum Bilbao')
 ) AS v(member_email, artwork_title)
 JOIN users u ON u.email = v.member_email AND u.role = 'member' AND u.is_active = TRUE
 JOIN artworks a ON a.title = v.artwork_title AND a.status = 'active'
@@ -797,13 +797,13 @@ SELECT
     v.content
 FROM (
     VALUES
-    ('raka@arthive.com',   'Sydney Opera House',        'Komposisi cangkang atap dan pencahayaan tepi airnya terasa sangat dramatis sekaligus presisi.'),
-    ('nadia@arthive.com',  'Villa Savoye',              'Proporsi pilotis dan jendela pita horizontalnya memperlihatkan kejernihan modernisme awal.'),
-    ('member@arthive.com', 'Fallingwater',              'Integrasi teras kantilever dengan aliran air terjun tetap menjadi referensi utama arsitektur organik.'),
-    ('kevin@arthive.com',  'Bosco Verticale',           'Keseimbangan vegetasi vertikal dan struktur hunian modernnya sangat inspiratif untuk kota padat.'),
-    ('dimas@arthive.com',  'Menara Phinisi UNM',        'Interpretasi bentuk layar Phinisi pada fasad kampus ini kuat secara identitas lokal maupun kontemporer.'),
-    ('member@arthive.com', 'Heydar Aliyev Center',      'Alur kurva selubung bangunannya menghadirkan transisi yang mulus antara ruang luar dan interior.'),
-    ('raka@arthive.com',   'Church of the Light',       'Permainan cahaya alami pada bidang beton ekspos menciptakan atmosfer ruang yang tenang dan fokus.')
+    ('raka@archive.com',   'Sydney Opera House',        'Komposisi cangkang atap dan pencahayaan tepi airnya terasa sangat dramatis sekaligus presisi.'),
+    ('nadia@archive.com',  'Villa Savoye',              'Proporsi pilotis dan jendela pita horizontalnya memperlihatkan kejernihan modernisme awal.'),
+    ('member@archive.com', 'Fallingwater',              'Integrasi teras kantilever dengan aliran air terjun tetap menjadi referensi utama arsitektur organik.'),
+    ('kevin@archive.com',  'Bosco Verticale',           'Keseimbangan vegetasi vertikal dan struktur hunian modernnya sangat inspiratif untuk kota padat.'),
+    ('dimas@archive.com',  'Menara Phinisi UNM',        'Interpretasi bentuk layar Phinisi pada fasad kampus ini kuat secara identitas lokal maupun kontemporer.'),
+    ('member@archive.com', 'Heydar Aliyev Center',      'Alur kurva selubung bangunannya menghadirkan transisi yang mulus antara ruang luar dan interior.'),
+    ('raka@archive.com',   'Church of the Light',       'Permainan cahaya alami pada bidang beton ekspos menciptakan atmosfer ruang yang tenang dan fokus.')
 ) AS v(member_email, artwork_title, content)
 JOIN users u ON u.email = v.member_email AND u.role = 'member' AND u.is_active = TRUE
 JOIN artworks a ON a.title = v.artwork_title AND a.status = 'active'
@@ -839,7 +839,7 @@ SELECT
 FROM (
     VALUES
     (
-        'kevin@arthive.com',
+        'kevin@archive.com',
         'The Shard',
         'Plagiarism',
         'Komposisi framing menyerupai render publikasi komersial tanpa kredit fotografer asli; mohon verifikasi.',
@@ -847,7 +847,7 @@ FROM (
         NULL
     ),
     (
-        'dimas@arthive.com',
+        'dimas@archive.com',
         'Marina Bay Sands',
         'Other',
         'Metadata tag dan kategori perlu ditinjau ulang agar konsisten dengan arsip pameran.',
@@ -855,20 +855,20 @@ FROM (
         NULL
     ),
     (
-        'raka@arthive.com',
+        'raka@archive.com',
         'Heydar Aliyev Center',
         'Inappropriate Content',
         'Dilaporkan untuk pemeriksaan kesesuaian atribusi referensi studi arsitektur.',
         'dismissed',
-        'Ditinjau oleh Admin ARTHIVE: atribusi dan deskripsi studi arsitektur sesuai pedoman platform.'
+        'Ditinjau oleh Admin ARCHIVE: atribusi dan deskripsi studi arsitektur sesuai pedoman platform.'
     ),
     (
-        'nadia@arthive.com',
+        'nadia@archive.com',
         'Unattributed Concrete Elevation Draft',
         'Plagiarism',
         'Draf elevasi menggunakan gambar pihak ketiga tanpa izin maupun keterangan sumber.',
         'taken_down',
-        'Karya diturunkan oleh Admin ARTHIVE karena pelanggaran atribusi hak cipta terverifikasi.'
+        'Karya diturunkan oleh Admin ARCHIVE karena pelanggaran atribusi hak cipta terverifikasi.'
     )
 ) AS v(
     reporter_email,

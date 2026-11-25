@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 /**
- * Unified reusable Breadcrumb navigation component for ARTHIVE.
+ * Unified reusable Breadcrumb navigation component for ARCHIVE.
  *
  * - Every parent item with an `href` renders as a clickable Next.js <Link>.
  * - The final item always renders as non-clickable text with `aria-current="page"`.
@@ -15,19 +15,19 @@ export default function Breadcrumb({ items = [], className = '' }) {
 
   return (
     <nav
-      className={`arthive-breadcrumb${className ? ` ${className}` : ''}`}
+      className={`archive-breadcrumb${className ? ` ${className}` : ''}`}
       aria-label="Breadcrumb"
     >
-      <ol className="arthive-breadcrumb-list">
+      <ol className="archive-breadcrumb-list">
         {validItems.map((item, index) => {
           const isLast = index === validItems.length - 1;
           const key = `${item.href || 'current'}-${index}`;
 
           return (
-            <li key={key} className="arthive-breadcrumb-item">
+            <li key={key} className="archive-breadcrumb-item">
               {index > 0 && (
                 <svg
-                  className="arthive-breadcrumb-sep"
+                  className="archive-breadcrumb-sep"
                   width="12"
                   height="12"
                   viewBox="0 0 24 24"
@@ -44,7 +44,7 @@ export default function Breadcrumb({ items = [], className = '' }) {
 
               {isLast || !item.href ? (
                 <span
-                  className="arthive-breadcrumb-current"
+                  className="archive-breadcrumb-current"
                   aria-current={isLast ? 'page' : undefined}
                   title={item.label}
                 >
@@ -53,7 +53,7 @@ export default function Breadcrumb({ items = [], className = '' }) {
               ) : (
                 <Link
                   href={item.href}
-                  className="arthive-breadcrumb-link"
+                  className="archive-breadcrumb-link"
                   title={item.label}
                 >
                   {item.label}

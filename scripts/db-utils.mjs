@@ -9,7 +9,7 @@ export const ROOT_DIR = process.cwd();
 export const SCHEMA_PATH = path.join(ROOT_DIR, 'database', 'schema.sql');
 export const SEED_PATH = path.join(ROOT_DIR, 'database', 'seed.sql');
 
-export const ARTHIVE_TABLES = [
+export const ARCHIVE_TABLES = [
   'sessions',
   'submissions',
   'reports',
@@ -177,7 +177,7 @@ export async function collectTableCounts(client) {
   const existingSet = new Set(existingRes.rows.map((r) => r.tablename));
 
   const counts = {};
-  for (const table of [...ARTHIVE_TABLES].reverse()) {
+  for (const table of [...ARCHIVE_TABLES].reverse()) {
     if (!existingSet.has(table)) {
       counts[table] = null;
       continue;
@@ -189,7 +189,7 @@ export async function collectTableCounts(client) {
 }
 
 export function printCountComparison(beforeCounts, afterCounts) {
-  const rows = [...ARTHIVE_TABLES].reverse().map((table) => ({
+  const rows = [...ARCHIVE_TABLES].reverse().map((table) => ({
     table,
     before: beforeCounts[table] === null ? '(missing)' : beforeCounts[table],
     after: afterCounts[table] === null ? '(missing)' : afterCounts[table],

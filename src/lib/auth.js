@@ -4,11 +4,11 @@ import { query } from './db';
 import { applyAvatarPolicy } from './avatar';
 
 const SECRET = new TextEncoder().encode(
-  process.env.SESSION_SECRET || 'arthive-fallback-secret-key-32chars'
+  process.env.SESSION_SECRET || 'archive-fallback-secret-key-32chars'
 );
 
 const SESSION_DURATION_DAYS = 7;
-const COOKIE_NAME = 'arthive_session';
+const COOKIE_NAME = 'archive_session';
 
 /**
  * Create a session for a user and set the cookie

@@ -80,9 +80,9 @@ export async function generateMetadata(props) {
   const params = await props.params;
   if (!toId(params.id)) notFound();
   const data = await getArtwork(params.id);
-  if (!data) return { title: 'Artwork not found — ARTHIVE' };
+  if (!data) return { title: 'Artwork not found — ARCHIVE' };
   return {
-    title: `${data.artwork.title} by ${data.artwork.creator_name} — ARTHIVE`,
+    title: `${data.artwork.title} by ${data.artwork.creator_name} — ARCHIVE`,
     description: data.artwork.description.substring(0, 160),
   };
 }

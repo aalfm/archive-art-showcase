@@ -92,8 +92,8 @@ export default async function CuratorPendingPage() {
 
             <p className="curator-pending-desc">
               {isRejected
-                ? 'Unfortunately, your application to become an ARTHIVE Curator was not approved.'
-                : 'Your Curator application is currently under review by the ARTHIVE Admin team. You will receive full curation access once approved.'}
+                ? 'Unfortunately, your application to become an ARCHIVE Curator was not approved.'
+                : 'Your Curator application is currently under review by the ARCHIVE Admin team. You will receive full curation access once approved.'}
             </p>
           </div>
 

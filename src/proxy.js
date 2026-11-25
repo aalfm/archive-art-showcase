@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 
 const SECRET = new TextEncoder().encode(
-  process.env.SESSION_SECRET || 'arthive-fallback-secret-key-32chars'
+  process.env.SESSION_SECRET || 'archive-fallback-secret-key-32chars'
 );
 
-const COOKIE_NAME = 'arthive_session';
+const COOKIE_NAME = 'archive_session';
 
 /**
  * Optimistic route guard (Next.js 16 "proxy" convention).

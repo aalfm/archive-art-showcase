@@ -13192,7 +13192,7 @@ body,
 
 /* ==========================================================================
    15. INACTIVE ARTIST PUBLIC PROFILE RESTRICTION VIEW (/artists/[id])
-   Minimalist ARTHIVE Editorial Notice · Safe Identity Only
+   Minimalist ARCHIVE Editorial Notice · Safe Identity Only
    ========================================================================== */
 
 .artist-inactive-page {
@@ -13306,7 +13306,7 @@ body,
 
 /* ==========================================================================
    16. FILE-ONLY IMAGE UPLOAD DROPZONE & PREVIEW CONTROLS
-   Minimalist Warm-Cream ARTHIVE Style · Drag-and-Drop + Safe Replacement
+   Minimalist Warm-Cream ARCHIVE Style · Drag-and-Drop + Safe Replacement
    ========================================================================== */
 
 .dashboard-layout .upload-file-area {
@@ -16021,7 +16021,7 @@ body,
   color: #2E2D29;
 }
 
-/* Member-specific hierarchy: Charcoal role identity + highlighted ARTHIVE accent active page */
+/* Member-specific hierarchy: Charcoal role identity + highlighted ARCHIVE accent active page */
 .navbar-profile-trigger--member .navbar-role-context {
   gap: 6px;
 }
@@ -17616,14 +17616,14 @@ body,
    28. UNIFIED REUSABLE BREADCRUMB NAVIGATION
    ============================================================ */
 
-.arthive-breadcrumb {
+.archive-breadcrumb {
   margin: 0 0 12px;
   min-width: 0;
   max-width: 100%;
   font-family: var(--font-sans);
 }
 
-.arthive-breadcrumb-list {
+.archive-breadcrumb-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -17634,7 +17634,7 @@ body,
   min-width: 0;
 }
 
-.arthive-breadcrumb-item {
+.archive-breadcrumb-item {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -17642,7 +17642,7 @@ body,
   max-width: 100%;
 }
 
-.arthive-breadcrumb-sep {
+.archive-breadcrumb-sep {
   flex-shrink: 0;
   color: #ABA498;
   opacity: 0.9;
@@ -17650,7 +17650,7 @@ body,
   pointer-events: none;
 }
 
-.arthive-breadcrumb-link {
+.archive-breadcrumb-link {
   display: inline-block;
   font-size: 0.78rem;
   font-weight: 500;
@@ -17664,8 +17664,8 @@ body,
   transition: color 0.16s ease, text-decoration-color 0.16s ease;
 }
 
-.arthive-breadcrumb-link:hover,
-.arthive-breadcrumb-link:focus-visible {
+.archive-breadcrumb-link:hover,
+.archive-breadcrumb-link:focus-visible {
   color: #826846;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -17673,13 +17673,13 @@ body,
   text-decoration-color: rgba(130, 104, 70, 0.55);
 }
 
-.arthive-breadcrumb-link:focus-visible {
+.archive-breadcrumb-link:focus-visible {
   outline: 2px solid #4E6F9E;
   outline-offset: 2px;
   border-radius: 2px;
 }
 
-.arthive-breadcrumb-current {
+.archive-breadcrumb-current {
   display: inline-block;
   font-size: 0.78rem;
   font-weight: 600;
@@ -17693,15 +17693,15 @@ body,
 }
 
 /* Harmonize compact spacing inside flex-gap detail pages & public pages */
-.dashboard-layout .admin-detail-page > .arthive-breadcrumb {
+.dashboard-layout .admin-detail-page > .archive-breadcrumb {
   margin-bottom: -12px;
 }
 
-.arthive-breadcrumb--public {
+.archive-breadcrumb--public {
   margin-bottom: 14px;
 }
 
-.arthive-breadcrumb--detail {
+.archive-breadcrumb--detail {
   margin-bottom: 18px;
 }
 
@@ -17716,7 +17716,7 @@ body,
   min-width: 0;
 }
 
-.detail-context-bar .arthive-breadcrumb {
+.detail-context-bar .archive-breadcrumb {
   margin-bottom: 0;
 }
 
@@ -17756,7 +17756,7 @@ body,
 }
 
 @media (max-width: 640px) {
-  .arthive-breadcrumb {
+  .archive-breadcrumb {
     margin-bottom: 10px;
   }
 
@@ -17769,12 +17769,12 @@ body,
     font-size: 0.75rem;
   }
 
-  .arthive-breadcrumb-link {
+  .archive-breadcrumb-link {
     font-size: 0.75rem;
     max-width: 150px;
   }
 
-  .arthive-breadcrumb-current {
+  .archive-breadcrumb-current {
     font-size: 0.75rem;
     max-width: 200px;
   }

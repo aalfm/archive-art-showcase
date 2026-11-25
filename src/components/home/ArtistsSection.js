@@ -76,7 +76,7 @@ function ArtistArtworkSheet({ artwork }) {
           />
         ) : (
           <div className="artist-dossier-sheet-fallback" aria-hidden="true">
-            <span>ARTHIVE</span>
+            <span>ARCHIVE</span>
           </div>
         )}
       </div>
@@ -246,7 +246,7 @@ export default function ArtistsSection({ artists = [] }) {
             <span className="editorial-eyebrow">CREATOR DOSSIER</span>
             <h2 className="editorial-section-heading">Featured Artists</h2>
             <p className="editorial-section-subtitle">
-              Open an artist&apos;s portfolio dossier to inspect their architectural works curated on ARTHIVE.
+              Open an artist&apos;s portfolio dossier to inspect their architectural works curated on ARCHIVE.
             </p>
           </div>
           <Link href="/artists" className="editorial-header-link">

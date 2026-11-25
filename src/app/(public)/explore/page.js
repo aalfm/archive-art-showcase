@@ -91,7 +91,7 @@ export default async function ExplorePage({ searchParams }) {
 
   return (
     <PublicPageContainer>
-      <Breadcrumb items={breadcrumbItems} className="arthive-breadcrumb--public" />
+      <Breadcrumb items={breadcrumbItems} className="archive-breadcrumb--public" />
       <div className="showcase-header">
         <div className="showcase-title-area">
           <span className="editorial-eyebrow">ARCHIVE COLLECTION</span>
