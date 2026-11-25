@@ -218,7 +218,7 @@ export default function ImageUpload({
                 onClick={() => fileRef.current?.click()}
                 disabled={uploading}
               >
-                {uploading ? 'Uploading...' : 'Replace Image'}
+                {uploading ? 'Uploading...' : 'Replace image'}
               </button>
               <button
                 type="button"
